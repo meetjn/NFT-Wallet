@@ -8,6 +8,7 @@ const inter = Inter({ subsets: ["latin"] });
 import { headers } from "next/headers";
 import ContextProvider from "@/context";
 // import { Sepolia } from "@thirdweb-dev/chains";
+import {ContractProvider} from "@/lending/index"
 
 export const metadata: Metadata = {
   title: "Quranium Node Sell",
@@ -23,7 +24,11 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ContextProvider cookies={cookies}>{children}</ContextProvider>
+        <ContextProvider cookies={cookies}>
+          <ContractProvider>
+          {children}
+          </ContractProvider>
+          </ContextProvider>
       </body>
     </html>
   );

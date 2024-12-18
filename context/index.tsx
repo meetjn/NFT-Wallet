@@ -1,9 +1,8 @@
 "use client";
 import { wagmiAdapter, projectId } from "@/config";
 import { createAppKit } from "@reown/appkit/react";
-import { cookieStorage, createStorage } from "wagmi";
 import { cookieToInitialState, WagmiProvider, type Config } from "wagmi";
-import { arbitrum, mainnet, sepolia } from "@reown/appkit/networks";
+import { arbitrum, mainnet, sepolia,arbitrumSepolia} from "@reown/appkit/networks";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { ReactNode } from "react";
 const queryClient = new QueryClient();
@@ -12,14 +11,14 @@ if (!projectId) {
 }
 
 const metadata = {
-  name: "QNodeSell",
-  description: "QNodeSell NFT Sell",
+  name: "NFT-Wallet",
+  description: "NFT-Wallet",
   url: "https://example.com",
   icons: ["https://avatars.githubusercontent.com/u/179229932"],
 };
 const modal = createAppKit({
   adapters: [wagmiAdapter],
-  networks: [mainnet, arbitrum, sepolia],
+  networks: [mainnet, arbitrum, sepolia, arbitrumSepolia],
   defaultNetwork: mainnet,
   projectId,
   metadata,
