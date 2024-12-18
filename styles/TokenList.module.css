@@ -1,0 +1,43 @@
+.tokenListContainer {
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.tokenList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  list-style-type: none;
+  padding: 0;
+}
+
+.tokenListItem {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.tokenListItem:hover {
+  transform: translateY(-5px); /* Hover effect */
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.tokenListItem a {
+  font-size: 18px;
+  color: #0070f3;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.tokenListItem a:hover {
+  text-decoration: underline;
+}
