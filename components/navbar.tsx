@@ -1,5 +1,6 @@
 "use client";
 import { useAccount } from "wagmi";
+import Link from "next/link";
 
 export default function NavBar() {
   const { isConnected } = useAccount();
@@ -12,8 +13,8 @@ export default function NavBar() {
           justifyContent: "space-between",
           alignItems: "center",
           padding: "15px 30px",
-          backgroundColor: "#fff", // Changed to white
-          color: "#000", // Changed text color to black
+          backgroundColor: "#fff",
+          color: "#000",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
@@ -60,6 +61,17 @@ export default function NavBar() {
           >
             Contact
           </a>
+          <Link
+            href="/trading"
+            style={{
+              color: "#000",
+              textDecoration: "none",
+              fontWeight: "700",
+              marginLeft: "20px",
+            }}
+          >
+            Trading
+          </Link>
         </div>
 
         <div>
