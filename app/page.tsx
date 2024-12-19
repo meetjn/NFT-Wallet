@@ -63,26 +63,28 @@ import NavBar from "../components/navbar";
 import { useAccount } from "wagmi";
 import { TokenboundClient } from "@tokenbound/sdk";
 import { sepolia } from "viem/chains";
+import NetworkSelector from "@/components/NetworkSelector";
+import MultichainDeployer from "@/components/MultichainDeployer";
 
 export default function Home() {
   const { isConnected, address } = useAccount();
   const [tokenBoundClient, setTokenBoundClient] = useState<TokenboundClient | null>(null);
   const [tbaAddress, setTbaAddress] = useState<string | null>(null);
   const [existingTbas, setExistingTbas] = useState<string[]>([]);
+  const [selectedChainId, setSelectedChainId] = useState<number>(sepolia.id); 
+  //const [rpcUrl, setRpcUrl] = useState<string>(""); // Selected network RPC URL
 
   useEffect(() => {
     if (isConnected) {
-      // Initialize ethers provider
       const provider = new ethers.providers.Web3Provider(window.ethereum);
 
-      // Initialize Token Bound Client when the wallet is connected
       const client = new TokenboundClient({
         signer: provider.getSigner(),
-        chainId: sepolia.id,
+        chainId: selectedChainId,
       });
       setTokenBoundClient(client);
     }
-  }, [isConnected]);
+  }, [isConnected, selectedChainId]);
 
   const fetchExistingTbas = async () => {
     if (tokenBoundClient && address) {
@@ -99,7 +101,7 @@ export default function Home() {
             return account;
           })
         );
-        setExistingTbas(tbas.filter((account) => account)); // Filter out null/undefined
+        setExistingTbas(tbas.filter((account) => account)); 
       } catch (error) {
         console.error("Error fetching existing TBAs:", error);
       }
@@ -109,6 +111,12 @@ export default function Home() {
   useEffect(() => {
     fetchExistingTbas();
   }, [tokenBoundClient]);
+
+  
+  const handleNetworkChange = (chainId: number) => {
+    setSelectedChainId(chainId);
+    
+  };
 
   const createTba = async () => {
     if (tokenBoundClient && address) {
@@ -136,6 +144,7 @@ export default function Home() {
       <div>
         <h2>Wallet Connected: {address}</h2>
         <br />
+        <h3>Default Chain: Sepolia</h3>
         <button onClick={createTba}>Create Token Bound Account (TBA)</button>
         {tbaAddress && <p>New Token Bound Account: {tbaAddress}</p>}
         <h3>Existing TBAs:</h3>
@@ -149,6 +158,16 @@ export default function Home() {
           <p>No existing TBAs found.</p>
         )}
       </div>
+
+      <div>
+        <h2>Deploy on Multiple Chains</h2>
+        <NetworkSelector onSelect={handleNetworkChange} />
+        <MultichainDeployer
+          tokenId="1"
+          contractAddress="0xE767739f02A6693d5D38B922324Bf19d1cd0c554"
+        />
+      </div>
     </div>
   );
 }
+
