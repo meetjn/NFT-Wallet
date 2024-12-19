@@ -14,7 +14,7 @@ const OrderBook: React.FC<{ pair: string }> = ({ pair }) => {
         const ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
         setProvider(ethersProvider);
 
-        const contractAddress = "0xYourContractAddress"; // Replace with your contract address
+        const contractAddress = "0xYourContractAddress"; 
         const contractABI = "#"
 
         try {

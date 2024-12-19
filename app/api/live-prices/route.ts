@@ -1,21 +1,18 @@
-// app/api/live-prices/route.ts
+import { fetchLivePrices } from "../../../utils/api";
 
-import { NextRequest, NextResponse } from "next/server";
-import { getLivePrices } from "@/utils/api"; // Import the updated function
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const pairs = url.searchParams.get("pairs") || "";
+  const pairsList = pairs.split(",");
 
-export async function GET(req: NextRequest) {
-  // Get the query parameters from the URL
-  const url = new URL(req.url);
-  const pairs = url.searchParams.get("pairs"); // Extract the pairs from the URL query params
-
-  if (!pairs) {
-    return NextResponse.json({ error: "No pairs provided" }, { status: 400 });
+  try {
+    const prices = await fetchLivePrices(pairsList);
+    return new Response(JSON.stringify(prices), { status: 200 });
+  } catch (error) {
+    console.error("Error fetching live prices:", error);
+    return new Response(
+      JSON.stringify({ error: "Failed to fetch live prices" }),
+      { status: 500 }
+    );
   }
-
-  const pairsArray = pairs.split(","); // Split the pairs by comma
-
-  // Get the live prices for the provided pairs
-  const prices = await getLivePrices(pairsArray);
-
-  return NextResponse.json(prices); // Return the prices in the response
 }

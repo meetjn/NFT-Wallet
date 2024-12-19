@@ -1,72 +1,17 @@
-"use client"; // Ensure this is client-side code
+"use client";
+import TradingChart from '../../../components/trading/TradingChart';
+import { useParams } from 'next/navigation';
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import OrderBook from "../../../components/trading/OrderBook";
-import PriceChart from "../../../components/trading/PriceChart"; 
-
-export default function TradingPairPage({ params }: { params: Promise<{ pair: string }> }) {
-  const [currentPair, setCurrentPair] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchParams = async () => {
-      const unwrappedParams = await params; 
-      if (unwrappedParams?.pair) {
-        setCurrentPair(unwrappedParams.pair);
-      }
-    };
-
-    fetchParams();
-  }, [params]);
-
-  if (!currentPair) {
-    return <div>Loading...</div>;
-  }
+const TradingPairPage = () => {
+  const params = useParams();
+  const pair = params.pair as string;
 
   return (
     <div>
-      <h1>Trading {currentPair}</h1>
-      {/* Display the Price Chart for the current pair */}
-      <PriceChart pair={currentPair} />
-      {/* Display the Order Book for the current pair */}
-      <OrderBook pair={currentPair} />
+      <h1>Trading Pair: {pair}</h1>
+      {pair && <TradingChart symbol={pair} />}
     </div>
   );
-}
+};
 
-// "use client"; // Ensure this is client-side code
-
-// import React, { useState, useEffect } from "react";
-// import { useRouter } from "next/navigation";
-// import OrderBook from "../../../components/trading/OrderBook";
-// import TradingGraph from "../../../components/trading/TradingGraph";
-
-// export default function TradingPairPage({ params }: { params: Promise<{ pair: string }> }) {
-//   const [currentPair, setCurrentPair] = useState<string | null>(null);
-
-//   useEffect(() => {
-//     const fetchParams = async () => {
-//       const unwrappedParams = await params; // Await the params Promise
-//       if (unwrappedParams?.pair) {
-//         setCurrentPair(unwrappedParams.pair); // Use the unwrapped params object
-//       }
-//     };
-
-//     fetchParams();
-//   }, [params]);
-
-//   if (!currentPair) {
-//     return <div>Loading...</div>;
-//   }
-
-//   return (
-//     <div>
-//       <h1>Trading {currentPair}</h1>
-//       {/* Display the Trading Graph for the current pair */}
-//       <TradingGraph pair={currentPair} />
-//       {/* Display the Order Book for the current pair */}
-//       <OrderBook pair={currentPair} />
-//     </div>
-//   );
-// }
-
+export default TradingPairPage;

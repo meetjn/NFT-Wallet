@@ -1,26 +1,51 @@
-const BINANCE_API_URL = "https://api.binance.com/api/v3";
+import axios from 'axios';
 
-export const getLivePrices = async (pairs: string[]) => {
-  try {
-    
-    const prices = await Promise.all(
-      pairs.map(async (pair) => {
-        const symbol = pair.replace("/", "").toUpperCase(); // Remove slash and make the pair uppercase for Binance
-        const response = await fetch(`${BINANCE_API_URL}/ticker/price?symbol=${symbol}`);
-        if (!response.ok) {
-          return { pair, price: "N/A" }; // Return N/A if there's an issue with the API
-        }
-        const data = await response.json();
+export const fetchLivePrices = async (pairs: string[]) => {
+  const prices = await Promise.all(
+    pairs.map(async (pair) => {
+      try {
+        const response = await axios.get(`https://api.binance.com/api/v3/ticker/price`, {
+          params: {
+            symbol: pair.replace("/", ""), // Convert DOT/USDT to DOTUSDT
+          },
+        });
+
+        const rawPrice = response.data.price;
+        const numericPrice = parseFloat(rawPrice.replace("$", ""));
         return {
-          pair,
-          price: data.price ? `$${parseFloat(data.price).toFixed(2)}` : "N/A", // Format the price to 2 decimal places
+          pair: pair,
+          price: numericPrice.toFixed(4), 
         };
-      })
-    );
+      } catch (error) {
+        console.error(`Error fetching price for ${pair}:`, error);
+        return { pair, price: "0.0000" }; 
+      }
+    })
+  );
 
-    return prices;
+  return prices;
+};
+
+
+
+export const fetchHistoricalData = async (symbol: string, interval: string, limit: number = 100) => {
+  try {
+    const response = await axios.get('https://api.binance.com/api/v3/klines', {
+      params: {
+        symbol,
+        interval,
+        limit,
+      },
+    });
+    return response.data.map((data: any) => ({
+      time: data[0],
+      open: parseFloat(data[1]),
+      high: parseFloat(data[2]),
+      low: parseFloat(data[3]),
+      close: parseFloat(data[4]),
+    }));
   } catch (error) {
-    console.error("Error fetching live prices:", error);
-    return pairs.map((pair) => ({ pair, price: "N/A" })); // Return N/A in case of error
+    console.error(`Error fetching historical data for ${symbol}:`, error);
+    return [];
   }
 };
