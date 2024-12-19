@@ -1,0 +1,73 @@
+.orderBookContainer {
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
+  margin-top: 20px;
+}
+
+.orders {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.orderSection {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  width: 100%;
+}
+
+h3 {
+  font-size: 18px;
+  margin-bottom: 15px;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  padding: 5px 0;
+  font-size: 16px;
+}
+
+.orderForm {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  width: 100%;
+}
+
+.orderForm form {
+  display: flex;
+  flex-direction: column;
+}
+
+.orderForm label {
+  margin-bottom: 10px;
+}
+
+.orderForm input,
+.orderForm select,
+.orderForm button {
+  padding: 10px;
+  margin-bottom: 15px;
+  font-size: 16px;
+}
+
+.orderForm button {
+  background-color: #0070f3;
+  color: white;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+}
+
+.orderForm button:hover {
+  background-color: #005bb5;
+}
