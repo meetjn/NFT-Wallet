@@ -35,7 +35,7 @@ const TradingChart = ({ symbol }: { symbol: string }) => {
 
     const chart = createChart(chartContainerRef.current, chartProperties);
     
-    // Make chart responsive
+    // responsive chart
     const handleResize = () => {
       if (chartContainerRef.current) {
         chart.applyOptions({
@@ -54,11 +54,11 @@ const TradingChart = ({ symbol }: { symbol: string }) => {
     });
     candleSeriesRef.current = candleSeries;
 
-    // Rest of your existing fetch and data handling code remains the same
+    
     const fetchHistoricalData = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/klines?symbol=${formattedSymbol}&interval=1m&limit=1000`
+          `http://localhost:5000/api/klines?symbol=${formattedSymbol}&interval=1m&limit=1000` //Dynamic limit
         );
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();

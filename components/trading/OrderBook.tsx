@@ -9,7 +9,7 @@ const OrderBook: React.FC<{ pair: string }> = ({ pair }) => {
 
   useEffect(() => {
     const initializeContract = async () => {
-      // Check if Ethereum is available
+      // Check if Ethereum is available(Mainnet)
       if (window.ethereum) {
         const ethersProvider = new ethers.providers.Web3Provider(window.ethereum);
         setProvider(ethersProvider);
@@ -18,7 +18,7 @@ const OrderBook: React.FC<{ pair: string }> = ({ pair }) => {
         const contractABI = "#"
 
         try {
-          // Initialize the contract
+          // Initializing the contract
           const orderBookContract = new ethers.Contract(
             contractAddress,
             contractABI,
@@ -39,7 +39,7 @@ const OrderBook: React.FC<{ pair: string }> = ({ pair }) => {
   return (
     <div>
       <h2>Order Book</h2>
-      {/* Display order book data here */}
+      {/* order book data will go here */}
     </div>
   );
 };
