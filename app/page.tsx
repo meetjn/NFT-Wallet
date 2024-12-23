@@ -1,4 +1,3 @@
-
 // "use client";
 // import React, { useState, useEffect } from "react";
 // import { ethers } from "ethers";
@@ -66,7 +65,8 @@ import { sepolia } from "viem/chains";
 
 export default function Home() {
   const { isConnected, address } = useAccount();
-  const [tokenBoundClient, setTokenBoundClient] = useState<TokenboundClient | null>(null);
+  const [tokenBoundClient, setTokenBoundClient] =
+    useState<TokenboundClient | null>(null);
   const [tbaAddress, setTbaAddress] = useState<string | null>(null);
   const [existingTbas, setExistingTbas] = useState<string[]>([]);
 
@@ -87,7 +87,7 @@ export default function Home() {
   const fetchExistingTbas = async () => {
     if (tokenBoundClient && address) {
       const tokenContractAddress = "0xE767739f02A6693d5D38B922324Bf19d1cd0c554";
-      const tokenIds = ["1"]; 
+      const tokenIds = ["1"];
 
       try {
         const tbas = await Promise.all(
@@ -121,7 +121,12 @@ export default function Home() {
           tokenId: tokenId,
         });
         setTbaAddress(account);
-        console.log("Token Bound Account created:", account, "Tx Hash:", txHash);
+        console.log(
+          "Token Bound Account created:",
+          account,
+          "Tx Hash:",
+          txHash
+        );
         fetchExistingTbas();
       } catch (error) {
         console.error("Error creating Token Bound Account:", error);
@@ -134,7 +139,7 @@ export default function Home() {
       <NavBar />
       <h1>TBA Platform</h1>
       <div>
-        <h2>Wallet Connected: {address}</h2>
+        <h2 className="text-white">Wallet Connected: {address}</h2>
         <br />
         <button onClick={createTba}>Create Token Bound Account (TBA)</button>
         {tbaAddress && <p>New Token Bound Account: {tbaAddress}</p>}
