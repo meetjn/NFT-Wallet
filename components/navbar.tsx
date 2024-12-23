@@ -70,7 +70,7 @@ export default function NavBar() {
               marginLeft: "20px",
             }}
           >
-            Trading
+            Trade
           </Link>
         </div>
 

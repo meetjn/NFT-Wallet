@@ -1,0 +1,219 @@
+.container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+
+.tradingLayout {
+   display: flex;
+   gap: 12px; 
+   width: 100%;
+   height: calc(100vh - 100px); 
+}
+
+.chartSection {
+   flex: 1;
+   min-width: 0;
+   border-radius: 12px;
+   overflow: hidden;
+   height: 100%; 
+}
+
+.controls {
+   width: 320px;
+   height: auto; 
+   padding: 8px;
+   overflow-y: auto; 
+   background: rgba(255, 255, 255, 0.03);
+   border-radius: 12px;
+   border: 1px solid rgba(255, 255, 255, 0.06);
+   backdrop-filter: blur(10px);
+}
+
+.tabs {
+  height: 100%;
+}
+
+.tabsList {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 6px;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tabsTrigger {
+  padding: 12px;
+  text-align: center;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s;
+  color: #94A3B8;
+  user-select: none;
+}
+
+.tabsTrigger:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.tabsTrigger[data-state="active"].buyTab {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34D399;
+}
+
+.tabsTrigger[data-state="active"].sellTab {
+  background: rgba(248, 113, 113, 0.15);
+  color: #F87171;
+}
+
+.formContent {
+  padding: 8px;
+}
+
+.inputGroup {
+  margin-bottom: 8px;
+}
+
+.label {
+  display: block;
+  color: #94A3B8;
+  font-size: 14px;
+  margin-bottom: 8px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 8px;
+  padding-right: 65px;
+  border-radius: 8px;
+  color: black; 
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.input::placeholder {
+  color: #94A3B8;
+}
+
+.input:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.input:focus {
+  border-color: rgba(255, 255, 255, 0.16);
+  outline: none;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.inputSuffix {
+  position: absolute;
+  right: 12px;
+  color: #64748B;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.percentageButtons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  margin-bottom: 24px;
+  margin: 8px 0;
+}
+
+/* .percentButton {
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  color: #94A3B8;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.percentButton:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.percentButtonActive {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: white;
+} */
+
+
+.percentButton {
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  color: #94A3B8;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.2s;
+}
+
+.percentButton:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.percentButton.active {
+  background: #2563eb !important;
+  color: white !important;
+  border-color: #2563eb !important;
+}
+
+.actionButton {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+  margin-top: 8px;
+}
+
+.buyButton {
+  background: #34D399;
+  color: #111827;
+}
+
+.buyButton:hover {
+  background: #10B981;
+}
+
+.sellButton {
+  background: #F87171;
+  color: #111827;
+}
+
+.sellButton:hover {
+  background: #EF4444;
+}
+
+@media (max-width: 1024px) {
+  .tradingLayout {
+    flex-direction: column;
+  }
+  
+  .controls { 
+    width: 100%;
+  }
+}
