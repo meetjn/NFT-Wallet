@@ -12,6 +12,7 @@
     "@aave/contract-helpers": "^1.30.5",
     "@aave/math-utils": "^1.30.5",
     "@bgd-labs/aave-address-book": "^4.7.0",
+    "@openzeppelin/contracts": "^5.1.0",
     "@radix-ui/react-slot": "^1.1.1",
     "@reown/appkit": "^1.6.1",
     "@reown/appkit-adapter-wagmi": "^1.2.0",
@@ -39,7 +40,8 @@
     "shadcn-ui": "^0.9.4",
     "tailwind-merge": "^2.5.5",
     "viem": "^2.21.36",
-    "wagmi": "^2.12.29"
+    "wagmi": "^2.12.29",
+    "web3": "^4.16.0"
   },
   "devDependencies": {
     "@types/node": "^20",

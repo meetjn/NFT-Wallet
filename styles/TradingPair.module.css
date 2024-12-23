@@ -5,6 +5,7 @@
 }
 
 
+
 .tradingLayout {
    display: flex;
    gap: 12px; 
@@ -177,6 +178,15 @@
   background: #2563eb !important;
   color: white !important;
   border-color: #2563eb !important;
+}
+
+.sellButton {
+  background-color: #ff4444;
+  color: white;
+}
+
+.sellButton:hover {
+  background-color: #cc3333;
 }
 
 .actionButton {

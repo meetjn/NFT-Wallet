@@ -1,9 +1,10 @@
+
 "use client";
+
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import styles from "../../styles/TokenList.module.css";
 
-// Types
 interface TokenPair {
   pair: string;
   link: string;
@@ -17,11 +18,16 @@ interface PriceData {
   change24h?: number;
 }
 
+{/** Here I ahve used ERC-20 Tokens Trading pairs */}
+
 const TOKEN_PAIRS: TokenPair[] = [
-  { pair: "DOT/USDT", link: "DOT-USDT", baseToken: "DOT", quoteToken: "USDT" },
-  { pair: "PHA/USDT", link: "PHA-USDT", baseToken: "PHA", quoteToken: "USDT" },
-  { pair: "ASTR/USDT", link: "ASTR-USDT", baseToken: "ASTR", quoteToken: "USDT" },
-  { pair: "GLMR/USDT", link: "GLMR-USDT", baseToken: "GLMR", quoteToken: "USDT" },
+  { pair: "ETH/USDT", link: "ETH-USDT", baseToken: "ETH", quoteToken: "USDT" },
+  { pair: "LINK/USDT", link: "LINK-USDT", baseToken: "LINK", quoteToken: "USDT" },
+  { pair: "UNI/USDT", link: "UNI-USDT", baseToken: "UNI", quoteToken: "USDT" },
+  { pair: "AAVE/USDT", link: "AAVE-USDT", baseToken: "AAVE", quoteToken: "USDT" },
+  { pair: "MATIC/USDT", link: "MATIC-USDT", baseToken: "MATIC", quoteToken: "USDT" },
+  { pair: "COMP/USDT", link: "COMP-USDT", baseToken: "COMP", quoteToken: "USDT" },
+  { pair: "MKR/USDT", link: "MKR-USDT", baseToken: "MKR", quoteToken: "USDT" }
 ];
 
 const TokenList = () => {
