@@ -79,35 +79,46 @@ export default function Home() {
   };
 
   return (
-    <div style={{ fontFamily: "'Arial', sans-serif" }}>
-      <h1>TBA Platform</h1>
-      <div>
-        <h2>Wallet Connected: {address}</h2>
+    <div className="w-full pl-4 pt-4">
+      <h1 className="text-2xl font-bold">TBA Platform</h1>
+      <div className="mt-4">
+        <h2 className="text-xl font-semibold">Wallet Connected: {address}</h2>
         <br />
-        <h3>Default Chain: Sepolia</h3>
-        <button onClick={createTba}>Create Token Bound Account (TBA)</button>
-        {tbaAddress && <p>New Token Bound Account: {tbaAddress}</p>}
-        <h3>Existing TBAs:</h3>
+        <h3 className="text-lg font-medium">Default Chain: Sepolia</h3>
+        <button 
+          onClick={createTba} 
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Create Token Bound Account (TBA)
+        </button>
+        {tbaAddress && (
+          <p className="mt-2 text-green-600">New Token Bound Account: {tbaAddress}</p>
+        )}
+        <h3 className="mt-6 text-lg font-medium">Existing TBAs:</h3>
         {existingTbas.length > 0 ? (
-          <ul>
+          <ul className="mt-2 list-disc list-inside">
             {existingTbas.map((tba, index) => (
               <li key={index}>{tba}</li>
             ))}
           </ul>
         ) : (
-          <p>No existing TBAs found.</p>
+          <p className="mt-2 text-gray-500">No existing TBAs found.</p>
         )}
       </div>
-
-      <div>
-        <h2>Deploy on Multiple Chains</h2>
-        <NetworkSelector onSelect={handleNetworkChange} />
-        <MultichainDeployer
-          tokenId="1"
-          contractAddress="0xE767739f02A6693d5D38B922324Bf19d1cd0c554"
-        />
+  
+      <div className="mt-8">
+        <h2 className="text-xl font-semibold">Deploy on Multiple Chains</h2>
+        <div className="mt-4">
+          <NetworkSelector onSelect={handleNetworkChange} />
+        </div>
+        <div className="mt-4">
+          <MultichainDeployer
+            tokenId="1"
+            contractAddress="0xE767739f02A6693d5D38B922324Bf19d1cd0c554"
+          />
+        </div>
       </div>
     </div>
   );
-}
+}  
 
