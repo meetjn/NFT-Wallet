@@ -1,0 +1,63 @@
+.chartContainer {
+  width: 65%;  /* Takes up roughly 2/3 of the space */
+  height: 400px;  /* Reduced height */
+  background-color: #1E2026;
+  border-radius: 4px;
+  position: relative;
+  margin-right: 16px; /* Adds space for the right panel */
+  min-width: 800px; /* Ensures minimum width for readability */
+}
+
+.chartWrapper {
+  width: 100%;
+  height: calc(100% - 40px);
+  position: relative;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-bottom: 1px solid #2A2E37;
+  height: 40px;
+}
+
+.symbolInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.symbolName {
+  color: #F0F4F8;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.price {
+  color: #00C087;
+  font-size: 14px;
+}
+
+.timeframes {
+  display: flex;
+  gap: 8px;
+}
+
+.timeframe {
+  color: #848E9C;
+  padding: 2px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.timeframe:hover {
+  background-color: #2A2E37;
+}
+
+.timeframeActive {
+  background-color: #2A2E37;
+  color: #F0F4F8;
+}
