@@ -181,6 +181,7 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import NavBar from "../components/navbar";
+import TokenBoundInterface from "../components/swap";
 import { useAccount } from "wagmi";
 import { TokenboundClient } from "@tokenbound/sdk";
 import { sepolia } from "viem/chains";
@@ -388,6 +389,7 @@ export default function Home() {
           onChange={(e) => setFundingAmount(e.target.value)}
         />
         <button onClick={fundWithErc20}>Send ERC20 Tokens</button>
+        <TokenBoundInterface />
       </div>
     </div>
   );
