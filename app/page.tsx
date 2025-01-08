@@ -1,6 +1,10 @@
+
 "use client";
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
+import NavBar from "../components/navbar";
+import TokenBoundInterface from "../components/swap";
+
 import { useAccount } from "wagmi";
 import { TokenboundClient } from "@tokenbound/sdk";
 import { sepolia } from "viem/chains";
@@ -13,13 +17,15 @@ export default function Home() {
     useState<TokenboundClient | null>(null);
   const [tbaAddress, setTbaAddress] = useState<string | null>(null);
   const [existingTbas, setExistingTbas] = useState<string[]>([]);
-  const [selectedChainId, setSelectedChainId] = useState<number>(sepolia.id);
-  //const [rpcUrl, setRpcUrl] = useState<string>(""); // Selected network RPC URL
-
+  const [fundingAmount, setFundingAmount] = useState<string>("0.01");
+  const [erc20Address, setErc20Address] = useState<string>("");
+  const [manualTbaAddress, setManualTbaAddress] = useState<string>("");
+  const [ethBalance, setEthBalance] = useState<string>("0");
+  const [erc20Balance, setErc20Balance] = useState<string>("0");
+  const [selectedChainId, setSelectedChainId] = useState<number>(sepolia.id); 
   useEffect(() => {
     if (isConnected) {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
-
       const client = new TokenboundClient({
         signer: provider.getSigner(),
         chainId: selectedChainId,
@@ -53,10 +59,41 @@ export default function Home() {
   useEffect(() => {
     fetchExistingTbas();
   }, [tokenBoundClient]);
-
   const handleNetworkChange = (chainId: number) => {
     setSelectedChainId(chainId);
+    
   };
+  const fetchBalances = async () => {
+    if (!manualTbaAddress) return;
+    console.log("tba address", manualTbaAddress);
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+    try {
+      // Fetch ETH Balance
+      const ethBalanceWei = await provider.getBalance(manualTbaAddress);
+      setEthBalance(ethers.utils.formatEther(ethBalanceWei));
+
+      // Fetch ERC20 Token Balance
+      if (erc20Address) {
+        const erc20Abi = [
+          "function balanceOf(address account) view returns (uint256)",
+        ];
+        const erc20Contract = new ethers.Contract(
+          erc20Address,
+          erc20Abi,
+          provider
+        );
+        const erc20BalanceWei = await erc20Contract.balanceOf(manualTbaAddress);
+        setErc20Balance(ethers.utils.formatUnits(erc20BalanceWei, 18)); // Assuming 18 decimals
+      }
+    } catch (error) {
+      console.error("Error fetching balances:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchBalances();
+  }, [manualTbaAddress]);
 
   const createTba = async () => {
     if (tokenBoundClient && address) {
@@ -82,6 +119,48 @@ export default function Home() {
     }
   };
 
+  const fundWithEth = async () => {
+    if (!manualTbaAddress) return alert("Please enter a valid TBA address.");
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+
+    try {
+      const tx = await signer.sendTransaction({
+        to: manualTbaAddress,
+        value: ethers.utils.parseEther(fundingAmount),
+      });
+      console.log("Transaction sent:", tx.hash);
+      alert(`ETH sent successfully! Tx Hash: ${tx.hash}`);
+    } catch (error) {
+      console.error("Error sending ETH:", error);
+      alert("Failed to send ETH.");
+    }
+  };
+
+  const fundWithErc20 = async () => {
+    if (!manualTbaAddress || !erc20Address)
+      return alert("TBA and ERC20 token address are required.");
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+
+    try {
+      const erc20Abi = [
+        "function transfer(address to, uint amount) returns (bool)",
+      ];
+      const erc20Contract = new ethers.Contract(erc20Address, erc20Abi, signer);
+
+      const tx = await erc20Contract.transfer(
+        manualTbaAddress,
+        ethers.utils.parseUnits(fundingAmount, 18)
+      );
+      console.log("ERC20 transfer transaction:", tx.hash);
+      alert(`ERC20 tokens sent successfully! Tx Hash: ${tx.hash}`);
+    } catch (error) {
+      console.error("Error sending ERC20 tokens:", error);
+      alert("Failed to send ERC20 tokens.");
+    }
+  };
+
   return (
     <div style={{ fontFamily: "'Arial', sans-serif" }}>
       <h1>TBA Platform</h1>
@@ -101,6 +180,44 @@ export default function Home() {
         ) : (
           <p>No existing TBAs found.</p>
         )}
+
+        <h3>Enter Token Bound Account (TBA) Address</h3>
+        <input
+          type="text"
+          placeholder="Enter TBA Address"
+          value={manualTbaAddress}
+          onChange={(e) => setManualTbaAddress(e.target.value)}
+          style={{ width: "400px", marginBottom: "10px" }}
+        />
+        <button onClick={fetchBalances}>Fetch Balances</button>
+        <h3>Balances:</h3>
+        <p>ETH Balance: {ethBalance}</p>
+        <p>ERC20 Balance: {erc20Balance}</p>
+
+        <h3>Fund TBA with ETH</h3>
+        <input
+          type="text"
+          placeholder="ETH Amount"
+          value={fundingAmount}
+          onChange={(e) => setFundingAmount(e.target.value)}
+        />
+        <button onClick={fundWithEth}>Send ETH</button>
+
+        <h3>Fund TBA with ERC20 Tokens</h3>
+        <input
+          type="text"
+          placeholder="ERC20 Contract Address"
+          value={erc20Address}
+          onChange={(e) => setErc20Address(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Token Amount"
+          value={fundingAmount}
+          onChange={(e) => setFundingAmount(e.target.value)}
+        />
+        <button onClick={fundWithErc20}>Send ERC20 Tokens</button>
+        <TokenBoundInterface />
       </div>
 
       <div>
