@@ -162,7 +162,7 @@ export default function Home() {
   };
 
   return (
-    <div className="w-full pl-4 pt-4">
+    <div className="w-full pt-4">
       <h1 className="text-2xl font-bold">TBA Platform</h1>
       <div className="mt-4">
         <h2 className="text-xl font-semibold">Wallet Connected: {address}</h2>

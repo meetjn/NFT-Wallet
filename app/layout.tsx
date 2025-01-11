@@ -28,12 +28,9 @@ export default async function RootLayout({
       <body>
         <ContextProvider cookies={cookies}>
           <ContractProvider>
-            <div className="flex flex-col w-full">
-              <NavBar />
-              <div className="flex flex-row w-full">
-                <Sidebar />
-                {children}
-              </div>
+            <div className="flex flex-row w-full gap-4">
+              <Sidebar />
+              {children}
             </div>
           </ContractProvider>
         </ContextProvider>
