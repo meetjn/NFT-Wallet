@@ -197,7 +197,7 @@ export default function Home() {
   const [manualTbaAddress, setManualTbaAddress] = useState<string>("");
   const [ethBalance, setEthBalance] = useState<string>("0");
   const [erc20Balance, setErc20Balance] = useState<string>("0");
-
+  const [currentTokenId, setCurrentTokenId] = useState(0);
   useEffect(() => {
     if (isConnected) {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -212,7 +212,7 @@ export default function Home() {
   const fetchExistingTbas = async () => {
     if (tokenBoundClient && address) {
       const tokenContractAddress = "0xE767739f02A6693d5D38B922324Bf19d1cd0c554";
-      const tokenIds = ["1"];
+      const tokenIds = ["0", "1", "2"];
 
       try {
         const tbas = await Promise.all(
@@ -270,24 +270,30 @@ export default function Home() {
   const createTba = async () => {
     if (tokenBoundClient && address) {
       const tokenContractAddress = "0xE767739f02A6693d5D38B922324Bf19d1cd0c554";
-      const tokenId = "1";
 
       try {
         const { account, txHash } = await tokenBoundClient.createAccount({
           tokenContract: tokenContractAddress,
-          tokenId: tokenId,
+          tokenId: currentTokenId.toString(), // Use the current token ID
         });
-        setTbaAddress(account);
+
+        setTbaAddress(account); // Save the newly created TBA address
         console.log(
-          "Token Bound Account created:",
+          `Token Bound Account created for Token ID ${currentTokenId}:`,
           account,
           "Tx Hash:",
           txHash
         );
-        fetchExistingTbas();
+
+        setCurrentTokenId((prevId) => prevId + 1); // Increment the token ID for the next call
+        fetchExistingTbas(); // Refresh the list of existing TBAs
       } catch (error) {
         console.error("Error creating Token Bound Account:", error);
       }
+    } else {
+      console.error(
+        "Wallet not connected or TokenboundClient not initialized."
+      );
     }
   };
 
@@ -340,7 +346,13 @@ export default function Home() {
       <div>
         <h2>Wallet Connected: {address}</h2>
         <br />
-        <button onClick={createTba}>Create Token Bound Account (TBA)</button>
+        <button onClick={createTba}>Create TBA</button>
+        {tbaAddress && (
+          <p>
+            New Token Bound Account for Token ID {currentTokenId - 1}:{" "}
+            {tbaAddress}
+          </p>
+        )}
         {tbaAddress && <p>New Token Bound Account: {tbaAddress}</p>}
         <h3>Existing TBAs:</h3>
         {existingTbas.length > 0 ? (
