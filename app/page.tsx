@@ -167,10 +167,10 @@ export default function Home() {
   };
 
   return (
-    <div style={{ fontFamily: "'Arial', sans-serif" }}>
-      <h1>TBA Platform</h1>
-      <div>
-        <h2>Wallet Connected: {address}</h2>
+    <div className="w-full pt-4">
+      <h1 className="text-2xl font-bold">TBA Platform</h1>
+      <div className="mt-4">
+        <h2 className="text-xl font-semibold">Wallet Connected: {address}</h2>
         <br />
         <button onClick={createTba}>Create TBA</button>
         {tbaAddress && (
@@ -182,13 +182,13 @@ export default function Home() {
         {tbaAddress && <p>New Token Bound Account: {tbaAddress}</p>}
         <h3>Existing TBAs:</h3>
         {existingTbas.length > 0 ? (
-          <ul>
+          <ul className="mt-2 list-disc list-inside">
             {existingTbas.map((tba, index) => (
               <li key={index}>{tba}</li>
             ))}
           </ul>
         ) : (
-          <p>No existing TBAs found.</p>
+          <p className="mt-2 text-gray-500">No existing TBAs found.</p>
         )}
 
         <h3>Enter Token Bound Account (TBA) Address</h3>
@@ -230,13 +230,17 @@ export default function Home() {
         <TokenBoundInterface />
       </div>
 
-      <div>
-        <h2>Deploy on Multiple Chains</h2>
-        <NetworkSelector onSelect={handleNetworkChange} />
-        <MultichainDeployer
-          tokenId="1"
-          contractAddress="0xE767739f02A6693d5D38B922324Bf19d1cd0c554"
-        />
+      <div className="mt-8">
+        <h2 className="text-xl font-semibold">Deploy on Multiple Chains</h2>
+        <div className="mt-4">
+          <NetworkSelector onSelect={handleNetworkChange} />
+        </div>
+        <div className="mt-4">
+          <MultichainDeployer
+            tokenId="1"
+            contractAddress="0xE767739f02A6693d5D38B922324Bf19d1cd0c554"
+          />
+        </div>
       </div>
     </div>
   );

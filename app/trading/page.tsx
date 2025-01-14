@@ -71,12 +71,8 @@ const TokenList = () => {
   }
 
   return (
-    <div className={styles.tokenListContainer}>
-      <div className={styles.headerSection}>
-        <h2 className={styles.title}>Available Trading Pairs</h2>
-        <p className={styles.subtitle}>Trade your favorite tokens with real-time prices</p>
-      </div>
-
+    <div className="flex justify-center items-center flex-col h-screen w-full gap-4"> 
+      <h2>Available Trading Pairs</h2>
       <div className={styles.tokenList}>
         {TOKEN_PAIRS.map((token) => {
           const priceData = prices.find((p) => p.pair === token.pair);
