@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import {AdvancedSafeWithTokenbound} from "contract/guardian.sol";
-import {Ownable} from "/@openzeppelin/contracts/access/Ownable.sol";
+import {AdvancedSafeWithTokenbound} from "contracts/guardian.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @author Meet Jain - @meetjn
@@ -10,11 +10,7 @@ import {Ownable} from "/@openzeppelin/contracts/access/Ownable.sol";
  * @dev A simplified multi-signature wallet contract that allows multiple owners to approve transactions.
  */
 
-contract MultiSigWallet is 
-    AdvancedSafeWithTokenbound, 
-    Ownable 
-    {
-
+contract MultiSigWallet is Ownable {
     // Custom errors
     error NotAnOwner();
     error TransactionDoesNotExist();
@@ -29,7 +25,10 @@ contract MultiSigWallet is
     // Events
     event Deposit(address indexed sender, uint256 amount);
     event TransactionSubmitted(uint256 indexed transactionId);
-    event TransactionConfirmed(address indexed owner, uint256 indexed transactionId);
+    event TransactionConfirmed(
+        address indexed owner,
+        uint256 indexed transactionId
+    );
     event TransactionExecuted(uint256 indexed transactionId);
     event OwnerAdded(address indexed newOwner);
     event OwnerRemoved(address indexed removedOwner);
@@ -56,22 +55,26 @@ contract MultiSigWallet is
      * @param _owners The list of initial owners.
      * @param _threshold The number of confirmations required for a transaction.
      */
-    
-    constructor(address[] memory _owners, uint256 _threshold) Ownable(msg.sender) {
-    if (_owners.length == 0) revert InvalidThreshold();
-    if (_threshold == 0 || _threshold > _owners.length) revert InvalidThreshold();
 
-    for (uint256 i = 0; i < _owners.length; i++) {
-        address owner = _owners[i];
-        if (owner == address(0)) revert InvalidOwnerAddress();
-        if (isOwner[owner]) revert OwnerNotUnique();
+    constructor(
+        address[] memory _owners,
+        uint256 _threshold
+    ) Ownable(msg.sender) {
+        if (_owners.length == 0) revert InvalidThreshold();
+        if (_threshold == 0 || _threshold > _owners.length)
+            revert InvalidThreshold();
 
-        isOwner[owner] = true;
-        owners.push(owner);
+        for (uint256 i = 0; i < _owners.length; i++) {
+            address owner = _owners[i];
+            if (owner == address(0)) revert InvalidOwnerAddress();
+            if (isOwner[owner]) revert OwnerNotUnique();
+
+            isOwner[owner] = true;
+            owners.push(owner);
+        }
+
+        threshold = _threshold;
     }
-
-    threshold = _threshold;
-}
 
     /**
      * @notice Allows the contract to receive Ether.
@@ -110,9 +113,12 @@ contract MultiSigWallet is
      * @param transactionId The ID of the transaction to confirm.
      */
     function confirmTransaction(uint256 transactionId) public onlyOwner {
-        if (transactionId >= transactions.length) revert TransactionDoesNotExist();
-        if (transactions[transactionId].executed) revert TransactionAlreadyExecuted();
-        if (confirmations[transactionId][msg.sender]) revert TransactionAlreadyConfirmed();
+        if (transactionId >= transactions.length)
+            revert TransactionDoesNotExist();
+        if (transactions[transactionId].executed)
+            revert TransactionAlreadyExecuted();
+        if (confirmations[transactionId][msg.sender])
+            revert TransactionAlreadyConfirmed();
 
         confirmations[transactionId][msg.sender] = true;
         transactions[transactionId].confirmations += 1;
@@ -128,11 +134,13 @@ contract MultiSigWallet is
      * @param transactionId The ID of the transaction to execute.
      */
     function executeTransaction(uint256 transactionId) public onlyOwner {
-        if (transactionId >= transactions.length) revert TransactionDoesNotExist();
-        if (transactions[transactionId].executed) revert TransactionAlreadyExecuted();
+        if (transactionId >= transactions.length)
+            revert TransactionDoesNotExist();
+        if (transactions[transactionId].executed)
+            revert TransactionAlreadyExecuted();
 
         Transaction storage txn = transactions[transactionId];
-        
+
         if (txn.confirmations < threshold) revert NotEnoughConfirmations();
 
         txn.executed = true;
@@ -187,7 +195,8 @@ contract MultiSigWallet is
      * @param newThreshold The new confirmation threshold.
      */
     function changeThreshold(uint256 newThreshold) public onlyOwner {
-        if (newThreshold == 0 || newThreshold > owners.length) revert InvalidThreshold();
+        if (newThreshold == 0 || newThreshold > owners.length)
+            revert InvalidThreshold();
 
         threshold = newThreshold;
 
