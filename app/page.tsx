@@ -180,7 +180,7 @@ export default function Home() {
 
   return (
     <>
-      {showMultiSigWalletCreator ? (
+      {!showMultiSigWalletCreator ? (
         <Web3Provider>
           <MultiSigWalletCreator onComplete={handleMultiSigWalletComplete} />
         </Web3Provider>
@@ -277,8 +277,8 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="mt-8">
-            <h2 className="text-xl font-semibold">Deploy on Multiple Chains</h2>
+          <div>
+            <h2 className="text-2xl font-urbanist-semibold">Deploy on Multiple Chains</h2>
             <div className="mt-4">
               <NetworkSelector onSelect={handleNetworkChange} />
             </div>
