@@ -3,12 +3,16 @@ import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import NavBar from "../components/navbar";
 import TokenBoundInterface from "../components/swap";
-
 import { useAccount } from "wagmi";
 import { TokenboundClient } from "@tokenbound/sdk";
 import { sepolia } from "viem/chains";
 import NetworkSelector from "@/components/NetworkSelector";
 import MultichainDeployer from "@/components/MultichainDeployer";
+import MultiSigWalletCreator from "@/components/MultiSignature";
+import { Web3Provider } from "@/context/Web3Context";
+import Image from "next/image";
+import { Coins } from "lucide-react";
+import AddFundsModal from "@/components/AddFundsModal";
 
 export default function Home() {
   const { isConnected, address } = useAccount();
@@ -23,6 +27,10 @@ export default function Home() {
   const [erc20Balance, setErc20Balance] = useState<string>("0");
   const [currentTokenId, setCurrentTokenId] = useState(0);
   const [selectedChainId, setSelectedChainId] = useState<number>(sepolia.id);
+  const [showMultiSigWalletCreator, setShowMultiSigWalletCreator] =
+    useState(true);
+  const [isEthModalOpen, setIsEthModalOpen] = useState(false);
+  const [isErc20ModalOpen, setIsErc20ModalOpen] = useState(false);
   useEffect(() => {
     if (isConnected) {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -166,82 +174,147 @@ export default function Home() {
     }
   };
 
+  const handleMultiSigWalletComplete = () => {
+    setShowMultiSigWalletCreator(false); // Hide the MultiSigWalletCreator
+  };
+
   return (
-    <div className="w-full pt-4">
-      <h1 className="text-2xl font-bold">TBA Platform</h1>
-      <div className="mt-4">
-        <h2 className="text-xl font-semibold">Wallet Connected: {address}</h2>
-        <br />
-        <button onClick={createTba}>Create TBA</button>
-        {tbaAddress && (
-          <p>
-            New Token Bound Account for Token ID {currentTokenId - 1}:{" "}
-            {tbaAddress}
-          </p>
-        )}
-        {tbaAddress && <p>New Token Bound Account: {tbaAddress}</p>}
-        <h3>Existing TBAs:</h3>
-        {existingTbas.length > 0 ? (
-          <ul className="mt-2 list-disc list-inside">
-            {existingTbas.map((tba, index) => (
-              <li key={index}>{tba}</li>
-            ))}
-          </ul>
-        ) : (
-          <p className="mt-2 text-gray-500">No existing TBAs found.</p>
-        )}
+    <>
+      {!showMultiSigWalletCreator ? (
+        <Web3Provider>
+          <MultiSigWalletCreator onComplete={handleMultiSigWalletComplete} />
+        </Web3Provider>
+      ) : (
+        <section className="pt-8 p-responsive flex flex-col gap-10 w-full pb-10">
+          <div className="flex flex-col gap-8 justify-start items-start">
+            <div className="text-2xl font-semibold">
+              {address ? <> {address}</> : <h1>Wallet Not connected</h1>}
+            </div>
+            <button
+              onClick={createTba}
+              className="py-3 px-6 bg-[#CE192D] font-urbanist-semibold rounded-lg text-white">
+              Create TBA
+            </button>
+            {tbaAddress && (
+              <h2 className="text-xl font-urbanist-medium">
+                New Token Bound Account for Token ID {currentTokenId - 1}:{" "}
+                {tbaAddress}
+              </h2>
+            )}
+          </div>
+          <div className="flex gap-5 items-center">
+            <h3 className="font-urbanist-medium text-lg">Existing TBAs:</h3>
+            {existingTbas.length > 0 ? (
+              <ul className="list-disc list-inside">
+                {existingTbas.map((tba, index) => (
+                  <li key={index} className="mt-2">
+                    {tba}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-[#3f3f3f]">No existing TBAs found</p>
+            )}
+          </div>
 
-        <h3>Enter Token Bound Account (TBA) Address</h3>
-        <input
-          type="text"
-          placeholder="Enter TBA Address"
-          value={manualTbaAddress}
-          onChange={(e) => setManualTbaAddress(e.target.value)}
-          style={{ width: "400px", marginBottom: "10px" }}
-        />
-        <button onClick={fetchBalances}>Fetch Balances</button>
-        <h3>Balances:</h3>
-        <p>ETH Balance: {ethBalance}</p>
-        <p>ERC20 Balance: {erc20Balance}</p>
+          <div className="flex flex-col gap-4">
+            <h2 className="text-lg font-medium">
+              Enter Token Bound Account (TBA) Address
+            </h2>
+            <div className="flex gap-4 items-center">
+              <input
+                type="text"
+                placeholder="Enter TBA Address"
+                value={manualTbaAddress}
+                onChange={(e) => setManualTbaAddress(e.target.value)}
+                className="p-2 pr-10 rounded-md text-black bg-gray-100 border border-opacity-10"
+              />
+              <button
+                onClick={fetchBalances}
+                className="font-urbanist-medium rounded-lg bg-[#CE192D] h-full px-6 text-white ">
+                Fetch Balances
+              </button>
+            </div>
+          </div>
 
-        <h3>Fund TBA with ETH</h3>
-        <input
-          type="text"
-          placeholder="ETH Amount"
-          value={fundingAmount}
-          onChange={(e) => setFundingAmount(e.target.value)}
-        />
-        <button onClick={fundWithEth}>Send ETH</button>
+          <div>
+            <h2 className="text-2xl font-urbanist-semibold">Balances</h2>
+            <div className="grid grid-cols-2 gap-8 mt-4">
+              <div className="flex justify-between flex-col p-6 border border-opacity-10 rounded-2xl min-h-96 hover-scale-on">
+                <div className="flex gap-3 text-xl font-urbanist-semibold items-center">
+                  <Image
+                    src="/ethereum.png"
+                    height={60}
+                    width={60}
+                    className="p-2 border border-opacity-10 rounded-md"
+                    alt="eth"
+                  />
+                  ETH Balance
+                  <p className="ml-auto">{ethBalance}</p>
+                </div>
+                <button
+                  onClick={() => setIsEthModalOpen(true)}
+                  className="font-urbanist-medium text-lg rounded-lg bg-[#CE192D] py-4 px-6 text-white">
+                  Add Funds
+                </button>
+              </div>
+              <div className="flex justify-between flex-col p-6 border border-opacity-10 rounded-2xl min-h-96 hover-scale-on">
+                <div className="flex gap-3 text-xl font-urbanist-semibold items-center">
+                  <Coins
+                    height={60}
+                    width={60}
+                    className="p-2 border border-opacity-10 rounded-md"
+                  />
+                  ERC20 Balance
+                  <p className="ml-auto">{erc20Balance}</p>
+                </div>
+                <button
+                  onClick={() => setIsErc20ModalOpen(true)}
+                  className="font-urbanist-medium text-lg rounded-lg bg-[#CE192D] py-4 px-6 text-white">
+                  Add Funds
+                </button>
+              </div>
+            </div>
+          </div>
 
-        <h3>Fund TBA with ERC20 Tokens</h3>
-        <input
-          type="text"
-          placeholder="ERC20 Contract Address"
-          value={erc20Address}
-          onChange={(e) => setErc20Address(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Token Amount"
-          value={fundingAmount}
-          onChange={(e) => setFundingAmount(e.target.value)}
-        />
-        <button onClick={fundWithErc20}>Send ERC20 Tokens</button>
-        <TokenBoundInterface />
-      </div>
+          <div>
+            <h2 className="text-2xl font-urbanist-semibold">Deploy on Multiple Chains</h2>
+            <div className="mt-4">
+              <NetworkSelector onSelect={handleNetworkChange} />
+            </div>
+            <div className="mt-4">
+              <MultichainDeployer
+                tokenId="1"
+                contractAddress="0xE767739f02A6693d5D38B922324Bf19d1cd0c554"
+              />
+            </div>
+          </div>
 
-      <div className="mt-8">
-        <h2 className="text-xl font-semibold">Deploy on Multiple Chains</h2>
-        <div className="mt-4">
-          <NetworkSelector onSelect={handleNetworkChange} />
-        </div>
-        <div className="mt-4">
-          <MultichainDeployer
-            tokenId="1"
-            contractAddress="0xE767739f02A6693d5D38B922324Bf19d1cd0c554"
+          <AddFundsModal
+            isOpen={isEthModalOpen}
+            onClose={() => {
+              setIsEthModalOpen(false);
+            }}
+            manualTbaAddress={manualTbaAddress}
+            fundingAmount={fundingAmount}
+            setFundingAmount={setFundingAmount}
+            onFund={fundWithEth}
+            fundingType="ETH"
           />
-        </div>
-      </div>
-    </div>
+
+          <AddFundsModal
+            isOpen={isErc20ModalOpen}
+            onClose={() => setIsErc20ModalOpen(false)}
+            manualTbaAddress={manualTbaAddress}
+            fundingAmount={fundingAmount}
+            setFundingAmount={setFundingAmount}
+            onFund={fundWithErc20}
+            fundingType="ERC20 Token"
+            erc20Address={erc20Address}
+            setErc20Address={setErc20Address}
+          />
+        </section>
+      )}
+    </>
   );
 }

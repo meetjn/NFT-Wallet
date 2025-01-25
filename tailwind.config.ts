@@ -74,11 +74,49 @@ const config: Config = {
           foreground: "hsl(var(--card-foreground))",
         },
       },
-      borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
-      },
+      fontFamily: {
+  			'urbanist-black': [
+  				'Urbanist-Black',
+  				'sans-serif'
+  			],
+  			'urbanist-bold': [
+  				'Urbanist-Bold',
+  				'sans-serif'
+  			],
+  			'urbanist-extrabold': [
+  				'Urbanist-ExtraBold',
+  				'sans-serif'
+  			],
+  			'urbanist-extralight': [
+  				'Urbanist-ExtraLight',
+  				'sans-serif'
+  			],
+  			'urbanist-light': [
+  				'Urbanist-Light',
+  				'sans-serif'
+  			],
+  			'urbanist-medium': [
+  				'Urbanist-Medium',
+  				'sans-serif'
+  			],
+  			'urbanist-regular': [
+  				'Urbanist-Regular',
+  				'sans-serif'
+  			],
+  			'urbanist-semibold': [
+  				'Urbanist-SemiBold',
+  				'sans-serif'
+  			],
+  			'urbanist-thin': [
+  				'Urbanist-Thin',
+  				'sans-serif'
+  			],
+  			'digital-7': [
+  				'Digital7',
+  				'sans-serif'
+  			]
+  		},
+      
     },
   },
   plugins: [],
