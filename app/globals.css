@@ -2,20 +2,101 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "Urbanist-Black";
+  src: url("/fonts/Urbanist-Black.ttf");
+}
+
+@font-face {
+  font-family: "Urbanist-Bold";
+  src: url("/fonts/Urbanist-Bold.ttf");
+}
+
+@font-face {
+  font-family: "Urbanist-ExtraBold";
+  src: url("/fonts/Urbanist-ExtraBold.ttf");
+}
+
+@font-face {
+  font-family: "Urbanist-ExtraLight";
+  src: url("/fonts/Urbanist-ExtraLight.ttf");
+}
+
+@font-face {
+  font-family: "Urbanist-Light";
+  src: url("/fonts/Urbanist-Light.ttf");
+}
+
+@font-face {
+  font-family: "Urbanist-Medium";
+  src: url("/fonts/Urbanist-Medium.ttf");
+}
+
+@font-face {
+  font-family: "Urbanist-Regular";
+  src: url("/fonts/Urbanist-Regular.ttf");
+}
+
+@font-face {
+  font-family: "Urbanist-SemiBold";
+  src: url("/fonts/Urbanist-SemiBold.ttf");
+}
+
+@font-face {
+  font-family: "Urbanist-Thin";
+  src: url("/fonts/Urbanist-Thin.ttf");
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  text-align: center;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+
+
+/* Your custom styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--background);
+  font-family: "Urbanist-Regular", sans-serif;
+  margin: 0;
+}
+
+.p-responsive {
+  @apply px-5 sm:px-10;
+}
+
+.hover-scale-on {
+  @apply transition-transform transform duration-300 ease-in-out hover:scale-105 hover:shadow-2xl;
 }
