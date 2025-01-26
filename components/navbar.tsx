@@ -1,6 +1,8 @@
 "use client";
 import { useAccount } from "wagmi";
 import Link from "next/link";
+import { NotificationButton } from "./notifications/NotificationButton";
+import { useState } from "react";
 
 export default function NavBar() {
   const { isConnected } = useAccount();
@@ -70,13 +72,16 @@ export default function NavBar() {
               marginLeft: "20px",
             }}
           >
-
             Trade
-
           </Link>
         </div>
 
-        <div>
+        <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+          {isConnected && (
+            <div style={{ position: "relative" }}>
+              <NotificationButton />
+            </div>
+          )}
           <w3m-button />
           {isConnected && <w3m-network-button />}
         </div>
