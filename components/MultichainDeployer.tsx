@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
-import { chains } from '../utils/chains';
-import { deployTBA } from '../utils/deployTBA';
-import NetworkSelector from './NetworkSelector';
+import React, { useState } from "react";
+import { chains } from "../utils/chains";
+import { deployTBA } from "../utils/deployTBA";
+import NetworkSelector from "./NetworkSelector";
 
 interface MultichainDeployerProps {
   tokenId: string;
   contractAddress: string;
 }
 
-export default function MultichainDeployer({ tokenId, contractAddress }: MultichainDeployerProps) {
+export default function MultichainDeployer({
+  tokenId,
+  contractAddress,
+}: MultichainDeployerProps) {
   const [selectedChain, setSelectedChain] = useState(chains[0]);
 
   const handleNetworkChange = (chainId: number) => {
@@ -30,17 +33,25 @@ export default function MultichainDeployer({ tokenId, contractAddress }: Multich
 
         alert(`TBA deployed at: ${accountAddress}`);
       } catch (error) {
-        console.error('Error deploying TBA:', error);
-        alert('Failed to deploy TBA. Please try again.');
+        console.error("Error deploying TBA:", error);
+        alert("Failed to deploy TBA. Please try again.");
       }
     }
   };
 
   return (
-    <div>
-      <h1>Deploy Token Bound Account</h1>
-      <NetworkSelector onSelect={handleNetworkChange} />
-      <button onClick={handleDeploy}>Deploy on {selectedChain.name}</button>
+    <div className="flex flex-col gap-4">
+      <h1 className="text-base font-urbanist-medium mb-2">
+        Deploy Token Bound Account
+      </h1>
+      <div className="flex flex-col md:flex-row gap-4">
+        <NetworkSelector onSelect={handleNetworkChange} />
+        <button
+          onClick={handleDeploy}
+          className="py-2 px-6 bg-[#CE192D] font-urbanist-semibold rounded-lg text-white">
+          Deploy on {selectedChain.name}
+        </button>
+      </div>
     </div>
   );
 }
