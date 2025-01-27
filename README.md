@@ -1,3 +1,37 @@
+# Contributing
+
+1. Fork the repository. (See the button on top left)
+2. Clone the forked repository on your machine
+3. To run the Frontend run the following commands
+```
+npm install
+```
+
+followed by 
+
+```
+npm run dev
+```
+
+Now this will start frontend code localhost:3000
+
+4. To make contributions create your own branch with your name
+5. Add all the changes by the using the command
+
+   ```
+   gid add .
+   ```
+
+   followed by
+
+   ```
+   git commit -m "your commit message"
+   ```
+
+   lastly,
+```
+   git push -u origin "your branch name here"
+```
 
 # Project Setup Guide
 
