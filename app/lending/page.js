@@ -7,14 +7,16 @@ import SupplyAssetsTable from "@/components/table/LendingTable";
 import { borrowAssets, supplyAssets } from "@/constants/lending";
 import AssetsTable from "@/components/table/LendingTable";
 const LendingPage = () => {
-  const { fetchAaveData } = useContract();
+  const {fetchAaveData} = useContract();
   const [reservesData, setReservesData] = useState([]);
   const [userReservesData, setUserReservesData] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await fetchAaveData(); // Modify fetchAaveData to return reserves and user reserves
+        const data = await fetchAaveData();
+        console.log(data);
+         // Modify fetchAaveData to return reserves and user reserves
         if (data) {
           setReservesData(data.formattedPoolReserves || []);
           setUserReservesData(data.userReserves || []);

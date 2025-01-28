@@ -15,7 +15,7 @@ const AssetsTable = ({  assets, actionLabel }:props) => {
         
         <table className="w-full border-collapse border-spacing-0 text-left">
           <thead>
-            <tr className="bg-gray-100 text-sm font-medium">
+            <tr className=" text-sm font-medium">
               <th className="p-4">Asset</th>
               <th className="p-4">APY</th>
               <th className="p-4">Balance</th>
@@ -27,9 +27,7 @@ const AssetsTable = ({  assets, actionLabel }:props) => {
             {assets.map((asset:any, index:number) => (
               <tr
                 key={index}
-                className={`text-sm hover:bg-gray-50 ${
-                  index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                }`}
+                className={`text-sm border-b border-neutral-600/20 `}
               >
                 <td className="p-4 font-medium">{asset.asset}</td>
                 <td className="p-4">{asset.apy}</td>

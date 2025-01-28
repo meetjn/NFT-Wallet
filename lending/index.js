@@ -65,36 +65,40 @@ export const ContractProvider = ({ children }) => {
       })
     : null;
 
-  const fetchAaveData = async () => {
-    if (!poolDataProvider || !incentiveDataProvider) {
-      console.error("Data providers are not initialized.");
-      return;
-    }
-    if (!address) {
-      console.error("User address is not available.");
-      return;
-    }
-
-    try {
-      console.log("Fetching reserves data...");
-      const rawReserves = await poolDataProvider.getReservesHumanized({
-        lendingPoolAddressProvider:
-          markets.AaveV3ArbitrumSepolia.POOL_ADDRESSES_PROVIDER,
-      });
-
-      console.log("Raw reserves data:", rawReserves);
-
-      console.log("Fetching user reserves data...");
-      const userReserves = await poolDataProvider.getUserReservesHumanized({
-        lendingPoolAddressProvider:
-          markets.AaveV3ArbitrumSepolia.POOL_ADDRESSES_PROVIDER,
-        user: address,
-      });
-      console.log("User reserves data:", userReserves);
-    } catch (error) {
-      console.error("Error fetching Aave data:", error);
-    }
-  };
+    const fetchAaveData = async () => {
+      if (!poolDataProvider || !incentiveDataProvider) {
+        console.error("Data providers are not initialized.");
+        return null;
+      }
+      if (!address) {
+        console.error("User address is not available.");
+        return null;
+      }
+    
+      try {
+        console.log("Fetching reserves data...");
+        const rawReserves = await poolDataProvider.getReservesHumanized({
+          lendingPoolAddressProvider:
+            markets.AaveV3ArbitrumSepolia.POOL_ADDRESSES_PROVIDER,
+        });
+    
+        console.log("Raw reserves data:", rawReserves);
+    
+        console.log("Fetching user reserves data...");
+        const userReserves = await poolDataProvider.getUserReservesHumanized({
+          lendingPoolAddressProvider:
+            markets.AaveV3ArbitrumSepolia.POOL_ADDRESSES_PROVIDER,
+          user: address,
+        });
+        console.log("User reserves data:", userReserves);
+    
+        return { rawReserves, userReserves }; // Return the fetched data
+      } catch (error) {
+        console.error("Error fetching Aave data:", error);
+        return null; // Return null in case of error
+      }
+    };
+    
 
   //Txn setup:
 
