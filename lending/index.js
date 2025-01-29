@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { ethers, BigNumber } from "ethers";
 import { useAccount, useWalletClient } from "wagmi";
 import {
-  UiPoolDataProvider,
+  LegacyUiPoolDataProvider,
   UiIncentiveDataProvider,
   ChainId,
   EthereumTransactionTypeExtended,
@@ -48,20 +48,20 @@ export const ContractProvider = ({ children }) => {
   }, [provider]);
 
   const poolDataProvider = provider
-    ? new UiPoolDataProvider({
+    ? new LegacyUiPoolDataProvider({
         uiPoolDataProviderAddress:
-          markets.AaveV3ArbitrumSepolia.UI_POOL_DATA_PROVIDER,
+          markets.AaveV3Sepolia.UI_POOL_DATA_PROVIDER,
         provider,
-        chainId: ChainId.arbitrum_sepolia,
+        chainId: ChainId.sepolia,
       })
     : null;
 
   const incentiveDataProvider = provider
     ? new UiIncentiveDataProvider({
         uiIncentiveDataProviderAddress:
-          markets.AaveV3ArbitrumSepolia.UI_INCENTIVE_DATA_PROVIDER,
+          markets.AaveV3Sepolia.UI_INCENTIVE_DATA_PROVIDER,
         provider,
-        chainId: ChainId.arbitrum_sepolia,
+        chainId: ChainId.sepolia,
       })
     : null;
 
@@ -79,7 +79,7 @@ export const ContractProvider = ({ children }) => {
         console.log("Fetching reserves data...");
         const rawReserves = await poolDataProvider.getReservesHumanized({
           lendingPoolAddressProvider:
-            markets.AaveV3ArbitrumSepolia.POOL_ADDRESSES_PROVIDER,
+            markets.AaveV3Sepolia.POOL_ADDRESSES_PROVIDER,
         });
     
         console.log("Raw reserves data:", rawReserves);
@@ -87,7 +87,7 @@ export const ContractProvider = ({ children }) => {
         console.log("Fetching user reserves data...");
         const userReserves = await poolDataProvider.getUserReservesHumanized({
           lendingPoolAddressProvider:
-            markets.AaveV3ArbitrumSepolia.POOL_ADDRESSES_PROVIDER,
+            markets.AaveV3Sepolia.POOL_ADDRESSES_PROVIDER,
           user: address,
         });
         console.log("User reserves data:", userReserves);
@@ -133,8 +133,8 @@ export const ContractProvider = ({ children }) => {
    // Initialize Pool instance
    const pool = provider
    ? new Pool(provider, {
-       POOL: markets.AaveV3ArbitrumSepolia.POOL,
-       WETH_GATEWAY: markets.AaveV3ArbitrumSepolia.WETH_GATEWAY,
+       POOL: markets.AaveV3Sepolia.POOL,
+       WETH_GATEWAY: markets.AaveV3Sepolia.WETH_GATEWAY,
      })
    : null;
 
