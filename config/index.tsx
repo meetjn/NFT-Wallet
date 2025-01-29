@@ -5,17 +5,23 @@ import { arbitrum, arbitrumSepolia, mainnet, sepolia } from "@reown/appkit/netwo
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 
-export const projectId = "12a0349a5714aab24e52307456552557";
+
+export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID || "2bec402b7bd44404a790f12362989c84";
+
 if (!projectId) {
-  throw new Error("projectId is not set");
+  throw new Error("ProjectId is required");
 }
 
 export const networks = [mainnet, arbitrum, sepolia,arbitrumSepolia];
 
+
 export const wagmiAdapter = new WagmiAdapter({
-  // storage: createStorage({ storage: cookieStorage }),
+  storage: createStorage({
+    storage: cookieStorage,
+  }),
   networks,
   projectId,
   ssr: true,
 });
+
 export const config = wagmiAdapter.wagmiConfig;

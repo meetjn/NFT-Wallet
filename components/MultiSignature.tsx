@@ -149,11 +149,11 @@ const MultiSigWalletCreator: React.FC<MultiSigWalletCreatorProps> = ({
     switch (step) {
       case 1:
         return (
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold">Create New Wallet</h2>
+          <div className="">
+            <h2 className="text-xl font-urbanist-bold">Create New Wallet</h2>
             <button
               onClick={() => setStep(2)}
-              className="px-4 py-2 bg-green-500 text-white rounded-lg"
+              className="py-3 px-6 bg-[#CE192D] font-urbanist-semibold rounded-lg text-white mt-2"
             >
               Create account
             </button>
@@ -310,11 +310,9 @@ const MultiSigWalletCreator: React.FC<MultiSigWalletCreatorProps> = ({
   );
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-8">
-      <div className="max-w-2xl mx-auto">
+    <div className="w-full h-screen flex items-center justify-center flex-col">
         {renderStep()}
         {errorDisplay}
-      </div>
     </div>
   );
 };
