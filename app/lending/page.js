@@ -11,14 +11,15 @@ const LendingPage = () => {
   const [reservesData, setReservesData] = useState([]);
   const [userReservesData, setUserReservesData] = useState([]);
 
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await fetchAaveData();
-        console.log(data);
+        console.log("data from page: ",data);
          // Modify fetchAaveData to return reserves and user reserves
         if (data) {
-          setReservesData(data.formattedPoolReserves || []);
+          setReservesData(data.rawReserves|| []);
           setUserReservesData(data.userReserves || []);
         }
       } catch (error) {
@@ -29,6 +30,7 @@ const LendingPage = () => {
     fetchData();
   }, [fetchAaveData]);
 
+  console.log("reserve data: ", reservesData);
   return (
     <div className="flex flex-col space-y-10  w-full px-4">
       <h1 className="text-3xl font-bold my-8">Lending Dashboard</h1>
@@ -52,7 +54,7 @@ const LendingPage = () => {
   );
 };
 
-const Tables = ({ reservesData, userReserves }) => (
+const Tables = ({ reservesData }) => (
   <main className="w-full flex flex-row items-center justify-between space-x-10">
     <Card className="border shadow-lg bg-neutral-200 w-1/2">
       <CardHeader className="text-xl font-semibold">Assets to supply</CardHeader>
@@ -62,7 +64,7 @@ const Tables = ({ reservesData, userReserves }) => (
           assets={supplyAssets}
           actionLabel="Supply"
         /> */}
-        <AssetsTable title="Assets to supply" assets={supplyAssets} actionLabel="Supply" />
+        <AssetsTable title="Assets to supply" assets={reservesData} actionLabel="Supply" />
       </CardDescription>
     </Card>
 
@@ -72,7 +74,7 @@ const Tables = ({ reservesData, userReserves }) => (
     <Card className="border shadow-lg bg-neutral-200 w-1/2">
       <CardHeader className="text-xl font-semibold">Assets to Borrow</CardHeader>
       <CardDescription>
-        <AssetsTable title="Assets to Borrow" assets={borrowAssets} actionLabel="Borrow" />
+        <AssetsTable title="Assets to Borrow" assets={reservesData} actionLabel="Borrow" />
       </CardDescription>
     </Card>
   </main>

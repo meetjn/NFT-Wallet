@@ -27,6 +27,7 @@
     "chart.js": "^4.4.7",
     "class-variance-authority": "^0.7.1",
     "cors": "^2.8.5",
+    "dayjs": "^1.11.13",
     "express": "^4.21.2",
     "init": "^0.1.2",
     "lightweight-charts": "^4.2.2",

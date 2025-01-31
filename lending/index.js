@@ -10,6 +10,8 @@ import {
   EthereumTransactionTypeExtended,
   Pool
 } from "@aave/contract-helpers";
+import {formatReserves} from '@aave/math-utils'
+import dayjs from 'dayjs'
 import * as markets from "@bgd-labs/aave-address-book";
 
 const ContractContext = createContext();
@@ -76,14 +78,16 @@ export const ContractProvider = ({ children }) => {
       }
     
       try {
+        // Object containing array of pool reserves and market base currency data
         console.log("Fetching reserves data...");
-        const rawReserves = await poolDataProvider.getReservesHumanized({
+        const reserves = await poolDataProvider.getReservesHumanized({
           lendingPoolAddressProvider:
             markets.AaveV3Sepolia.POOL_ADDRESSES_PROVIDER,
         });
     
-        console.log("Raw reserves data:", rawReserves);
+        console.log("reserves data:", reserves);
     
+        //object containing array of user's aave position
         console.log("Fetching user reserves data...");
         const userReserves = await poolDataProvider.getUserReservesHumanized({
           lendingPoolAddressProvider:
@@ -91,11 +95,26 @@ export const ContractProvider = ({ children }) => {
           user: address,
         });
         console.log("User reserves data:", userReserves);
+
+        //formatting fetched reserves data:
+        const reservesArray = reserves.reservesData;
+        const baseCurrencyData = reserves.baseCurrencyData;
+        const currentTimestamp = dayjs().unix();
+
+        const formattedPoolReserves = formatReserves({
+          reserves: reservesArray,
+          currentTimestamp,
+          marketReferenceCurrencyDecimals:
+            baseCurrencyData.marketReferenceCurrencyDecimals,
+          marketReferencePriceInUsd: baseCurrencyData.marketReferenceCurrencyPriceInUsd,
+        });
+
+        console.log("meow meow formatted reserves: ", formattedPoolReserves);
     
-        return { rawReserves, userReserves }; // Return the fetched data
+        return { formattedPoolReserves };
       } catch (error) {
         console.error("Error fetching Aave data:", error);
-        return null; // Return null in case of error
+        return null; 
       }
     };
     

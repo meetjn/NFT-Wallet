@@ -8,7 +8,8 @@ interface props{
   actionLabel:any
 }
 
-const AssetsTable = ({  assets, actionLabel }:props) => {
+const AssetsTable = ({ assets, actionLabel }:props) => {
+  console.log("assets", assets)
   return (
     <Card className="w-full p-4">
       <CardContent>
@@ -19,7 +20,7 @@ const AssetsTable = ({  assets, actionLabel }:props) => {
               <th className="p-4">Asset</th>
               <th className="p-4">APY</th>
               <th className="p-4">Balance</th>
-              <th className="p-4 text-center">Collateral</th>
+              <th className="p-4 text-center">Can be collateral</th>
               <th className="p-4 text-center">Action</th>
             </tr>
           </thead>
@@ -29,16 +30,16 @@ const AssetsTable = ({  assets, actionLabel }:props) => {
                 key={index}
                 className={`text-sm border-b border-neutral-600/20 `}
               >
-                <td className="p-4 font-medium">{asset.asset}</td>
-                <td className="p-4">{asset.apy}</td>
-                <td className="p-4">{asset.balance}</td>
-                <td className="p-4 text-center">
-                  {asset.collateral ? (
+                <td className="p-4 font-medium">{}</td>
+                <td className="p-4">{}</td>
+                <td className="p-4">{}</td>
+                {/* <td className="p-4 text-center">
+                  { ? (
                     <ChevronDown className="inline-block text-green-500" />
                   ) : (
                     <ChevronUp className="inline-block text-red-500" />
                   )}
-                </td>
+                </td> */}
                 <td className="p-4 text-center">
                   <Button variant="outline">{actionLabel}</Button>
                 </td>
