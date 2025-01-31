@@ -289,62 +289,7 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <div>
-        <h2 className="text-2xl font-urbanist-semibold">Balances</h2>
-        <div className="grid grid-cols-2 gap-8 mt-4">
-          <div className="flex justify-between flex-col p-6 border border-opacity-10 rounded-2xl min-h-96 hover-scale-on">
-            <div className="flex gap-3 text-xl font-urbanist-semibold items-center">
-              <Image
-                src="/ethereum.png"
-                height={60}
-                width={60}
-                className="p-2 border border-opacity-10 rounded-md"
-                alt="eth"
-              />
-              ETH Balance
-              <p className="ml-auto">{ethBalance}</p>
-            </div>
-            <button
-              onClick={() => setIsEthModalOpen(true)}
-              className="font-urbanist-medium text-lg rounded-lg bg-[#CE192D] py-4 px-6 text-white"
-            >
-              Add Funds
-            </button>
-          </div>
-          <div className="flex justify-between flex-col p-6 border border-opacity-10 rounded-2xl min-h-96 hover-scale-on">
-            <div className="flex gap-3 text-xl font-urbanist-semibold items-center">
-              <Coins
-                height={60}
-                width={60}
-                className="p-2 border border-opacity-10 rounded-md"
-              />
-              ERC20 Balance
-              <p className="ml-auto">{erc20Balance}</p>
-            </div>
-            <button
-              onClick={() => setIsErc20ModalOpen(true)}
-              className="font-urbanist-medium text-lg rounded-lg bg-[#CE192D] py-4 px-6 text-white"
-            >
-              Add Funds
-            </button>
-          </div>
-        </div>
-      </div>
 
-      <div>
-        <h2 className="text-2xl font-urbanist-semibold">
-          Deploy on Multiple Chains
-        </h2>
-        <div className="mt-4">
-          <NetworkSelector onSelect={handleNetworkChange} />
-        </div>
-        <div className="mt-4">
-          <MultichainDeployer
-            tokenId="1"
-            contractAddress="0xE767739f02A6693d5D38B922324Bf19d1cd0c554"
-          />
-        </div>
-      </div>
       <div>
         <h2 className="text-2xl font-urbanist-semibold">
           Deploy on Multiple Chains
