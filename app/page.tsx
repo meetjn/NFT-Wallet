@@ -25,7 +25,7 @@ export default function Home() {
   const [manualTbaAddress, setManualTbaAddress] = useState<string>("");
   const [ethBalance, setEthBalance] = useState<string>("0");
   const [erc20Balance, setErc20Balance] = useState<string>("0");
-  const [currentTokenId, setCurrentTokenId] = useState(0);
+  const [currentTokenId, setCurrentTokenId] = useState(4);
   const [selectedChainId, setSelectedChainId] = useState<number>(sepolia.id);
   const [showMultiSigWalletCreator, setShowMultiSigWalletCreator] =
     useState(true);
@@ -45,7 +45,7 @@ export default function Home() {
   const fetchExistingTbas = async () => {
     if (tokenBoundClient && address) {
       const tokenContractAddress = "0xE767739f02A6693d5D38B922324Bf19d1cd0c554";
-      const tokenIds = ["0", "1", "2"];
+      const tokenIds = ["0", "1", "2", "3", "4"];
 
       try {
         const tbas = await Promise.all(
@@ -192,7 +192,8 @@ export default function Home() {
             </div>
             <button
               onClick={createTba}
-              className="py-3 px-6 bg-[#CE192D] font-urbanist-semibold rounded-lg text-white">
+              className="py-3 px-6 bg-[#CE192D] font-urbanist-semibold rounded-lg text-white"
+            >
               Create TBA
             </button>
             {tbaAddress && (
@@ -231,7 +232,8 @@ export default function Home() {
               />
               <button
                 onClick={fetchBalances}
-                className="font-urbanist-medium rounded-lg bg-[#CE192D] h-full px-6 text-white ">
+                className="font-urbanist-medium rounded-lg bg-[#CE192D] h-full px-6 text-white "
+              >
                 Fetch Balances
               </button>
             </div>
@@ -254,7 +256,8 @@ export default function Home() {
                 </div>
                 <button
                   onClick={() => setIsEthModalOpen(true)}
-                  className="font-urbanist-medium text-lg rounded-lg bg-[#CE192D] py-4 px-6 text-white">
+                  className="font-urbanist-medium text-lg rounded-lg bg-[#CE192D] py-4 px-6 text-white"
+                >
                   Add Funds
                 </button>
               </div>
@@ -270,7 +273,8 @@ export default function Home() {
                 </div>
                 <button
                   onClick={() => setIsErc20ModalOpen(true)}
-                  className="font-urbanist-medium text-lg rounded-lg bg-[#CE192D] py-4 px-6 text-white">
+                  className="font-urbanist-medium text-lg rounded-lg bg-[#CE192D] py-4 px-6 text-white"
+                >
                   Add Funds
                 </button>
               </div>
@@ -278,7 +282,9 @@ export default function Home() {
           </div>
 
           <div>
-            <h2 className="text-2xl font-urbanist-semibold">Deploy on Multiple Chains</h2>
+            <h2 className="text-2xl font-urbanist-semibold">
+              Deploy on Multiple Chains
+            </h2>
             <div className="mt-4">
               <NetworkSelector onSelect={handleNetworkChange} />
             </div>
