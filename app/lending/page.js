@@ -6,6 +6,7 @@ import { Card, CardDescription, CardHeader } from "@/components/ui/card";
 import SupplyAssetsTable from "@/components/table/LendingTable";
 import { borrowAssets, supplyAssets } from "@/constants/lending";
 import AssetsTable from "@/components/table/LendingTable";
+import BorrowingTable from "@/components/table/BorrowingTable"
 const LendingPage = () => {
   const {fetchAaveData} = useContract();
   const [reservesData, setReservesData] = useState([]);
@@ -75,6 +76,7 @@ const Tables = ({ reservesData }) => (
       <CardHeader className="text-xl font-semibold">Assets to Borrow</CardHeader>
       <CardDescription>
         {/* <AssetsTable title="Assets to Borrow" assets={reservesData} actionLabel="Borrow" /> */}
+        <BorrowingTable title="Assets to borrow" assets={reservesData} actionLabel="Borrow"/>
       </CardDescription>
     </Card>
   </main>
