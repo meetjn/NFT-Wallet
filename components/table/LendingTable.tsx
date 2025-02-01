@@ -33,7 +33,7 @@ const AssetsTable = ({ assets, actionLabel }: props) => {
                 <td className="p-4 font-semibold">{(asset?.supplyAPY * 10).toFixed(2)}%</td>
                 <td className="p-4 text-center">
                   {asset.borrowingEnabled ? (
-                    asset.borrowableInIsolation ? (
+                    asset.isIsolated ? (
                       <AlertTriangle
                         className="inline-block text-yellow-500"
                         size={20}
