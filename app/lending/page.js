@@ -19,7 +19,7 @@ const LendingPage = () => {
         console.log("data from page: ",data);
          // Modify fetchAaveData to return reserves and user reserves
         if (data) {
-          setReservesData(data.rawReserves|| []);
+          setReservesData(data.formattedPoolReserves|| []);
           setUserReservesData(data.userReserves || []);
         }
       } catch (error) {
@@ -74,7 +74,7 @@ const Tables = ({ reservesData }) => (
     <Card className="border shadow-lg bg-neutral-200 w-1/2">
       <CardHeader className="text-xl font-semibold">Assets to Borrow</CardHeader>
       <CardDescription>
-        <AssetsTable title="Assets to Borrow" assets={reservesData} actionLabel="Borrow" />
+        {/* <AssetsTable title="Assets to Borrow" assets={reservesData} actionLabel="Borrow" /> */}
       </CardDescription>
     </Card>
   </main>
