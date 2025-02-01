@@ -38,7 +38,7 @@ interface props {
                     <></>
                   }
                   <td className="p-4 text-center">
-                   <button className="rounded-lg bg-[#CE192D] py-3 px-6 text-white">Supply</button>
+                   <button className="rounded-lg bg-[#CE192D] py-3 px-6 text-white">Borrow</button>
                   </td>
                 </tr>
               ))}
