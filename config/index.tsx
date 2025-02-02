@@ -1,7 +1,7 @@
 import { createAppKit } from "@reown/appkit/react";
 import { cookieStorage, createStorage } from "wagmi";
 import { WagmiProvider } from "wagmi";
-import { arbitrum, mainnet, sepolia } from "@reown/appkit/networks";
+import { arbitrum, mainnet, sepolia, baseSepolia, holesky,avalancheFuji } from "@reown/appkit/networks";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 
@@ -10,7 +10,7 @@ if (!projectId) {
   throw new Error("projectId is not set");
 }
 
-export const networks = [mainnet, arbitrum, sepolia];
+export const networks = [mainnet, arbitrum, sepolia, baseSepolia, holesky,avalancheFuji];
 
 export const wagmiAdapter = new WagmiAdapter({
   // storage: createStorage({ storage: cookieStorage }),

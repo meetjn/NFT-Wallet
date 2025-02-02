@@ -11,10 +11,12 @@ import { ContractProvider } from "@/lending/index";
 import NavBar from "@/components/navbar";
 import Sidebar from "@/components/sidebar";
 
+
 export const metadata: Metadata = {
-  title: "Quranium Node Sell",
-  description: "Quranium Node Sell",
+  title: "QNFT-Wallet",
+  description: "Quranium NFT Wallet",
 };
+
 
 export default async function RootLayout({
   children,
@@ -31,7 +33,7 @@ export default async function RootLayout({
             <div className="flex flex-row w-full gap-4">
               <Sidebar />
               {children}
-            </div>
+              </div>
           </ContractProvider>
         </ContextProvider>
       </body>
