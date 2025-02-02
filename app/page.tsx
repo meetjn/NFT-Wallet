@@ -21,6 +21,8 @@ import { injected } from "wagmi";
 
 
 
+import router from "next/router";
+import Sidebar from "@/components/sidebar";
 
 export default function Home() {
   const { isConnected, address } = useAccount();
@@ -204,109 +206,120 @@ const handleCreateTBA = async () => {
   };
 
   const handleMultiSigWalletComplete = () => {
-    setShowMultiSigWalletCreator(false); // Hide the MultiSigWalletCreator
+    localStorage.setItem("multiSigCompleted", "true");
+    setShowMultiSigWalletCreator(false);
+
+    // Hide the MultiSigWalletCreator
   };
 
-  return (
-    <>
-      {!showMultiSigWalletCreator ? (
+  if (showMultiSigWalletCreator) {
+    return (
+      <div className="w-screen h-screen fixed top-0 left-0 bg-white z-50">
         <Web3Provider>
           <MultiSigWalletCreator onComplete={handleMultiSigWalletComplete} />
         </Web3Provider>
-      ) : (
-        <section className="pt-8 p-responsive flex flex-col gap-10 w-full pb-10">
-          <div className="flex flex-col gap-8 justify-start items-start">
-            <div className="text-2xl font-semibold">
-              {address ? <> {address}</> : <h1>Wallet Not connected</h1>}
+      </div>
+    );
+  }
+
+  return (
+    <section className="pt-8 p-responsive flex flex-col gap-10 w-full pb-10">
+      <div className="flex flex-col gap-8 justify-start items-start">
+        <div className="text-2xl font-semibold">
+          {address ? <> {address}</> : <h1>Wallet Not connected</h1>}
+        </div>
+        <button
+          onClick={handleCreateTBA} disabled={isDeploying}
+          className="py-3 px-6 bg-[#CE192D] font-urbanist-semibold rounded-lg text-white"
+        >
+              {isDeploying ? "Deploying...":"" }
+          Create TBA
+        </button>
+        {tbaAddress && (
+          <h2 className="text-xl font-urbanist-medium">
+            New Token Bound Account for Token ID {currentTokenId - 1}:{" "}
+            {tbaAddress}
+          </h2>
+        )}
+      </div>
+         
+      <div className="flex gap-5 items-center">
+        <h3 className="font-urbanist-medium text-lg">Existing TBAs:</h3>
+        {existingTbas.length > 0 ? (
+          <ul className="list-disc list-inside">
+            {existingTbas.map((tba, index) => (
+              <li key={index} className="mt-2">
+                {tba}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-[#3f3f3f]">No existing TBAs found</p>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-4">
+        <h2 className="text-lg font-medium">
+          Enter Token Bound Account (TBA) Address
+        </h2>
+        <div className="flex gap-4 items-center">
+          <input
+            type="text"
+            placeholder="Enter TBA Address"
+            value={manualTbaAddress}
+            onChange={(e) => setManualTbaAddress(e.target.value)}
+            className="p-2 pr-10 rounded-md text-black bg-gray-100 border border-opacity-10"
+          />
+          <button
+            onClick={fetchBalances}
+            className="font-urbanist-medium rounded-lg bg-[#CE192D] h-full px-6 text-white "
+          >
+            Fetch Balances
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <h2 className="text-2xl font-urbanist-semibold">Balances</h2>
+        <div className="grid grid-cols-2 gap-8 mt-4">
+          <div className="flex justify-between flex-col p-6 border border-opacity-10 rounded-2xl min-h-96 hover-scale-on">
+            <div className="flex gap-3 text-xl font-urbanist-semibold items-center">
+              <Image
+                src="/ethereum.png"
+                height={60}
+                width={60}
+                className="p-2 border border-opacity-10 rounded-md"
+                alt="eth"
+              />
+              ETH Balance
+              <p className="ml-auto">{ethBalance}</p>
             </div>
             <button
-              onClick={handleCreateTBA} disabled={isDeploying}
-              className="py-3 px-6 bg-[#CE192D] font-urbanist-semibold rounded-lg text-white">
-              {isDeploying ? "Deploying...":"" }
-              Create TBA
+              onClick={() => setIsEthModalOpen(true)}
+              className="font-urbanist-medium text-lg rounded-lg bg-[#CE192D] py-4 px-6 text-white"
+            >
+              Add Funds
             </button>
-            {tbaAddress && (
-              <h2 className="text-xl font-urbanist-medium">
-                New Token Bound Account for Token ID {currentTokenId - 1}:{" "}
-                {tbaAddress}
-              </h2>
-            )}
           </div>
-         
-          <div className="flex gap-5 items-center">
-            <h3 className="font-urbanist-medium text-lg">Existing TBAs:</h3>
-            {existingTbas.length > 0 ? (
-              <ul className="list-disc list-inside">
-                {existingTbas.map((tba, index) => (
-                  <li key={index} className="mt-2">
-                    {tba}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-[#3f3f3f]">No existing TBAs found</p>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <h2 className="text-lg font-medium">
-              Enter Token Bound Account (TBA) Address
-            </h2>
-            <div className="flex gap-4 items-center">
-              <input
-                type="text"
-                placeholder="Enter TBA Address"
-                value={manualTbaAddress}
-                onChange={(e) => setManualTbaAddress(e.target.value)}
-                className="p-2 pr-10 rounded-md text-black bg-gray-100 border border-opacity-10"
+          <div className="flex justify-between flex-col p-6 border border-opacity-10 rounded-2xl min-h-96 hover-scale-on">
+            <div className="flex gap-3 text-xl font-urbanist-semibold items-center">
+              <Coins
+                height={60}
+                width={60}
+                className="p-2 border border-opacity-10 rounded-md"
               />
-              <button
-                onClick={fetchBalances}
-                className="font-urbanist-medium rounded-lg bg-[#CE192D] h-full px-6 text-white ">
-                Fetch Balances
-              </button>
+              ERC20 Balance
+              <p className="ml-auto">{erc20Balance}</p>
             </div>
+            <button
+              onClick={() => setIsErc20ModalOpen(true)}
+              className="font-urbanist-medium text-lg rounded-lg bg-[#CE192D] py-4 px-6 text-white"
+            >
+              Add Funds
+            </button>
           </div>
-
-          <div>
-            <h2 className="text-2xl font-urbanist-semibold">Balances</h2>
-            <div className="grid grid-cols-2 gap-8 mt-4">
-              <div className="flex justify-between flex-col p-6 border border-opacity-10 rounded-2xl min-h-96 hover-scale-on">
-                <div className="flex gap-3 text-xl font-urbanist-semibold items-center">
-                  <Image
-                    src="/ethereum.png"
-                    height={60}
-                    width={60}
-                    className="p-2 border border-opacity-10 rounded-md"
-                    alt="eth"
-                  />
-                  ETH Balance
-                  <p className="ml-auto">{ethBalance}</p>
-                </div>
-                <button
-                  onClick={() => setIsEthModalOpen(true)}
-                  className="font-urbanist-medium text-lg rounded-lg bg-[#CE192D] py-4 px-6 text-white">
-                  Add Funds
-                </button>
-              </div>
-              <div className="flex justify-between flex-col p-6 border border-opacity-10 rounded-2xl min-h-96 hover-scale-on">
-                <div className="flex gap-3 text-xl font-urbanist-semibold items-center">
-                  <Coins
-                    height={60}
-                    width={60}
-                    className="p-2 border border-opacity-10 rounded-md"
-                  />
-                  ERC20 Balance
-                  <p className="ml-auto">{erc20Balance}</p>
-                </div>
-                <button
-                  onClick={() => setIsErc20ModalOpen(true)}
-                  className="font-urbanist-medium text-lg rounded-lg bg-[#CE192D] py-4 px-6 text-white">
-                  Add Funds
-                </button>
-              </div>
-            </div>
-          </div>
+        </div>
+      </div>
 
           <div>
             <h2 className="text-2xl font-urbanist-semibold">Deploy on Multiple Chains</h2>
@@ -404,31 +417,29 @@ const handleCreateTBA = async () => {
             </div>
           </div>
 
-          <AddFundsModal
-            isOpen={isEthModalOpen}
-            onClose={() => {
-              setIsEthModalOpen(false);
-            }}
-            manualTbaAddress={manualTbaAddress}
-            fundingAmount={fundingAmount}
-            setFundingAmount={setFundingAmount}
-            onFund={fundWithEth}
-            fundingType="ETH"
-          />
+      <AddFundsModal
+        isOpen={isEthModalOpen}
+        onClose={() => {
+          setIsEthModalOpen(false);
+        }}
+        manualTbaAddress={manualTbaAddress}
+        fundingAmount={fundingAmount}
+        setFundingAmount={setFundingAmount}
+        onFund={fundWithEth}
+        fundingType="ETH"
+      />
 
-          <AddFundsModal
-            isOpen={isErc20ModalOpen}
-            onClose={() => setIsErc20ModalOpen(false)}
-            manualTbaAddress={manualTbaAddress}
-            fundingAmount={fundingAmount}
-            setFundingAmount={setFundingAmount}
-            onFund={fundWithErc20}
-            fundingType="ERC20 Token"
-            erc20Address={erc20Address}
-            setErc20Address={setErc20Address}
-          />
-        </section>
-      )}
-    </>
+      <AddFundsModal
+        isOpen={isErc20ModalOpen}
+        onClose={() => setIsErc20ModalOpen(false)}
+        manualTbaAddress={manualTbaAddress}
+        fundingAmount={fundingAmount}
+        setFundingAmount={setFundingAmount}
+        onFund={fundWithErc20}
+        fundingType="ERC20 Token"
+        erc20Address={erc20Address}
+        setErc20Address={setErc20Address}
+      />
+    </section>
   );
 }
