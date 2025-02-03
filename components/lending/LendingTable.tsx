@@ -2,6 +2,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, AlertTriangle, Check, X } from "lucide-react"; // Add this import
+import SupplyDialog from "./SupplyDialog";
 
 interface props {
   assets: any;
@@ -49,7 +50,8 @@ const AssetsTable = ({ assets, actionLabel }: props) => {
                   )}
                 </td>
                 <td className="p-4 text-center">
-                 <button className="rounded-lg bg-[#CE192D] py-3 px-6 text-white">Supply</button>
+                 {/* <button className="rounded-lg bg-[#CE192D] py-3 px-6 text-white">Supply</button> */}
+                 <SupplyDialog asset={asset} />
                 </td>
               </tr>
             ))}

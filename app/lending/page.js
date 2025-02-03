@@ -3,9 +3,9 @@
 import React, { useEffect, useState } from "react";
 import { useContract } from "@/lending/index";
 import { Card, CardDescription, CardHeader } from "@/components/ui/card";
-import SupplyAssetsTable from "@/components/table/LendingTable";
+import SupplyAssetsTable from "@/components/lending/LendingTable";
 import { borrowAssets, supplyAssets } from "@/constants/lending";
-import AssetsTable from "@/components/table/LendingTable";
+import AssetsTable from "@/components/lending/LendingTable";
 const LendingPage = () => {
   const {fetchAaveData} = useContract();
   const [reservesData, setReservesData] = useState([]);
