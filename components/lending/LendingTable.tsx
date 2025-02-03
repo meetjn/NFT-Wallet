@@ -1,8 +1,9 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, AlertTriangle, Check, X } from "lucide-react"; // Add this import
+
 import SupplyDialog from "./SupplyDialog";
+import { CheckCircle, AlertTriangle, Check, X } from "lucide-react"; 
 
 interface props {
   assets: any;
@@ -21,7 +22,7 @@ const AssetsTable = ({ assets, actionLabel }: props) => {
               <th className="p-4">APY</th>
 
               <th className="p-4 text-center">Collateral</th>
-              <th className="p-4 text-center">Action</th>
+              
             </tr>
           </thead>
           <tbody>
@@ -33,8 +34,8 @@ const AssetsTable = ({ assets, actionLabel }: props) => {
                 <td className="p-4 font-medium">{asset?.name}</td>
                 <td className="p-4 font-semibold">{(asset?.supplyAPY * 10).toFixed(2)}%</td>
                 <td className="p-4 text-center">
-                  {asset.borrowingEnabled ? (
-                    asset.borrowableInIsolation ? (
+                  {asset.usageAsCollateralEnabled ? (
+                    asset.isIsolated ? (
                       <AlertTriangle
                         className="inline-block text-yellow-500"
                         size={20}

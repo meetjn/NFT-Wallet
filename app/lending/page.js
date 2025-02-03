@@ -75,6 +75,7 @@ const Tables = ({ reservesData }) => (
       <CardHeader className="text-xl font-semibold">Assets to Borrow</CardHeader>
       <CardDescription>
         {/* <AssetsTable title="Assets to Borrow" assets={reservesData} actionLabel="Borrow" /> */}
+        <BorrowingTable title="Assets to borrow" assets={reservesData} actionLabel="Borrow"/>
       </CardDescription>
     </Card>
   </main>
