@@ -13,7 +13,7 @@ const LendingPage = () => {
   const {fetchAaveData, supplyWithPermit, checkWalletBalance} = useContract();
   const [reservesData, setReservesData] = useState([]);
   const [userReservesData, setUserReservesData] = useState([]);
-  const [assetBalances, setAssetBalances] = useState({});
+
 
 
   useEffect(() => {
@@ -36,26 +36,27 @@ const LendingPage = () => {
 
   console.log("reserve data: ", reservesData);
 
-  const fetchBalances = async () => {
-    const balances = {};
-    for (const asset of reservesData) {
-      try {
-        const balance = await checkWalletBalance(asset.underlyingAsset);
-        balances[asset.underlyingAsset] = balance;
-      } catch (error) {
-        console.error(`Error fetching balance for ${asset.name}`, error);
-        balances[asset.underlyingAsset] = ethers.BigNumber.from(0);
-      }
-    }
-    setAssetBalances(balances);
-  };
+  // const fetchBalances = async () => {
+  //   const balances = {};
+  //   for (const asset of reservesData) {
+  //     try {
+  //       const balance = await checkWalletBalance(asset.underlyingAsset);
+  //       balances[asset.underlyingAsset] = balance;
+  //       console.log("Balance bro:", balance)
+  //     } catch (error) {
+  //       console.error(`Error fetching balance for ${asset.name}`, error);
+  //       balances[asset.underlyingAsset] = ethers.BigNumber.from(0);
+  //     }
+  //   }
+  //   setAssetBalances(balances);
+  // };
 
   // Fetch balances whenever reservesData changes
-  useEffect(() => {
-    if (reservesData.length > 0) {
-      fetchBalances();
-    }
-  }, [reservesData]);
+  // useEffect(() => {
+  //   if (reservesData.length > 0) {
+  //     fetchBalances();
+  //   }
+  // }, [reservesData]);
 
   const handleSupply = async (asset) => {
     try {
@@ -92,7 +93,7 @@ const LendingPage = () => {
           </CardDescription>
         </Card>
       </section>
-      <Tables reservesData={reservesData} onSupply={handleSupply} userReserves={userReservesData} assetBalances={assetBalances} />
+      <Tables reservesData={reservesData} onSupply={handleSupply} userReserves={userReservesData}  />
     </div>
   );
 };
