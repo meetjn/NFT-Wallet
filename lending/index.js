@@ -42,6 +42,29 @@ export const ContractProvider = ({ children }) => {
     }
   }, [walletClient, isConnected]);
 
+  //checking wallet balance for specific token:
+
+  const checkWalletBalance =  async (tokenAddress) => {
+    if(!provider || !address){
+      console.log("Provider or user address is not initialised!");
+      return BigNumber.from(0);
+    }
+    try {
+      const tokenContract = new ethers.Contract(tokenAddress,
+        ["function balanceOf(address) view returns (uint256)"],
+        provider
+      );
+
+      const balance = await tokenContract.balanceOf(address);
+      console.log("wallet balance: ", balance.toString());
+      return balance;
+    } catch (error) {
+      console.error("Error fetching wallet balance: ", error)
+      return BigNumber.from(0);
+    }
+
+  }
+
   useEffect(() => {
     if (provider) {
       console.log("Provider is set:", provider);
@@ -204,7 +227,7 @@ export const ContractProvider = ({ children }) => {
  };
 
   return (
-    <ContractContext.Provider value={{ fetchAaveData, submitTransaction, supplyWithPermit }}>
+    <ContractContext.Provider value={{ fetchAaveData, submitTransaction, supplyWithPermit, checkWalletBalance}}>
       {children}
     </ContractContext.Provider>
   );

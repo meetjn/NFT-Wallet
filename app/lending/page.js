@@ -5,11 +5,15 @@ import { useContract } from "@/lending/index";
 import { Card, CardDescription, CardHeader } from "@/components/ui/card";
 import SupplyAssetsTable from "@/components/lending/LendingTable";
 import { borrowAssets, supplyAssets } from "@/constants/lending";
+
 import AssetsTable from "@/components/lending/LendingTable";
+import BorrowingTable from "@/components/lending/BorrowingTable"
+import { ethers } from "ethers";
 const LendingPage = () => {
-  const {fetchAaveData} = useContract();
+  const {fetchAaveData, supplyWithPermit, checkWalletBalance} = useContract();
   const [reservesData, setReservesData] = useState([]);
   const [userReservesData, setUserReservesData] = useState([]);
+  const [assetBalances, setAssetBalances] = useState({});
 
 
   useEffect(() => {
@@ -31,6 +35,45 @@ const LendingPage = () => {
   }, [fetchAaveData]);
 
   console.log("reserve data: ", reservesData);
+
+  const fetchBalances = async () => {
+    const balances = {};
+    for (const asset of reservesData) {
+      try {
+        const balance = await checkWalletBalance(asset.underlyingAsset);
+        balances[asset.underlyingAsset] = balance;
+      } catch (error) {
+        console.error(`Error fetching balance for ${asset.name}`, error);
+        balances[asset.underlyingAsset] = ethers.BigNumber.from(0);
+      }
+    }
+    setAssetBalances(balances);
+  };
+
+  // Fetch balances whenever reservesData changes
+  useEffect(() => {
+    if (reservesData.length > 0) {
+      fetchBalances();
+    }
+  }, [reservesData]);
+
+  const handleSupply = async (asset) => {
+    try {
+      const amount = ethers.utils.parseUnits("1",asset.decimals);
+
+      const deadline = Math.floor(Date.now() / 1000) + 3600;
+
+      const walletBalance =  await checkWalletBalance(asset.underlyingAsset);
+      if(walletBalance.lt(amount)){
+        console.log("Insufficient balane: ");
+        alert("Insufficient balance to supply this asset");
+        return;
+      }
+      alert("Supply txn successfull!!!!");
+    } catch (error) {
+      console.log("Error supplying asset", error);
+    }
+  }
   return (
     <div className="flex flex-col space-y-10  w-full px-4">
       <h1 className="text-3xl font-bold my-8">Lending Dashboard</h1>
@@ -49,12 +92,12 @@ const LendingPage = () => {
           </CardDescription>
         </Card>
       </section>
-      <Tables reservesData={reservesData} userReserves={userReservesData} />
+      <Tables reservesData={reservesData} onSupply={handleSupply} userReserves={userReservesData} assetBalances={assetBalances} />
     </div>
   );
 };
 
-const Tables = ({ reservesData }) => (
+const Tables = ({ reservesData, }) => (
   <main className="w-full flex flex-row items-center justify-between space-x-10">
     <Card className="border shadow-lg bg-neutral-200 w-1/2">
       <CardHeader className="text-xl font-semibold">Assets to supply</CardHeader>

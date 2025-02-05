@@ -22,7 +22,7 @@ interface props {
   asset: assetType;
 }
 
-const SupplyDialog = ({ asset }: props) => {
+const SupplyDialog = ({ asset,isDisabled }: {asset: any; isDisabled:  boolean}) => {
   const [amount, setAmount] = useState<string>("");
   const [showSuccess, setShowSuccess] = useState<boolean>(false);
   const [txHash, setTxHash] = useState<string>("");
@@ -53,11 +53,14 @@ const SupplyDialog = ({ asset }: props) => {
     <>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger>
-          <button className="rounded-lg bg-[#CE192D] py-3 px-6 text-white">
-            Supply
-          </button>
+        <button
+          className={`rounded-lg py-3 px-6 text-white ${isDisabled ? "bg-gray-400" : "bg-[#CE192D]"}`}
+          disabled={isDisabled}
+        >
+          Supply
+        </button>
         </DialogTrigger>
-        <DialogContent>
+        {!isDisabled &&    <DialogContent>
           <DialogHeader>
             <DialogTitle className="leading-relaxed tracking-wider">
               Supply {asset?.name}
@@ -118,6 +121,8 @@ const SupplyDialog = ({ asset }: props) => {
             </DialogDescription>
           </DialogHeader>
         </DialogContent>
+        }
+     
       </Dialog>
       
       <SuccessDialog 
