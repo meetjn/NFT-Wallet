@@ -6,8 +6,8 @@ interface SuccessDialogProps {
   amount: string;
   assetName: string;
   txHash: string;
-  onAddToWallet: () => void;
-  onViewTransaction: () => void;
+  // onAddToWallet: () => void;
+  // onViewTransaction: () => void;
   onClose: () => void;  // Add this
 }
 
@@ -16,8 +16,8 @@ const SuccessDialog = ({
   amount,
   assetName,
   txHash,
-  onAddToWallet,
-  onViewTransaction,
+  // onAddToWallet,
+  // onViewTransaction,
   onClose,
 }: SuccessDialogProps) => {
   return (
@@ -40,7 +40,7 @@ const SuccessDialog = ({
             <div className="flex flex-col gap-2">
               <button 
                 className="flex items-center justify-center gap-2 w-full p-3 border rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                onClick={onAddToWallet}
+                // onClick={onAddToWallet}
               >
                 <Plus size={18} />
                 Add to Wallet

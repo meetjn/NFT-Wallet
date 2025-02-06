@@ -11,21 +11,30 @@ import { Input } from "../ui/input";
 import { AlertTriangle, Check, X } from "lucide-react";
 import SuccessDialog from './SuccessDialog';
 
+import { ethers } from "ethers";
+import { useContract } from "@/lending";
+
 interface assetType {
   name: string;
   supplyAPY: number;
   borrowingEnabled: boolean;
   borrowableInIsolation: boolean;
+  decimals: number; // Add this property
+  underlyingAsset: string; // Add this if you're using it elsewhere
 }
+
 
 interface props {
   asset: assetType;
 }
 
 const SupplyDialog = ({ asset }: props) => {
+  const {supplyWithPermit, checkWalletBalance} = useContract();
   const [amount, setAmount] = useState<string>("");
   const [showSuccess, setShowSuccess] = useState<boolean>(false);
   const [txHash, setTxHash] = useState<string>("");
+  const [error,setError] = useState<string>("");
+  const [isLoading,setIsLoading] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const handleSubmit = (e: FormEvent) => {
@@ -35,14 +44,45 @@ const SupplyDialog = ({ asset }: props) => {
     setShowSuccess(true); // Open success dialog
   };
 
-  const handleAddToWallet = () => {
-    // Add to wallet logic
-  };
+  const handleSupply = async () => {
+    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+      setError("Please enter a valid amount.");
+      return;
+    }
 
-  const handleViewTransaction = () => {
-    // View transaction logic
-  };
+    setError("");
 
+    try {
+      // Convert the amount to the correct units (e.g., Wei for tokens with 18 decimals)
+      const amountInWei = ethers.utils.parseUnits(amount, asset.decimals);
+
+      // Check wallet balance
+      const walletBalance = await checkWalletBalance(asset.underlyingAsset);
+      if (walletBalance.lt(amountInWei)) {
+        setError("Insufficient balance to supply this amount.");
+        setIsLoading(false);
+        return;
+      }
+
+      // Set a deadline for the permit (e.g., 1 hour from now)
+      const deadline = Math.floor(Date.now() / 1000) + 3600; // 1 hour from now
+
+      // Call supplyWithPermit
+      await supplyWithPermit({
+        reserve: asset.underlyingAsset,
+        amount: amountInWei.toString(),
+        deadline,
+      });
+
+      alert("Supply transaction successful!");
+    } catch (error) {
+      console.error("Error during supply:", error);
+      setError("Failed to submit the supply transaction. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+
+  }
   const handleClose = () => {
     setShowSuccess(false);
     setAmount("");
@@ -111,6 +151,7 @@ const SupplyDialog = ({ asset }: props) => {
                 <button
                   type="submit"
                   className="rounded-lg bg-[#CE192D] py-3 px-6 text-white"
+                  onClick={handleSupply}
                 >
                   Supply
                 </button>
@@ -125,8 +166,8 @@ const SupplyDialog = ({ asset }: props) => {
         amount={amount}
         assetName={asset.name}
         txHash={txHash}
-        onAddToWallet={handleAddToWallet}
-        onViewTransaction={handleViewTransaction}
+        // onAddToWallet={handleAddToWallet}
+        // onViewTransaction={handleViewTransaction}
         onClose={handleClose}
       />
     </>
