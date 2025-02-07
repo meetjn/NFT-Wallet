@@ -10,7 +10,6 @@ import {
 import { Input } from "../ui/input";
 import { AlertTriangle, Check, X } from "lucide-react";
 import SuccessDialog from './SuccessDialog';
-
 import { ethers } from "ethers";
 import { useContract } from "@/lending";
 
@@ -19,70 +18,70 @@ interface assetType {
   supplyAPY: number;
   borrowingEnabled: boolean;
   borrowableInIsolation: boolean;
-  decimals: number; // Add this property
-  underlyingAsset: string; // Add this if you're using it elsewhere
+  decimals: number;
+  underlyingAsset: string;
 }
-
 
 interface props {
   asset: assetType;
+  disabled: boolean; // Add this prop
 }
 
-const SupplyDialog = ({ asset }: props) => {
-  const {supplyWithPermit, checkWalletBalance} = useContract();
+const SupplyDialog = ({ asset, disabled }: props) => {
+  const { supplyWithPermit, checkWalletBalance } = useContract();
   const [amount, setAmount] = useState<string>("");
   const [showSuccess, setShowSuccess] = useState<boolean>(false);
   const [txHash, setTxHash] = useState<string>("");
-  const [error,setError] = useState<string>("");
-  const [isLoading,setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSupply = async (e: FormEvent) => {
     e.preventDefault();
-    setTxHash("0x1234...5678");
-    setIsOpen(false); // Close supply dialog
-    setShowSuccess(true); // Open success dialog
-  };
 
-  const handleSupply = async () => {
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
       setError("Please enter a valid amount.");
       return;
     }
 
     setError("");
+    setIsLoading(true);
 
     try {
-      // Convert the amount to the correct units (e.g., Wei for tokens with 18 decimals)
       const amountInWei = ethers.utils.parseUnits(amount, asset.decimals);
-
-      // Check wallet balance
       const walletBalance = await checkWalletBalance(asset.underlyingAsset);
+
       if (walletBalance.lt(amountInWei)) {
         setError("Insufficient balance to supply this amount.");
         setIsLoading(false);
         return;
       }
 
-      // Set a deadline for the permit (e.g., 1 hour from now)
       const deadline = Math.floor(Date.now() / 1000) + 3600; // 1 hour from now
-
-      // Call supplyWithPermit
-      await supplyWithPermit({
+      const txResponse = await supplyWithPermit({
         reserve: asset.underlyingAsset,
         amount: amountInWei.toString(),
         deadline,
       });
 
-      alert("Supply transaction successful!");
-    } catch (error) {
+      setTxHash(txResponse.hash);
+      setShowSuccess(true);
+      setIsOpen(false);
+    } catch (error: any) {
       console.error("Error during supply:", error);
-      setError("Failed to submit the supply transaction. Please try again.");
+
+      if (error.code === 4001) {
+        setError("Transaction rejected by user.");
+      } else if (error.code === "INSUFFICIENT_FUNDS") {
+        setError("Insufficient funds for gas fees.");
+      } else {
+        setError("Failed to submit the supply transaction. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
+  };
 
-  }
   const handleClose = () => {
     setShowSuccess(false);
     setAmount("");
@@ -93,7 +92,10 @@ const SupplyDialog = ({ asset }: props) => {
     <>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger>
-          <button className="rounded-lg bg-[#CE192D] py-3 px-6 text-white">
+          <button
+            className="rounded-lg bg-[#CE192D] py-3 px-6 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={disabled} // Disable the button if the prop is true
+          >
             Supply
           </button>
         </DialogTrigger>
@@ -103,9 +105,9 @@ const SupplyDialog = ({ asset }: props) => {
               Supply {asset?.name}
             </DialogTitle>
             <DialogDescription className="flex flex-col space-y-2">
-              <form onSubmit={handleSubmit} className="flex flex-col space-y-5">
+              <form onSubmit={handleSupply} className="flex flex-col space-y-5">
                 <div>
-                  <label htmlFor="">Amount</label>
+                  <label htmlFor="amount">Amount</label>
                   <div className="flex flex-row justify-between items-center border rounded-md p-2">
                     <Input
                       type="number"
@@ -148,26 +150,29 @@ const SupplyDialog = ({ asset }: props) => {
                     </div>
                   </div>
                 </div>
+                {error && (
+                  <div className="text-red-500 text-sm text-center">
+                    {error}
+                  </div>
+                )}
                 <button
                   type="submit"
-                  className="rounded-lg bg-[#CE192D] py-3 px-6 text-white"
-                  onClick={handleSupply}
+                  className="rounded-lg bg-[#CE192D] py-3 px-6 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isLoading || disabled} // Disable if loading or insufficient balance
                 >
-                  Supply
+                  {isLoading ? "Processing..." : "Supply"}
                 </button>
               </form>
             </DialogDescription>
           </DialogHeader>
         </DialogContent>
       </Dialog>
-      
-      <SuccessDialog 
+
+      <SuccessDialog
         open={showSuccess}
         amount={amount}
         assetName={asset.name}
         txHash={txHash}
-        // onAddToWallet={handleAddToWallet}
-        // onViewTransaction={handleViewTransaction}
         onClose={handleClose}
       />
     </>
