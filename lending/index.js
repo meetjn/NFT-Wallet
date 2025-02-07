@@ -50,6 +50,7 @@ export const ContractProvider = ({ children }) => {
       return BigNumber.from(0);
     }
     try {
+      console.log("Token address: ", tokenAddress)
       const tokenContract = new ethers.Contract(tokenAddress,
         ["function balanceOf(address) view returns (uint256)"],
         provider
