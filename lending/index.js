@@ -151,20 +151,35 @@ export const ContractProvider = ({ children }) => {
         console.error("Provider is not initialized.");
         return;
       }
-
+  
+      console.log("Fetching extended transaction data...");
+      if (!tx || typeof tx.tx !== "function") {
+        console.error("Error: tx object is invalid or does not have a tx() method.");
+        return;
+      }
+  
       const extendedTxData = await tx.tx();
+      console.log("Extended Transaction Data:", extendedTxData);
+  
+      if (!extendedTxData) {
+        console.error("Error: extendedTxData is undefined.");
+        return;
+      }
+  
       const { from, ...txData } = extendedTxData;
-
+  
       if (!signer) {
         console.error("Signer is not initialized.");
         return;
       }
-
+  
+      console.log("Final transaction data before sending:", txData);
+  
       const txResponse = await signer.sendTransaction({
         ...txData,
-        value: txData.value ? BigNumber.from(txData.value) : undefined,
+        value: txData.value ? BigNumber.from(txData.value) : BigNumber.from("0"), // ✅ Ensure valid BigNumber
       });
-
+  
       console.log("Transaction submitted successfully:", txResponse);
       return txResponse;
     } catch (error) {
@@ -172,6 +187,8 @@ export const ContractProvider = ({ children }) => {
       throw error;
     }
   };
+  
+  
 
    // Initialize Pool instance
    const pool = provider
@@ -182,50 +199,62 @@ export const ContractProvider = ({ children }) => {
    : null;
 
  // Supply with permit
+ 
  const supplyWithPermit = async ({ reserve, amount, deadline }) => {
-   if (!pool || !signer || !address) {
-     console.error("Required dependencies are not initialized.");
-     return;
-   }
+  if (!pool || !signer || !address) {
+    console.error("Required dependencies are not initialized.");
+    return;
+  }
 
-   try {
-     console.log("Generating data to sign for permit...");
-     const dataToSign = await pool.signERC20Approval({
-       user: address,
-       reserve,
-       amount,
-       deadline,
-     });
+  try {
+    console.log("Generating data to sign for permit...");
+    const dataToSign = await pool.signERC20Approval({
+      user: address,
+      reserve,
+      amount: ethers.BigNumber.from(amount).toString(),
+      deadline,
+    });
 
-     console.log("Requesting signature from user...");
-     const signature = await provider.send("eth_signTypedData_v4", [
-       address,
-       dataToSign,
-     ]);
+    console.log("Requesting signature from user...");
+    const signature = await provider.send("eth_signTypedData_v4", [
+      address,
+      dataToSign,
+    ]);
 
-     console.log("Performing supply with permit...");
-     const txs = await pool.supplyWithPermit({
-       user: address,
-       reserve,
-       amount,
-       signature,
-     });
+    console.log("Signature:", signature);
+    if (!signature) {
+      console.error("Error: No signature received.");
+      return;
+    }
 
-     console.log("Submitting supplyWithPermit transaction...");
-     const extendedTxData = await txs[0].tx();
-     const { from, ...txData } = extendedTxData;
+    console.log("Performing supply with permit...");
+    const txs = await pool.supplyWithPermit({
+      user: address,
+      reserve,
+      amount: ethers.BigNumber.from(amount).toString(),
+      signature,
+    });
 
-     const txResponse = await signer.submitTransaction({
-       ...txData,
-       value: txData.value ? BigNumber.from(txData.value) : undefined,
-     });
+    console.log("txs array:", txs);
+    if (!txs || txs.length === 0) {
+      console.error("Error: supplyWithPermit did not return any transactions.");
+      return;
+    }
 
-     console.log("Transaction submitted successfully:", txResponse);
-     return txResponse;
-   } catch (error) {
-     console.error("Error during supplyWithPermit:", error);
-   }
- };
+    console.log("First transaction object:", txs[0]);
+    if (!txs[0] || typeof txs[0].tx !== "function") {
+      console.error("Error: txs[0] is invalid or does not have a tx() method.");
+      return;
+    }
+
+    console.log("Submitting transaction using submitTransaction...");
+    return await submitTransaction({ tx: txs[0] });
+  } catch (error) {
+    console.error("Error during supplyWithPermit:", error);
+    throw error;
+  }
+};
+
 
   return (
     <ContractContext.Provider value={{ fetchAaveData, submitTransaction, supplyWithPermit,checkWalletBalance}}>

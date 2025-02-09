@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     "global.d.ts",
     "src/**/*"
-  ],
+, "lending/index.js"  ],
   "exclude": ["node_modules"]
 }

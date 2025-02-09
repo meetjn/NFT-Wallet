@@ -10,7 +10,7 @@ import {
 import { Input } from "../ui/input";
 import { AlertTriangle, Check, X } from "lucide-react";
 import SuccessDialog from './SuccessDialog';
-import { ethers } from "ethers";
+import { ethers, BigNumber} from "ethers";
 import { useContract } from "@/lending";
 
 interface assetType {
@@ -39,7 +39,7 @@ const SupplyDialog = ({ asset, disabled }: props) => {
   const handleSupply = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0 || BigNumber.from(Number(amount)).isZero()) {
       setError("Please enter a valid amount.");
       return;
     }
