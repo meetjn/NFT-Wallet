@@ -1,4 +1,3 @@
-// ConnectWallet.tsx
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 
@@ -26,13 +25,10 @@ const ConnectWallet: React.FC = () => {
     }
   };
 
-  // Note: Programmatic disconnect is not supported by most wallets (like MetaMask).
-  // To "disconnect", you can simply clear the local state.
   const disconnectWallet = () => {
     setAddress(null);
   };
 
-  // Optionally, you can check if a wallet is already connected on component mount
   useEffect(() => {
     const checkConnection = async () => {
       if (window.ethereum) {

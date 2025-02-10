@@ -4,10 +4,11 @@ import { WalletClient } from "viem";
 import { Signer, providers } from "ethers";
 
 // Constant
-const NFT_CONTRACT = "0x1894CA318597538418607bFB3933f44b8F2B6d91";
+const NFT_CONTRACT = "0xe4d54752B3c6786851c2F8336743367458835c5C";
+  //"0x1894CA318597538418607bFB3933f44b8F2B6d91", // NFT contract address of avax-fuji-chain
 const TOKEN_ID = "1";
 const FIXED_SALT = 7;
-const NFT_NATIVE_CHAIN_ID = 43113;
+const NFT_NATIVE_CHAIN_ID = 11155111;
 
 export async function createTBA(
   selectedChain: SupportedChain,
@@ -48,7 +49,7 @@ export async function createTBA(
 
   //  Compute the deterministic TBA address
   const tbaAddress = await tokenboundClient.getAccount({
-    tokenContract: "0x1894CA318597538418607bFB3933f44b8F2B6d91",
+    tokenContract: "0xe4d54752B3c6786851c2F8336743367458835c5C",
     tokenId: "1",
     salt: FIXED_SALT,
     chainId: NFT_NATIVE_CHAIN_ID,
@@ -67,7 +68,7 @@ export async function createTBA(
 
   //  Deploy the account
   const { txHash } = await tokenboundClient.createAccount({
-    tokenContract: "0x1894CA318597538418607bFB3933f44b8F2B6d91",
+    tokenContract: "0xe4d54752B3c6786851c2F8336743367458835c5C",
     tokenId: "1",
     salt: FIXED_SALT,
     chainId: NFT_NATIVE_CHAIN_ID,

@@ -49,25 +49,58 @@ export default function Home() {
   //const [transactionHash, setTransactionHash] = useState<string | null>(null);
   //const [deploymentStatus, setDeploymentStatus] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
   const { chain } = useAccount(); // Get the connected chain
-  const { switchChain } = useSwitchChain();
+  //const { switchChain } = useSwitchChain();
   const { data: walletClient } = useWalletClient(); 
 
-useEffect(() => {
-  if (!isConnected) return;
 
-  const fetchTBA = async () => {
-    try {
-      console.log("Fetching TBA Address for:", selectedChain);
-      const address = getTBAAddress(selectedChain);
-      setTbaAddress(address);
-    } catch (err) {
-      console.error("Error fetching TBA:", err);
-      setError("Failed to fetch TBA address.");
-    }
-  };
+  useEffect(() => {
+    if (!isConnected || !address) return;
+  
+    const fetchTBA = async () => {
+      try {
+        console.log("Fetching TBA Address for:", selectedChain);
+  
+        const tbaAddress = getTBAAddress(selectedChain);
+        console.log("Fetched TBA Address:", tbaAddress);
+  
+        if (tbaAddress) {
+          setTbaAddress(tbaAddress);
+  
+          // Store TBA in existing list if not already present
+          setExistingTbas((prevTbas) =>
+            prevTbas.includes(tbaAddress) ? prevTbas : [...prevTbas, tbaAddress]
+          );
+        } else {
+          setTbaAddress(null);
+          console.warn("No TBA address found.");
+        }
+      } catch (err) {
+        console.error("Error fetching TBA:", err);
+        setError("Failed to fetch TBA address.");
+      }
+    };
+  
+    fetchTBA();
+  }, [isConnected, address, selectedChain]);
+  
+  
 
-  fetchTBA();
-}, [isConnected, selectedChain]);
+// useEffect(() => {
+//   if (!isConnected) return;
+// 
+//   const fetchTBA = async () => {
+//     try {
+//       console.log("Fetching TBA Address for:", selectedChain);
+//       const address = getTBAAddress(selectedChain);
+//       setTbaAddress(address);
+//     } catch (err) {
+//       console.error("Error fetching TBA:", err);
+//       setError("Failed to fetch TBA address.");
+//     }
+//   };
+// 
+//   fetchTBA();
+// }, [isConnected, selectedChain]);
 
 const handleCreateTBA = async () => {
   if (!isConnected || !walletClient) {
@@ -249,7 +282,7 @@ const handleCreateTBA = async () => {
           <ul className="list-disc list-inside">
             {existingTbas.map((tba, index) => (
               <li key={index} className="mt-2">
-                {tba}
+                {tba} 
               </li>
             ))}
           </ul>
@@ -349,7 +382,8 @@ const handleCreateTBA = async () => {
           {/* NFT Info */}
           <div className="mb-6">
             <h3 className="text-lg font-medium mb-2">NFT Details</h3>
-            <p>Contract: 0x1894CA318597538418607bFB3933f44b8F2B6d91</p>
+            <p>Contract: 0xe4d54752B3c6786851c2F8336743367458835c5C
+            </p>
             <p>Token ID: 1</p>
           </div>
 

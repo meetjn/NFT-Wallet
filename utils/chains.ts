@@ -2,9 +2,10 @@ import { sepolia } from "viem/chains";
 import { avalancheFuji } from "viem/chains";
 import { baseSepolia } from "viem/chains";
 import { holesky } from "viem/chains";
+import { zetachainAthensTestnet } from "viem/chains";
 
 
-export type SupportedChain = "sepolia"  | "avalancheFuji" | "baseSepolia"| "holesky"; // etc.
+export type SupportedChain = "sepolia"  | "avalancheFuji" | "baseSepolia"| "holesky"| "zetachainAthensTestnet"; // etc.
 
 export const SUPPORTED_CHAINS: Record<SupportedChain, {
   id: number;
@@ -41,6 +42,13 @@ export const SUPPORTED_CHAINS: Record<SupportedChain, {
     accountImplementation: "0x41C8f39463A868d3A88af00cd0fe7102F30E44eC",
     chain: holesky,
   },
+  zetachainAthensTestnet: {
+    id: zetachainAthensTestnet.id,
+    name: zetachainAthensTestnet.name,
+    registryAddress: "0x000000006551c19487814612e58FE06813775758",
+    accountImplementation: "0x41C8f39463A868d3A88af00cd0fe7102F30E44eC",
+    chain: zetachainAthensTestnet,
+  }
 };
 
 

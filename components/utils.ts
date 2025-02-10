@@ -6,10 +6,10 @@ import { avalancheFuji } from "viem/chains";
 // Constants
 const REGISTRY_ADDRESS = "0x000000006551c19487814612e58FE06813775758";
 const IMPLEMENTATION_ADDRESS = "0x41C8f39463A868d3A88af00cd0fe7102F30E44eC";
-const NFT_CONTRACT = "0x1894CA318597538418607bFB3933f44b8F2B6d91";
+const NFT_CONTRACT = "0xe4d54752B3c6786851c2F8336743367458835c5C";
 const TOKEN_ID = 1; // Make sure this matches your actual token ID
 const FIXED_SALT = 7;
-const NFT_NATIVE_CHAIN_ID = 43113; // Avalanche Fuji chain ID where NFT exists
+const NFT_NATIVE_CHAIN_ID = 11155111; // Avalanche Fuji chain ID where NFT exists
 
 
 interface TBAConfig {
