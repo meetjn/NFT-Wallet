@@ -10,7 +10,7 @@ import {
 import { Input } from "../ui/input";
 import { AlertTriangle, Check, X } from "lucide-react";
 import SuccessDialog from './SuccessDialog';
-import { ethers, BigNumber} from "ethers";
+import { ethers, BigNumber } from "ethers";
 import { useContract } from "@/lending";
 
 interface assetType {
@@ -24,7 +24,7 @@ interface assetType {
 
 interface props {
   asset: assetType;
-  disabled: boolean; // Add this prop
+  disabled: boolean; 
 }
 
 const SupplyDialog = ({ asset, disabled }: props) => {
@@ -39,8 +39,15 @@ const SupplyDialog = ({ asset, disabled }: props) => {
   const handleSupply = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0 || BigNumber.from(Number(amount)).isZero()) {
+    // Validate the amount
+    if (!amount || isNaN(Number(amount))) {
       setError("Please enter a valid amount.");
+      return;
+    }
+
+    const amountNumber = Number(amount);
+    if (amountNumber <= 0) {
+      setError("Amount must be greater than 0.");
       return;
     }
 
@@ -48,28 +55,33 @@ const SupplyDialog = ({ asset, disabled }: props) => {
     setIsLoading(true);
 
     try {
-      const amountInWei = ethers.utils.parseUnits(amount, asset.decimals);
+
       const walletBalance = await checkWalletBalance(asset.underlyingAsset);
 
-      if (walletBalance.lt(amountInWei)) {
+      if (walletBalance.lt(amount)) {
         setError("Insufficient balance to supply this amount.");
         setIsLoading(false);
         return;
       }
 
-      const deadline = Math.floor(Date.now() / 1000) + 3600; // 1 hour from now
+      
+      const deadline = Math.floor(Date.now() / 1000) + 3600;
+
+      
       const txResponse = await supplyWithPermit({
         reserve: asset.underlyingAsset,
-        amount: amountInWei.toString(),
+        amount,
         deadline,
       });
 
+      
       setTxHash(txResponse.hash);
       setShowSuccess(true);
       setIsOpen(false);
     } catch (error: any) {
       console.error("Error during supply:", error);
 
+      
       if (error.code === 4001) {
         setError("Transaction rejected by user.");
       } else if (error.code === "INSUFFICIENT_FUNDS") {
@@ -115,6 +127,7 @@ const SupplyDialog = ({ asset, disabled }: props) => {
                       onChange={(e) => setAmount(e.target.value)}
                       placeholder="0.00"
                       className="!px-0 outline-none border-none focus:outline-none"
+                      step="any" // Allow decimal input
                     />
                     <span className="text-sm">{asset?.name}</span>
                   </div>
