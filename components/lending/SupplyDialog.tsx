@@ -34,6 +34,7 @@ const SupplyDialog = ({ asset, disabled }: props) => {
   const [txHash, setTxHash] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isConfirming, setIsConfirming] = useState<boolean>(false); 
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const handleSupply = async (e: FormEvent) => {
@@ -55,7 +56,7 @@ const SupplyDialog = ({ asset, disabled }: props) => {
     setIsLoading(true);
 
     try {
-
+    
       const walletBalance = await checkWalletBalance(asset.underlyingAsset);
 
       if (walletBalance.lt(amount)) {
@@ -74,8 +75,13 @@ const SupplyDialog = ({ asset, disabled }: props) => {
         deadline,
       });
 
-      
       setTxHash(txResponse.hash);
+
+     
+      setIsConfirming(true); 
+      await txResponse.wait();
+      setIsConfirming(false); 
+     
       setShowSuccess(true);
       setIsOpen(false);
     } catch (error: any) {
@@ -91,6 +97,7 @@ const SupplyDialog = ({ asset, disabled }: props) => {
       }
     } finally {
       setIsLoading(false);
+      setIsConfirming(false); 
     }
   };
 
@@ -106,7 +113,7 @@ const SupplyDialog = ({ asset, disabled }: props) => {
         <DialogTrigger>
           <button
             className="rounded-lg bg-[#CE192D] py-3 px-6 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={disabled} // Disable the button if the prop is true
+            disabled={disabled} 
           >
             Supply
           </button>
@@ -171,9 +178,13 @@ const SupplyDialog = ({ asset, disabled }: props) => {
                 <button
                   type="submit"
                   className="rounded-lg bg-[#CE192D] py-3 px-6 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={isLoading || disabled} // Disable if loading or insufficient balance
+                  disabled={isLoading || isConfirming || disabled} // Disable if loading, confirming, or insufficient balance
                 >
-                  {isLoading ? "Processing..." : "Supply"}
+                  {isLoading
+                    ? "Processing..."
+                    : isConfirming
+                    ? "Confirming..."
+                    : "Supply"}
                 </button>
               </form>
             </DialogDescription>
