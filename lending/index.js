@@ -13,7 +13,7 @@ import {
 import {formatReserves} from '@aave/math-utils'
 import dayjs from 'dayjs'
 import * as markets from "@bgd-labs/aave-address-book";
-import submitTransaction from "./utils"
+
 const ContractContext = createContext();
 
 export const useContract = () => useContext(ContractContext);
@@ -145,48 +145,48 @@ export const ContractProvider = ({ children }) => {
 
   //Txn setup:
 
-  // const submitTransaction = async ({ tx }) => {
-  //   try {
-  //     if (!provider) {
-  //       console.error("Provider is not initialized.");
-  //       return;
-  //     }
+  const submitTransaction = async ({ tx }) => {
+    try {
+      if (!provider) {
+        console.error("Provider is not initialized.");
+        return;
+      }
   
-  //     console.log("Fetching extended transaction data...");
-  //     if (!tx || typeof tx.tx !== "function") {
-  //       console.error("Error: tx object is invalid or does not have a tx() method.");
-  //       return;
-  //     }
-  //     console.log("fetched lo ");
-  //     const extendedTxData = await tx.tx();
-  //     console.log("Extended Transaction Data:", extendedTxData);
+      console.log("Fetching extended transaction data...");
+      if (!tx || typeof tx.tx !== "function") {
+        console.error("Error: tx object is invalid or does not have a tx() method.");
+        return;
+      }
   
-  //     if (!extendedTxData) {
-  //       console.error("Error: extendedTxData is undefined.");
-  //       return;
-  //     }
+      const extendedTxData = await tx.tx();
+      console.log("Extended Transaction Data:", extendedTxData);
   
-  //     const { from, ...txData } = extendedTxData;
+      if (!extendedTxData) {
+        console.error("Error: extendedTxData is undefined.");
+        return;
+      }
   
-  //     if (!signer) {
-  //       console.error("Signer is not initialized.");
-  //       return;
-  //     }
+      const { from, ...txData } = extendedTxData;
   
-  //     console.log("Final transaction data before sending:", txData);
+      if (!signer) {
+        console.error("Signer is not initialized.");
+        return;
+      }
   
-  //     const txResponse = await signer.sendTransaction({
-  //       ...txData,
-  //       value: txData.value ? BigNumber.from(txData.value) : BigNumber.from("0"), // ✅ Ensure valid BigNumber
-  //     });
+      console.log("Final transaction data before sending:", txData);
   
-  //     console.log("Transaction submitted successfully:", txResponse);
-  //     return txResponse;
-  //   } catch (error) {
-  //     console.error("Error submitting transaction:", error);
-  //     throw error;
-  //   }
-  // };
+      const txResponse = await signer.sendTransaction({
+        ...txData,
+        value: txData.value ? BigNumber.from(txData.value) : BigNumber.from("0"), // ✅ Ensure valid BigNumber
+      });
+  
+      console.log("Transaction submitted successfully:", txResponse);
+      return txResponse;
+    } catch (error) {
+      console.error("Error submitting transaction:", error);
+      throw error;
+    }
+  };
   
   
 
