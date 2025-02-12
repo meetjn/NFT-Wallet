@@ -71,7 +71,7 @@ const SupplyDialog = ({ asset, disabled }: props) => {
       
       const txResponse = await supplyWithPermit({
         reserve: asset.underlyingAsset,
-        amount,
+        amount: amount.toString(),
         deadline,
       });
 

@@ -8,17 +8,38 @@ import {
   UiIncentiveDataProvider,
   ChainId,
   Pool,
+  InterestRate,
 } from "@aave/contract-helpers";
 import { formatReserves } from "@aave/math-utils";
 import dayjs from "dayjs";
 import * as markets from "@bgd-labs/aave-address-book";
 import { submitTransaction } from "./utils/submitTransaction";
 import { supplyWithPermit } from "./utils/supplyWithPermit";
+import { borrow } from "./utils/borrow"; // ✅ Import borrow function
 
 interface ContractContextType {
   fetchAaveData: () => Promise<{ formattedPoolReserves: any } | null>;
   submitTransaction: ({ tx }: { tx: any }) => Promise<providers.TransactionResponse>;
-  supplyWithPermit: ({ reserve, amount, deadline }: { reserve: string; amount: string; deadline: number }) => Promise<providers.TransactionResponse>;
+  supplyWithPermit: ({
+    reserve,
+    amount,
+    deadline,
+  }: {
+    reserve: string;
+    amount: string;
+    deadline: number;
+  }) => Promise<providers.TransactionResponse>;
+  borrow: ({
+    reserve,
+    amount,
+    interestRateMode,
+    onBehalfOf,
+  }: {
+    reserve: string;
+    amount: string;
+    interestRateMode: InterestRate;
+    onBehalfOf?: string;
+  }) => Promise<providers.TransactionResponse>;
   checkWalletBalance: (tokenAddress: string) => Promise<ethers.BigNumber>;
 }
 
@@ -84,7 +105,6 @@ export const ContractProvider = ({ children }: { children: React.ReactNode }) =>
     }
   };
 
-
   useEffect(() => {
     if (provider) {
       console.log("Provider is set:", provider);
@@ -122,16 +142,14 @@ export const ContractProvider = ({ children }: { children: React.ReactNode }) =>
     }
   
     try {
-      // Object containing array of pool reserves and market base currency data
       console.log("Fetching reserves data...");
       const reserves = await poolDataProvider.getReservesHumanized({
         lendingPoolAddressProvider:
           markets.AaveV3Sepolia.POOL_ADDRESSES_PROVIDER,
       });
-  
+
       console.log("reserves data:", reserves);
-  
-      //object containing array of user's aave position
+
       console.log("Fetching user reserves data...");
       const userReserves = await poolDataProvider.getUserReservesHumanized({
         lendingPoolAddressProvider:
@@ -140,7 +158,6 @@ export const ContractProvider = ({ children }: { children: React.ReactNode }) =>
       });
       console.log("User reserves data:", userReserves);
 
-      //formatting fetched reserves data:
       const reservesArray = reserves.reservesData;
       const baseCurrencyData = reserves.baseCurrencyData;
       const currentTimestamp = dayjs().unix();
@@ -153,7 +170,7 @@ export const ContractProvider = ({ children }: { children: React.ReactNode }) =>
         marketReferencePriceInUsd: baseCurrencyData.marketReferenceCurrencyPriceInUsd,
       });
 
-      console.log("meow meow formatted reserves: ", formattedPoolReserves);
+      console.log("Formatted reserves: ", formattedPoolReserves);
   
       return { formattedPoolReserves };
     } catch (error) {
@@ -184,7 +201,21 @@ export const ContractProvider = ({ children }: { children: React.ReactNode }) =>
             provider,
             signer,
             user: address,
-        
+          });
+        },
+        borrow: ({ reserve, amount, interestRateMode, onBehalfOf }) => {
+          if (!pool || !provider || !signer || !address) {
+            throw new Error("Required dependencies are not initialized.");
+          }
+          return borrow({
+            user: address,
+            reserve,
+            amount,
+            pool,
+            provider,
+            signer,
+            interestRateMode,
+            onBehalfOf,
           });
         },
         checkWalletBalance,

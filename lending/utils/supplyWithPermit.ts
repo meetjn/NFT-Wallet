@@ -13,6 +13,8 @@ interface SupplyWithPermitParams {
   onBehalfOf?: string;
 }
 
+//display variableBorrowAPY
+
 export const supplyWithPermit = async ({
   reserve,
   amount,
@@ -24,33 +26,14 @@ export const supplyWithPermit = async ({
   onBehalfOf,
 }: SupplyWithPermitParams): Promise<providers.TransactionResponse> => {
   try {
-    console.log("Generating data to sign for permit...");
-    const dataToSign = await pool.signERC20Approval({
-      user,
-      reserve,
-      amount,
-      deadline: deadline.toString(),
-    });
-
-    console.log("Requesting signature from user...");
-    const signature = await provider.send("eth_signTypedData_v4", [
-      user,
-      dataToSign,
-    ]);
-
-    console.log("Signature:", signature);
-    if (!signature) {
-      throw new Error("No signature received.");
-    }
-
     console.log("Performing supply with permit...");
-    const txs: EthereumTransactionTypeExtended[] = await pool.supplyWithPermit({
+
+    // Call the supplyWithPermit method on the Pool instance
+    const txs: EthereumTransactionTypeExtended[] = await pool.supply({
       user,
       reserve,
       amount,
-      signature,
       onBehalfOf,
-      deadline: deadline.toString()
     });
 
     console.log("Transactions array:", txs);
