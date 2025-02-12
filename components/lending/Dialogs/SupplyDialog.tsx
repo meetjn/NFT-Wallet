@@ -7,9 +7,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "../ui/input";
+import { Input } from "../../ui/input";
 import { AlertTriangle, Check, X } from "lucide-react";
-import SuccessDialog from './SuccessDialog';
+import SuccessDialog from "./SuccessDialog";
 import { ethers, BigNumber } from "ethers";
 import { useContract } from "@/lending";
 

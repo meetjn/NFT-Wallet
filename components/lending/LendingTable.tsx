@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, AlertTriangle, Check, X } from "lucide-react";
-import SupplyDialog from "./SupplyDialog";
+import SupplyDialog from "./Dialogs/SupplyDialog";
 import { useContract } from "@/lending";
 import { ethers } from "ethers";
 
