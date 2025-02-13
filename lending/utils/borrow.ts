@@ -9,7 +9,7 @@ interface BorrowParams {
   pool: Pool;
   provider: providers.Web3Provider;
   signer: providers.JsonRpcSigner;
-  interestRateMode: InterestRate; // Use the InterestRate enum
+  interestRateMode: InterestRate;
   onBehalfOf?: string; // Optional parameter
 }
 

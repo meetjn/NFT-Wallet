@@ -10,7 +10,7 @@ import {
   Pool,
   InterestRate,
 } from "@aave/contract-helpers";
-import { formatReserves } from "@aave/math-utils";
+import { formatReserves, formatReservesAndIncentives, formatUserSummary } from "@aave/math-utils";
 import dayjs from "dayjs";
 import * as markets from "@bgd-labs/aave-address-book";
 import { submitTransaction } from "./utils/submitTransaction";
@@ -18,7 +18,7 @@ import { supplyWithPermit } from "./utils/supplyWithPermit";
 import { borrow } from "./utils/borrow"; // ✅ Import borrow function
 
 interface ContractContextType {
-  fetchAaveData: () => Promise<{ formattedPoolReserves: any } | null>;
+  fetchAaveData: () => Promise<{ formattedReserves: any } | null>;
   submitTransaction: ({ tx }: { tx: any }) => Promise<providers.TransactionResponse>;
   supplyWithPermit: ({
     reserve,
@@ -160,9 +160,11 @@ export const ContractProvider = ({ children }: { children: React.ReactNode }) =>
 
       const reservesArray = reserves.reservesData;
       const baseCurrencyData = reserves.baseCurrencyData;
+      const userReserveArray = userReserves.userReserves;
+
       const currentTimestamp = dayjs().unix();
 
-      const formattedPoolReserves = formatReserves({
+      const formattedReserves = formatReserves({
         reserves: reservesArray,
         currentTimestamp,
         marketReferenceCurrencyDecimals:
@@ -170,9 +172,19 @@ export const ContractProvider = ({ children }: { children: React.ReactNode }) =>
         marketReferencePriceInUsd: baseCurrencyData.marketReferenceCurrencyPriceInUsd,
       });
 
-      console.log("Formatted reserves: ", formattedPoolReserves);
+      console.log("Formatted reserves: ", formattedReserves);
   
-      return { formattedPoolReserves };
+     const userSummary = formatUserSummary({
+      currentTimestamp,
+      marketReferencePriceInUsd: baseCurrencyData.marketReferenceCurrencyPriceInUsd,
+      marketReferenceCurrencyDecimals: baseCurrencyData.marketReferenceCurrencyDecimals,
+      userReserves: userReserveArray,
+      formattedReserves,
+      userEmodeCategoryId: userReserves.userEmodeCategoryId,
+     })
+
+     console.log("User summary: ", userSummary);
+      return { formattedReserves,userSummary };
     } catch (error) {
       console.error("Error fetching Aave data:", error);
       return null; 

@@ -32,9 +32,13 @@ const AssetsTable = ({ assets, actionLabel }: props) => {
                   className="text-sm border-b border-neutral-600/20"
                 >
                   <td className="p-4">{asset.name}</td>
+                  <td className="p-4">{asset.variableBorrowAPY}</td> {/* have to show Availabel borrow in USD here  */}
+                  <td className="p-4 font-semibold">{asset.variableBorrowAPY*100} %</td>
+                  
                   <td className="p-4 text-center">
                    <BorrowDialog asset={asset} />
                   </td>
+                  
                 </tr>
               ))}
           </tbody>

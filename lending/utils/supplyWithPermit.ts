@@ -13,7 +13,6 @@ interface SupplyWithPermitParams {
   onBehalfOf?: string;
 }
 
-//display variableBorrowAPY
 
 export const supplyWithPermit = async ({
   reserve,

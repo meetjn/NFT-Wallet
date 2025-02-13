@@ -13,6 +13,7 @@ const LendingPage = () => {
   const {fetchAaveData, supplyWithPermit} = useContract();
   const [reservesData, setReservesData] = useState([]);
   const [userReservesData, setUserReservesData] = useState([]);
+  const [userSummary, setUserSummary] = useState([]);
 
 
 
@@ -23,8 +24,9 @@ const LendingPage = () => {
         console.log("data from page: ",data);
          // Modify fetchAaveData to return reserves and user reserves
         if (data) {
-          setReservesData(data.formattedPoolReserves|| []);
+          setReservesData(data.formattedReserves|| []);
           setUserReservesData(data.userReserves || []);
+          setUserSummary(data.userSummary || []);
         }
       } catch (error) {
         console.error("Error fetching Aave data:", error);
