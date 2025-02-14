@@ -1,41 +1,40 @@
-// components/notifications/NotificationButton.tsx
 import { useState } from "react";
-import { NotificationList } from "./NotificationList";
-import { BsBell } from "react-icons/bs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { useNotifications } from "@/context/NotificationContext";
+import { Bell } from "lucide-react";
 
 export const NotificationButton = () => {
-  const [showNotifications, setShowNotifications] = useState(false);
+  const [open, setOpen] = useState(false);
+  const { notifications } = useNotifications();
 
   return (
-    <div style={{ position: "relative" }}>
+    <div>
       <button
-        onClick={() => setShowNotifications(!showNotifications)}
-        style={{
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          padding: "8px",
-          borderRadius: "50%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
+        onClick={() => setOpen(true)}
+        className="relative p-2 rounded-full hover:bg-gray-200"
       >
-        <BsBell size={20} />
+        <Bell size={20} />
       </button>
-      {showNotifications && (
-        <div
-          style={{
-            position: "absolute",
-            right: 0,
-            top: "100%",
-            marginTop: "10px",
-            zIndex: 1000,
-          }}
-        >
-          <NotificationList />
-        </div>
-      )}
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="w-96">
+          <DialogHeader>
+            <DialogTitle>Notifications</DialogTitle>
+          </DialogHeader>
+          <div className="max-h-60 overflow-y-auto">
+            {notifications.length === 0 ? (
+              <p className="text-center text-gray-400">No new notifications</p>
+            ) : (
+              notifications.map((notif) => (
+                <div key={notif.id} className="p-3 border-b border-gray-700">
+                  <p className="font-semibold">{notif.title}</p>
+                  <p className="text-sm text-gray-400">{notif.message}</p>
+                </div>
+              ))
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

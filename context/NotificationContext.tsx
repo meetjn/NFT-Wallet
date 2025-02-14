@@ -115,13 +115,14 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
 
   // Set up Push Protocol user subscription
   useEffect(() => {
+    console.log(PushAPI)
     const initializePushProtocol = async () => {
       if (!address || !isConnected) return;
 
       try {
         await PushAPI.user.subscribe({
           signer: walletClient,
-          channelAddress: process.env.NEXT_PUBLIC_PUSH_CHANNEL_ADDRESS!, // channel address in CAIP
+          channelAddress: "0xD8634C39BBFd4033c0d3289C4515275102423681", // channel address in CAIP
           userAddress: `eip155:5:${address}`, // user address in CAIP
           onSuccess: () => {
             console.log("Opt-in Success");

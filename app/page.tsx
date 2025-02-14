@@ -13,8 +13,11 @@ import { Web3Provider } from "@/context/Web3Context";
 import Image from "next/image";
 import { Coins } from "lucide-react";
 import AddFundsModal from "@/components/AddFundsModal";
+import { NotificationButton } from "@/components/notifications/NotificationButton";
+import { useNotifications } from "@/context/NotificationContext";
 
 export default function Home() {
+  const {sendNotification} = useNotifications();
   const { isConnected, address } = useAccount();
   const [tokenBoundClient, setTokenBoundClient] =
     useState<TokenboundClient | null>(null);
@@ -177,6 +180,13 @@ export default function Home() {
   const handleMultiSigWalletComplete = () => {
     setShowMultiSigWalletCreator(false); // Hide the MultiSigWalletCreator
   };
+  const handleSendNotification = async () => {
+    console.log("Sending test notification");
+    await sendNotification(
+      "Test Notification",
+      "This is a test notification from Push Protocol."
+    );
+  };
 
   return (
     <>
@@ -186,6 +196,13 @@ export default function Home() {
         </Web3Provider>
       ) : (
         <section className="pt-8 p-responsive flex flex-col gap-10 w-full pb-10">
+          <NotificationButton />
+          <button
+      onClick={handleSendNotification}
+      className="px-4 py-2 bg-blue-500 text-white rounded-md"
+    >
+      Send Test Notification
+    </button>
           <div className="flex flex-col gap-8 justify-start items-start">
             <div className="text-2xl font-semibold">
               {address ? <> {address}</> : <h1>Wallet Not connected</h1>}
