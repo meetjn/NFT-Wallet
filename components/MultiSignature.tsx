@@ -152,7 +152,7 @@ const MultiSigWalletCreator: React.FC<MultiSigWalletCreatorProps> = ({
           <div className="">
             <h2 className="text-xl font-urbanist-bold">Create New Wallet</h2>
             <button
-              onClick={() => setStep(4)}
+              onClick={() => setStep(2)}
               className="py-3 px-6 bg-[#CE192D] font-urbanist-semibold rounded-lg text-white mt-2"
             >
               Create account

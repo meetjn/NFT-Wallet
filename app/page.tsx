@@ -238,23 +238,6 @@ const handleCreateTBA = async () => {
     }
   };
 
-  const handleMultiSigWalletComplete = () => {
-    localStorage.setItem("multiSigCompleted", "true");
-    setShowMultiSigWalletCreator(false);
-
-    // Hide the MultiSigWalletCreator
-  };
-
-  if (showMultiSigWalletCreator) {
-    return (
-      <div className="w-screen h-screen fixed top-0 left-0 bg-white z-50">
-        <Web3Provider>
-          <MultiSigWalletCreator onComplete={handleMultiSigWalletComplete} />
-        </Web3Provider>
-      </div>
-    );
-  }
-
   return (
     <section className="pt-8 p-responsive flex flex-col gap-10 w-full pb-10">
       <div className="flex flex-col gap-8 justify-start items-start">
