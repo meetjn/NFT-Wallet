@@ -52,7 +52,7 @@ const AssetsTable = ({ assets, actionLabel }: Props) => {
                 >
                   <td className="p-4 font-medium">{asset?.name}</td>
                   <td className="p-4 font-semibold">
-                    {(asset?.supplyAPY * 10).toFixed(2)}%
+                    {(asset?.supplyAPY*100).toFixed(2)}%
                   </td>
                   <td className="p-4 text-center">
                     {asset.usageAsCollateralEnabled ? (

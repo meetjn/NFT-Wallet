@@ -37,7 +37,7 @@ const LendingPage = () => {
   }, [fetchAaveData]);
 
   console.log("reserve data: ", reservesData);
-
+  console.log("user summary data...checking state", userSummary);
 
  
   return (
@@ -58,12 +58,12 @@ const LendingPage = () => {
           </CardDescription>
         </Card>
       </section>
-      <Tables reservesData={reservesData}  userReserves={userReservesData}  />
+      <Tables reservesData={reservesData}  userReserves={userReservesData}  userSummary={userSummary}/>
     </div>
   );
 };
 
-const Tables = ({ reservesData, }) => (
+const Tables = ({ reservesData, userSummary}) => (
   <main className="w-full flex flex-row items-center justify-between space-x-10">
     <Card className="border shadow-lg bg-neutral-200 w-1/2">
       <CardHeader className="text-xl font-semibold">Assets to supply</CardHeader>
@@ -73,7 +73,7 @@ const Tables = ({ reservesData, }) => (
           assets={supplyAssets}
           actionLabel="Supply"
         /> */}
-        <AssetsTable title="Assets to supply" assets={reservesData} actionLabel="Supply" />
+        <AssetsTable title="Assets to supply" assets={reservesData} summary={userSummary} actionLabel="Supply" />
       </CardDescription>
     </Card>
 
@@ -84,7 +84,7 @@ const Tables = ({ reservesData, }) => (
       <CardHeader className="text-xl font-semibold">Assets to Borrow</CardHeader>
       <CardDescription>
         {/* <AssetsTable title="Assets to Borrow" assets={reservesData} actionLabel="Borrow" /> */}
-        <BorrowingTable title="Assets to borrow" assets={reservesData} actionLabel="Borrow"/>
+        <BorrowingTable title="Assets to borrow" assets={reservesData} summary={userSummary} actionLabel="Borrow"/>
       </CardDescription>
     </Card>
   </main>

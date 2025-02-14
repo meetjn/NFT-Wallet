@@ -7,10 +7,12 @@ import BorrowDialog from "./Dialogs/BorrowDialog";
 interface props {
   assets: any;
   actionLabel: any;
+  summary: any;
 }
 
-const AssetsTable = ({ assets, actionLabel }: props) => {
+const AssetsTable = ({ assets, actionLabel, summary }: props) => {
   console.log("assets are", assets);
+  console.log("user summary from page.js: ", summary);
   return (
     <Card className="w-full p-4">
       <CardContent>
@@ -32,13 +34,18 @@ const AssetsTable = ({ assets, actionLabel }: props) => {
                   className="text-sm border-b border-neutral-600/20"
                 >
                   <td className="p-4">{asset.name}</td>
-                  <td className="p-4">{asset.variableBorrowAPY}</td> {/* have to show Availabel borrow in USD here  */}
-                  <td className="p-4 font-semibold">{asset.variableBorrowAPY*100} %</td>
-                  
-                  <td className="p-4 text-center">
-                   <BorrowDialog asset={asset} />
+                  <td className="p-4">
+                    {asset.name == "Gho Token"
+                      ? Number(summary.availableBorrowsUSD).toFixed(2)
+                      : (summary.availableBorrowsUSD * 0.99).toFixed(2)}
+                  </td>{" "}
+                  {/* have to show Available borrow in USD here  */}
+                  <td className="p-4 font-semibold">
+                    {(asset.variableBorrowAPY * 100).toFixed(2)} %
                   </td>
-                  
+                  <td className="p-4 text-center">
+                    <BorrowDialog asset={asset} />
+                  </td>
                 </tr>
               ))}
           </tbody>
