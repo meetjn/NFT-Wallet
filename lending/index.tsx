@@ -184,7 +184,7 @@ export const ContractProvider = ({ children }: { children: React.ReactNode }) =>
      })
 
      console.log("User summary: ", userSummary);
-      return { formattedReserves,userSummary };
+      return { formattedReserves,userSummary, baseCurrencyData };
     } catch (error) {
       console.error("Error fetching Aave data:", error);
       return null; 

@@ -6,27 +6,39 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import React, { FormEvent } from "react";
-import { useState } from "react";
+import React, { FormEvent, useState } from "react";
 import { Input } from "@/components/ui/input";
-import { InfinityIcon } from "lucide-react";
+import SuccessDialog from "./SuccessDialog";
+import {
+  calculateHealthFactorFromBalancesBigUnits,
+  valueToBigNumber,
+  USD_DECIMALS,
+} from "@aave/math-utils";
+import { borrow } from "@/lending/utils/borrow"; 
 import { useContract } from "@/lending";
-import { InterestRate } from "@aave/contract-helpers"; 
-import SuccessDialog from "./SuccessDialog"; 
-import { ethers } from "ethers";
+import { InterestRate } from "@aave/contract-helpers";
 
 interface AssetType {
   name: string;
   underlyingAsset: string;
   decimals: number;
+  formattedPriceInMarketReferenceCurrency: string;
 }
 
 interface BorrowDialogProps {
   asset: AssetType;
+  user: {
+    totalCollateralUSD: string;
+    totalBorrowsUSD: string;
+    currentLiquidationThreshold: string;
+    healthFactor: string;
+  };
+  marketReferencePriceInUsd: string;
 }
 
-const BorrowDialog = ({ asset }: BorrowDialogProps) => {
-  const { borrow } = useContract();
+const BorrowDialog = ({ asset, user, marketReferencePriceInUsd }: BorrowDialogProps) => {
+  const {borrow} = useContract();
+  
   const [amount, setAmount] = useState<string>("");
   const [showSuccess, setShowSuccess] = useState<boolean>(false);
   const [txHash, setTxHash] = useState<string>("");
@@ -34,6 +46,35 @@ const BorrowDialog = ({ asset }: BorrowDialogProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isConfirming, setIsConfirming] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [healthFactor, setHealthFactor] = useState<number | null>(null);
+
+  const calculateHealthFactor = (amount: string) => {
+    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+      setHealthFactor(null);
+      return;
+    }
+
+    const amountToBorrowInUsd = valueToBigNumber(amount)
+      .multipliedBy(asset.formattedPriceInMarketReferenceCurrency)
+      .multipliedBy(marketReferencePriceInUsd)
+      .shiftedBy(-USD_DECIMALS);
+
+    const newHealthFactor = calculateHealthFactorFromBalancesBigUnits({
+      collateralBalanceMarketReferenceCurrency: user.totalCollateralUSD,
+      borrowBalanceMarketReferenceCurrency: valueToBigNumber(user.totalBorrowsUSD).plus(
+        amountToBorrowInUsd
+      ),
+      currentLiquidationThreshold: user.currentLiquidationThreshold,
+    });
+
+    setHealthFactor(newHealthFactor.toNumber());
+  };
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newAmount = e.target.value;
+    setAmount(newAmount);
+    calculateHealthFactor(newAmount);
+  };
 
   const handleBorrow = async (e: FormEvent) => {
     e.preventDefault();
@@ -53,15 +94,14 @@ const BorrowDialog = ({ asset }: BorrowDialogProps) => {
     setIsLoading(true);
 
     try {
-      
       const txResponse = await borrow({
         reserve: asset.underlyingAsset,
-        amount: ethers.utils.parseUnits(amount, asset.decimals).toString(), 
-        interestRateMode: InterestRate.Stable, 
+        amount: amount.toString(),
+        interestRateMode: InterestRate.Stable
       });
 
       setIsConfirming(true);
-      await txResponse.wait(); 
+      await txResponse.wait();
       setIsConfirming(false);
 
       setTxHash(txResponse.hash);
@@ -93,6 +133,13 @@ const BorrowDialog = ({ asset }: BorrowDialogProps) => {
     setTxHash("");
   };
 
+  const getHealthFactorColor = (healthFactor: number | null) => {
+    if (healthFactor === null) return "text-gray-500"; // Default color
+    if (healthFactor > 2) return "text-green-500"; // Safe
+    if (healthFactor > 1.5) return "text-orange-500"; // Medium risk
+    return "text-red-500"; // High risk
+  };
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -113,10 +160,10 @@ const BorrowDialog = ({ asset }: BorrowDialogProps) => {
                   <Input
                     type="number"
                     value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
+                    onChange={handleAmountChange}
                     placeholder="0.00"
                     className="!px-0 outline-none border-none focus:outline-none"
-                    step="any" 
+                    step="any"
                   />
                   <span className="text-sm">{asset?.name}</span>
                 </div>
@@ -125,7 +172,9 @@ const BorrowDialog = ({ asset }: BorrowDialogProps) => {
               <div className="flex flex-col w-full justify-between border p-2">
                 <div className="flex flex-row w-full justify-between items-center">
                   <span>Health factor</span>
-                  <InfinityIcon className="text-green-500" />
+                  <span className={getHealthFactorColor(healthFactor)}>
+                    {healthFactor !== null ? healthFactor.toFixed(2) : "N/A"}
+                  </span>
                 </div>
                 <div className="flex flex-row items-center justify-end">
                   <span>Liquidation at {"<"}1.0</span>

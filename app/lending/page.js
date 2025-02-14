@@ -9,11 +9,13 @@ import { borrowAssets, supplyAssets } from "@/constants/lending";
 import AssetsTable from "@/components/lending/LendingTable";
 import BorrowingTable from "@/components/lending/BorrowingTable"
 import { ethers } from "ethers";
+import { base58 } from "ethers/lib/utils";
 const LendingPage = () => {
   const {fetchAaveData, supplyWithPermit} = useContract();
   const [reservesData, setReservesData] = useState([]);
   const [userReservesData, setUserReservesData] = useState([]);
   const [userSummary, setUserSummary] = useState([]);
+  const [baseCurrencyData, setBaseCurrencyData] = useState([]);
 
 
 
@@ -27,6 +29,7 @@ const LendingPage = () => {
           setReservesData(data.formattedReserves|| []);
           setUserReservesData(data.userReserves || []);
           setUserSummary(data.userSummary || []);
+          setBaseCurrencyData(data.baseCurrencyData || []);
         }
       } catch (error) {
         console.error("Error fetching Aave data:", error);
@@ -38,6 +41,7 @@ const LendingPage = () => {
 
   console.log("reserve data: ", reservesData);
   console.log("user summary data...checking state", userSummary);
+  console.log("base currency data from page.js: ",baseCurrencyData)
 
  
   return (
@@ -58,12 +62,12 @@ const LendingPage = () => {
           </CardDescription>
         </Card>
       </section>
-      <Tables reservesData={reservesData}  userReserves={userReservesData}  userSummary={userSummary}/>
+      <Tables reservesData={reservesData}  userReserves={userReservesData}  userSummary={userSummary} baseCurrencyData={baseCurrencyData}/>
     </div>
   );
 };
 
-const Tables = ({ reservesData, userSummary}) => (
+const Tables = ({ reservesData, userSummary, baseCurrencyData}) => (
   <main className="w-full flex flex-row items-center justify-between space-x-10">
     <Card className="border shadow-lg bg-neutral-200 w-1/2">
       <CardHeader className="text-xl font-semibold">Assets to supply</CardHeader>
@@ -84,7 +88,7 @@ const Tables = ({ reservesData, userSummary}) => (
       <CardHeader className="text-xl font-semibold">Assets to Borrow</CardHeader>
       <CardDescription>
         {/* <AssetsTable title="Assets to Borrow" assets={reservesData} actionLabel="Borrow" /> */}
-        <BorrowingTable title="Assets to borrow" assets={reservesData} summary={userSummary} actionLabel="Borrow"/>
+        <BorrowingTable title="Assets to borrow" assets={reservesData} summary={userSummary} baseCurrencyData={baseCurrencyData} actionLabel="Borrow"/>
       </CardDescription>
     </Card>
   </main>
