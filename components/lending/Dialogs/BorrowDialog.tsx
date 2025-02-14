@@ -97,7 +97,7 @@ const BorrowDialog = ({ asset, user, marketReferencePriceInUsd }: BorrowDialogPr
       const txResponse = await borrow({
         reserve: asset.underlyingAsset,
         amount: amount.toString(),
-        interestRateMode: InterestRate.Stable
+        interestRateMode: InterestRate.Variable
       });
 
       setIsConfirming(true);
