@@ -10,6 +10,7 @@ import {
   MULTISIG_WALLET_ABI,
   MULTISIG_WALLET_BYTECODE,
 } from "../context/constant";
+import Link from "next/link";
 
 interface Signer {
   name: string;
@@ -148,19 +149,6 @@ const MultiSigWalletCreator: React.FC<MultiSigWalletCreatorProps> = ({
   const renderStep = () => {
     switch (step) {
       case 1:
-        return (
-          <div className="">
-            <h2 className="text-xl font-urbanist-bold">Create New Wallet</h2>
-            <button
-              onClick={() => setStep(4)}
-              className="py-3 px-6 bg-[#CE192D] font-urbanist-semibold rounded-lg text-white mt-2"
-            >
-              Create account
-            </button>
-          </div>
-        );
-
-      case 2:
         console.log(
           "Authorized Signers Step: Current Threshold:",
           requiredSignatures
@@ -172,7 +160,7 @@ const MultiSigWalletCreator: React.FC<MultiSigWalletCreatorProps> = ({
               <h2 className="text-xl font-bold">Authorized Signers</h2>
               <button
                 onClick={addSigner}
-                className="px-4 py-2 bg-green-500 text-white rounded-lg"
+                className="px-4 py-2 bg-gray-100 text-black hover:text-black rounded-md hover-scale-on"
               >
                 + Add Signer
               </button>
@@ -182,7 +170,7 @@ const MultiSigWalletCreator: React.FC<MultiSigWalletCreatorProps> = ({
                 <input
                   type="text"
                   placeholder="Signer name"
-                  className="p-2 bg-gray-800 rounded"
+                  className="p-2 bg-gray-100 rounded over:text-black rounded-md hover-scale-on"
                   value={signer.name}
                   onChange={(e) => {
                     const newSigners = [...signers];
@@ -195,7 +183,7 @@ const MultiSigWalletCreator: React.FC<MultiSigWalletCreatorProps> = ({
                 ) : (
                   <button
                     onClick={() => connectWallet(index)}
-                    className="flex-1 p-2 bg-blue-900 text-blue-300 rounded"
+                    className="flex-1 p-2 bg-red-500 text-white-300 hover:text-black rounded-md hover-scale-on"
                   >
                     Connect Wallet
                   </button>
@@ -216,7 +204,7 @@ const MultiSigWalletCreator: React.FC<MultiSigWalletCreatorProps> = ({
                   setRequiredSignatures(newThreshold);
                   console.log("Updated Threshold:", newThreshold); // Added
                 }}
-                className="p-2 bg-gray-800 rounded"
+                className="p-2 bg-gray-100 rounded"
               >
                 {signers.map((_, index) => (
                   <option key={index + 1} value={index + 1}>
@@ -227,15 +215,14 @@ const MultiSigWalletCreator: React.FC<MultiSigWalletCreatorProps> = ({
               <span className="ml-2">Threshold limit {signers.length}</span>
             </div>
             <div className="flex justify-between">
+              <Link href="/">
+                <button className="flex items-center px-4 py-2 text-black">
+                  <ChevronLeft className="mr-1" /> Previous Step
+                </button>
+              </Link>
               <button
-                onClick={() => setStep(1)}
-                className="flex items-center px-4 py-2 text-gray-400"
-              >
-                <ChevronLeft className="mr-1" /> Previous Step
-              </button>
-              <button
-                onClick={() => setStep(3)}
-                className="px-4 py-2 bg-green-500 text-white rounded-lg"
+                onClick={() => setStep(2)}
+                className="px-4 py-2 bg-gray-100 text-black hover:text-black rounded-md hover-scale-on"
               >
                 Continue
               </button>
@@ -243,7 +230,7 @@ const MultiSigWalletCreator: React.FC<MultiSigWalletCreatorProps> = ({
           </div>
         );
 
-      case 3:
+      case 2:
         console.log(
           "Review Step: Required Signatures:",
           requiredSignatures,
@@ -265,16 +252,16 @@ const MultiSigWalletCreator: React.FC<MultiSigWalletCreatorProps> = ({
                 </span>
               </div>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-x-5">
               <button
-                onClick={() => setStep(2)}
-                className="px-4 py-2 border border-green-500 text-green-500 rounded-lg"
+                onClick={() => setStep(1)}
+                className="px-4 py-2 bg-gray-100 text-black hover:text-black rounded-md hover-scale-on"
               >
                 Back
               </button>
               <button
                 onClick={createWallet}
-                className="px-4 py-2 bg-green-500 text-white rounded-lg"
+                className="px-4 py-2 bg-gray-100 text-black rounded-lg"
               >
                 Create Wallet
               </button>
@@ -291,12 +278,13 @@ const MultiSigWalletCreator: React.FC<MultiSigWalletCreatorProps> = ({
             <h2 className="text-2xl font-bold">Your account is almost set!</h2>
             <p>Use your wallet to receive funds on Ethereum.</p>
             <p className="text-gray-500">{createdAddress}</p>
-            <button
-              onClick={handleLetsGo}
-              className="px-4 py-2 bg-green-500 text-white rounded-lg"
-            >
-              Let’s Go
-            </button>
+            <Link href="/">
+              <a>
+                <button className="px-4 py-2 bg-gray-100 text-black rounded-lg">
+                  Let’s Go
+                </button>
+              </a>
+            </Link>
           </div>
         );
 
