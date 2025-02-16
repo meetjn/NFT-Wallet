@@ -10,6 +10,9 @@ import AssetsTable from "@/components/lending/LendingTable";
 import BorrowingTable from "@/components/lending/BorrowingTable"
 import { ethers } from "ethers";
 import { base58 } from "ethers/lib/utils";
+import LendingHeader from "@/components/lending/LendingHeader";
+import SupplyCard from "@/components/lending/CardContent/SupplyCard";
+import BorrowCard from "@/components/lending/CardContent/BorrowCard";
 const LendingPage = () => {
   const {fetchAaveData, supplyWithPermit} = useContract();
   const [reservesData, setReservesData] = useState([]);
@@ -47,18 +50,19 @@ const LendingPage = () => {
   return (
     <div className="flex flex-col space-y-10  w-full px-4">
       <h1 className="text-3xl font-bold my-8">Lending Dashboard</h1>
+      <LendingHeader userReserves = {userSummary} />
       <section className="flex flex-row justify-between space-x-10">
         <Card className="border shadow-lg bg-neutral-200 w-1/2">
           <CardHeader className="text-xl font-semibold">Your supplies</CardHeader>
           {/* your supply */}
           <CardDescription className="p-6">
-            Nothing Supplied Yet
+            <SupplyCard data={userSummary?.userReservesData} />
           </CardDescription>
         </Card>
         <Card className="border shadow-lg bg-neutral-200 w-1/2">
           <CardHeader className="text-xl font-semibold">Your Borrows</CardHeader>
           <CardDescription className="p-6">
-            Nothing Borrowed Yet
+         <BorrowCard data={userSummary} />
           </CardDescription>
         </Card>
       </section>
@@ -68,7 +72,7 @@ const LendingPage = () => {
 };
 
 const Tables = ({ reservesData, userSummary, baseCurrencyData}) => (
-  <main className="w-full flex flex-row items-center justify-between space-x-10">
+  <main className="w-full flex flex-row items-start justify-between space-x-10">
     <Card className="border shadow-lg bg-neutral-200 w-1/2">
       <CardHeader className="text-xl font-semibold">Assets to supply</CardHeader>
       <CardDescription>
