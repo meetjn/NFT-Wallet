@@ -16,6 +16,7 @@ import * as markets from "@bgd-labs/aave-address-book";
 import { submitTransaction } from "./utils/submitTransaction";
 import { supplyWithPermit } from "./utils/supplyWithPermit";
 import { borrow } from "./utils/borrow"; // ✅ Import borrow function
+import { withdraw } from "./utils/withdraw";
 
 interface ContractContextType {
   fetchAaveData: () => Promise<{ formattedReserves: any } | null>;
@@ -41,6 +42,17 @@ interface ContractContextType {
     onBehalfOf?: string;
   }) => Promise<providers.TransactionResponse>;
   checkWalletBalance: (tokenAddress: string) => Promise<ethers.BigNumber>;
+  withdraw: ({
+    reserve,
+    amount,
+    aTokenAddress,
+    onBehalfOf,
+  }: {
+    reserve: string;
+    amount: string;
+    aTokenAddress: string;
+    onBehalfOf?: string;
+  }) => Promise<providers.TransactionResponse>; // Add withdraw function
 }
 
 const ContractContext = createContext<ContractContextType | null>(null);
@@ -231,6 +243,21 @@ export const ContractProvider = ({ children }: { children: React.ReactNode }) =>
           });
         },
         checkWalletBalance,
+        withdraw: ({ reserve, amount, aTokenAddress, onBehalfOf }) => {
+          if (!pool || !provider || !signer || !address) {
+            throw new Error("Required dependencies are not initialized.");
+          }
+          return withdraw({
+            user: address,
+            reserve,
+            amount,
+            aTokenAddress,
+            pool,
+            provider,
+            signer,
+            onBehalfOf,
+          });
+        },
       }}
     >
       {children}

@@ -1,3 +1,5 @@
+import React, { useState } from "react";
+import { useContract } from "@/lending/index"; 
 import {
   Dialog,
   DialogContent,
@@ -7,11 +9,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import Image from "next/image";
-import React, { useState } from "react";
 
 interface Reserve {
   name: string;
+  underlyingAsset: string; 
+  aTokenAddress: string; 
 }
 
 interface Props {
@@ -21,14 +23,32 @@ interface Props {
 }
 
 const WithdrawDialog = ({ data }: Props) => {
-  const [amount, setAmount] = useState<number>(0);
+  const [amount, setAmount] = useState<string>("");
+  const { withdraw } = useContract(); // Use the withdraw function from context
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log({
-      amount,
-      data,
-    });
+
+    try {
+      console.log("Withdrawing...", {
+        amount,
+        reserve: data.reserve.underlyingAsset,
+        aTokenAddress: data.reserve.aTokenAddress,
+      });
+
+      // Call the withdraw function
+      const txResponse = await withdraw({
+        reserve: data.reserve.underlyingAsset,
+        amount,
+        aTokenAddress: data.reserve.aTokenAddress,
+      });
+
+      console.log("Withdraw transaction successful:", txResponse);
+      alert("Withdraw successful!");
+    } catch (error) {
+      console.error("Error during withdraw:", error);
+      alert("Withdraw failed. Please try again.");
+    }
   };
 
   return (
@@ -51,7 +71,7 @@ const WithdrawDialog = ({ data }: Props) => {
                 <Input
                   type="number"
                   value={amount}
-                  onChange={(e) => setAmount(parseFloat(e.target.value))}
+                  onChange={(e) => setAmount(e.target.value)}
                   className="!px-0 outline-none border-none focus:outline-none"
                   step="any"
                   placeholder="0.00"

@@ -10,7 +10,7 @@ interface BorrowParams {
   provider: providers.Web3Provider;
   signer: providers.JsonRpcSigner;
   interestRateMode: InterestRate;
-  onBehalfOf?: string; // Optional parameter
+  onBehalfOf?: string; 
 }
 
 export const borrow = async ({
