@@ -134,7 +134,7 @@ const BorrowDialog = ({ asset, user, marketReferencePriceInUsd }: BorrowDialogPr
   };
 
   const getHealthFactorColor = (healthFactor: number | null) => {
-    if (healthFactor === null) return "text-gray-500"; // Default color
+    if (healthFactor === null) return "text-gray-500"; 
     if (healthFactor > 2) return "text-green-500"; // Safe
     if (healthFactor > 1.5) return "text-orange-500"; // Medium risk
     return "text-red-500"; // High risk
