@@ -15,7 +15,7 @@ interface BorrowCardProps {
   };
 }
 
-const BorrowCard = ({ data }: BorrowCardProps) => {
+const BorrowCard = ({ data}: BorrowCardProps) => {
   const reserves = data?.userReservesData;
 
   const filteredReserves = reserves?.filter(
@@ -43,7 +43,7 @@ const BorrowCard = ({ data }: BorrowCardProps) => {
         </thead>
         <tbody className="divide-y divide-neutral-800 border-t border-neutral-800">
           {filteredReserves ? (
-            filteredReserves.map((reserve, idex) => {
+            filteredReserves.map((reserve, index) => {
              
               return (
                 // Render the row(s) when totalBorrows > 0
@@ -53,12 +53,16 @@ const BorrowCard = ({ data }: BorrowCardProps) => {
                   {reserve.reserve.name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
-                    {/* Replace with dynamic balance */}
-                   {reserve.totalBorrowsUSD}
-                  </td>
+                  <div className="flex flex-col items-center">
+                    <span>{Number(reserve.totalBorrows).toFixed(2)}</span>
+                    <span className="text-sm text-gray-500">
+                      ${Number(reserve.totalBorrowsUSD).toFixed(2)}
+                    </span>
+                  </div>
+                </td>
                   <td className="px-6 py-4 whitespace-nowrap text-left">
                     {/* Replace with dynamic APY */}
-                    5%
+                    {Number(reserve.reserve.variableBorrowAPY * 100).toFixed(2)}%
                   </td>
                   
                   <td className="px-6 py-4 whitespace-nowrap text-center">

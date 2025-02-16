@@ -10,12 +10,12 @@ interface RepayParams {
   pool: Pool;
   provider: providers.Web3Provider;
   signer: providers.JsonRpcSigner;
-  deadline: number;
   onBehalfOf?: string; // Optional parameter
 }
 
 interface RepayWithPermitParams extends RepayParams {
   signature: string; // Signature for gasless approval
+  deadline: string;
 }
 
 interface RepayWithATokensParams {

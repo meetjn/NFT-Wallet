@@ -20,9 +20,10 @@ export interface SupplyData {
 
 interface SupplyCardProps {
   data: SupplyData[];
+  assets: any;
 }
 
-const SupplyCard = ({ data }: SupplyCardProps) => {
+const SupplyCard = ({ data, assets}: SupplyCardProps) => {
   // Filter items that have a reserve with an underlyingBalance greater than 0
   const filteredData = data?.filter(
     (item) => item?.underlyingBalance && item.underlyingBalance > 0
@@ -64,7 +65,7 @@ const SupplyCard = ({ data }: SupplyCardProps) => {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-center">
-                  {item.APY}
+                  {Number(item?.reserve?.supplyAPY * 100).toFixed(2)}%
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-center">
                   <label className="flex items-center justify-center cursor-pointer">

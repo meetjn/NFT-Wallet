@@ -15,8 +15,9 @@ import dayjs from "dayjs";
 import * as markets from "@bgd-labs/aave-address-book";
 import { submitTransaction } from "./utils/submitTransaction";
 import { supplyWithPermit } from "./utils/supplyWithPermit";
-import { borrow } from "./utils/borrow"; // ✅ Import borrow function
+import { borrow } from "./utils/borrow"; 
 import { withdraw } from "./utils/withdraw";
+import { repay, repayWithATokens } from "./utils/repay"; 
 
 interface ContractContextType {
   fetchAaveData: () => Promise<{ formattedReserves: any } | null>;
@@ -52,7 +53,27 @@ interface ContractContextType {
     amount: string;
     aTokenAddress: string;
     onBehalfOf?: string;
-  }) => Promise<providers.TransactionResponse>; // Add withdraw function
+  }) => Promise<providers.TransactionResponse>; 
+  repay: ({
+    reserve,
+    amount,
+    interestRateMode,
+    onBehalfOf,
+  }: {
+    reserve: string;
+    amount: string;
+    interestRateMode: InterestRate;
+    onBehalfOf?: string;
+  }) => Promise<providers.TransactionResponse>; // Add repay function
+  repayWithATokens: ({
+    reserve,
+    amount,
+    rateMode,
+  }: {
+    reserve: string;
+    amount: string;
+    rateMode: InterestRate;
+  }) => Promise<providers.TransactionResponse>; // Add repayWithATokens function
 }
 
 const ContractContext = createContext<ContractContextType | null>(null);
@@ -256,6 +277,35 @@ export const ContractProvider = ({ children }: { children: React.ReactNode }) =>
             provider,
             signer,
             onBehalfOf,
+          });
+        },
+        repay: ({ reserve, amount, interestRateMode, onBehalfOf }) => {
+          if (!pool || !provider || !signer || !address) {
+            throw new Error("Required dependencies are not initialized.");
+          }
+          return repay({
+            user: address,
+            reserve,
+            amount,
+            interestRateMode,
+            pool,
+            provider,
+            signer,
+            onBehalfOf,
+          });
+        },
+        repayWithATokens: ({ reserve, amount, rateMode }) => {
+          if (!pool || !provider || !signer || !address) {
+            throw new Error("Required dependencies are not initialized.");
+          }
+          return repayWithATokens({
+            user: address,
+            reserve,
+            amount,
+            rateMode,
+            pool,
+            provider,
+            signer,
           });
         },
       }}

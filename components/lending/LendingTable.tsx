@@ -43,7 +43,7 @@ const AssetsTable = ({ assets, actionLabel }: Props) => {
           <tbody>
             {assets?.map((asset: any, index: number) => {
               const userBalance = balances[asset.underlyingAsset] || ethers.BigNumber.from(0);
-              const isDisabled = userBalance.lte(0); // Disable if balance is 0 or less
+              const isDisabled = userBalance.lte(0); 
 
               return (
                 <tr

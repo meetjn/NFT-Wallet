@@ -1,3 +1,5 @@
+import React, { useState } from "react";
+import { useContract } from "@/lending/index"; // Import the context
 import {
   Dialog,
   DialogContent,
@@ -7,11 +9,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import React, { useState } from "react";
 import RepayPopover from "../Popover/RepayPopover";
+import { InterestRate } from "@aave/contract-helpers";
 
 interface Asset {
   name: string;
+  underlyingAsset: string; // Add underlyingAsset to the Asset interface
+  aTokenAddress: string; // Add aTokenAddress to the Asset interface
 }
 
 interface Props {
@@ -19,16 +23,43 @@ interface Props {
 }
 
 const RepayDialog = ({ asset }: Props): JSX.Element => {
-  const [amount, setAmount] = useState<number>(0);
-  const [selectedToken, setSelectedToken] = useState<string>("USDC");
+  const [amount, setAmount] = useState<string>("");
+  const [selectedToken, setSelectedToken] = useState<string>("USDC"); // Default to normal token
+  const { repay, repayWithATokens } = useContract(); // Use repay functions from context
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log({
-      amount,
-      asset,
-      selectedToken,
-    });
+
+    try {
+      console.log("Repaying...", {
+        amount,
+        reserve: asset.underlyingAsset,
+        selectedToken,
+      });
+
+      if (selectedToken === "aToken") {
+        // Repay with aTokens
+        const txResponse = await repayWithATokens({
+          reserve: asset.underlyingAsset,
+          amount,
+          rateMode: InterestRate.Variable, // Default to variable rate
+        });
+        console.log("Repay with aTokens successful:", txResponse);
+        alert("Repay with aTokens successful!");
+      } else {
+        // Repay with normal tokens
+        const txResponse = await repay({
+          reserve: asset.underlyingAsset,
+          amount,
+          interestRateMode: InterestRate.Variable, // Default to variable rate
+        });
+        console.log("Repay successful:", txResponse);
+        alert("Repay successful!");
+      }
+    } catch (error) {
+      console.error("Error during repay:", error);
+      alert("Repay failed. Please try again.");
+    }
   };
 
   return (
@@ -50,7 +81,7 @@ const RepayDialog = ({ asset }: Props): JSX.Element => {
                 <Input
                   type="number"
                   value={amount}
-                  onChange={(e) => setAmount(parseFloat(e.target.value))}
+                  onChange={(e) => setAmount(e.target.value)}
                   className="!px-0 outline-none border-none focus:outline-none"
                   step="any"
                   placeholder="0.00"
@@ -63,7 +94,7 @@ const RepayDialog = ({ asset }: Props): JSX.Element => {
               </div>
               {/* Showing updated token */}
               <p className="mt-2 text-xs text-gray-600">
-                Selected Token: {selectedToken}
+                Selected Token: {selectedToken === "aToken" ? "aToken" : "USDC"}
               </p>
             </div>
             <label className="font-semibold">Transaction Overview</label>

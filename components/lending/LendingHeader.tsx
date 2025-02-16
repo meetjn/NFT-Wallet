@@ -16,7 +16,7 @@ const LendingHeader = ({ userReserves }: props) => {
           <span className="text-sm">Net Worth</span>
           <span className="text-2xl font-bold text-black">
             <span className="font-bold text-neutral-800">$</span>
-            {userReserves?.netWorthUSD}
+            {Number(userReserves?.netWorthUSD).toFixed(2)}
           </span>
         </div>
         <div className="flex flex-col items-start">
@@ -26,7 +26,7 @@ const LendingHeader = ({ userReserves }: props) => {
         <div className="flex flex-col items-start">
           <span className="text-sm">Health Factor</span>
           <span className="text-2xl font-bold text-black">
-            {userReserves?.healthFactor}
+            {Number(userReserves?.healthFactor).toFixed(2)}
           </span>
         </div>
       </div>
