@@ -10,7 +10,7 @@ import {
   Pool,
   InterestRate,
 } from "@aave/contract-helpers";
-import { formatReserves, formatReservesAndIncentives, formatUserSummary } from "@aave/math-utils";
+import { formatReserves, formatReservesAndIncentives, formatUserSummary, formatUserSummaryAndIncentives } from "@aave/math-utils";
 import dayjs from "dayjs";
 import * as markets from "@bgd-labs/aave-address-book";
 import { submitTransaction } from "./utils/submitTransaction";
@@ -214,6 +214,7 @@ export const ContractProvider = ({ children }: { children: React.ReactNode }) =>
       userReserves: userReserveArray,
       formattedReserves,
       userEmodeCategoryId: userReserves.userEmodeCategoryId,
+
      })
 
      console.log("User summary: ", userSummary);

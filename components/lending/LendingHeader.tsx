@@ -1,5 +1,6 @@
-import React from "react";
-
+import React from "react"; 
+import {} from "@aave/math-utils";
+ 
 interface props {
   userReserves: {
     netWorthUSD: number;
@@ -21,7 +22,7 @@ const LendingHeader = ({ userReserves }: props) => {
         </div>
         <div className="flex flex-col items-start">
           <span className="text-sm">Net APY</span>
-          <span className="text-2xl font-bold text-black"> 0.00%</span>
+          <span className="text-2xl font-bold text-black"> 0.06%</span>
         </div>
         <div className="flex flex-col items-start">
           <span className="text-sm">Health Factor</span>

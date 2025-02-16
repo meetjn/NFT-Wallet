@@ -49,7 +49,7 @@ const LendingPage = () => {
  
   return (
     <div className="flex flex-col space-y-10  w-full px-4">
-      <h1 className="text-3xl font-bold my-8">Lending Dashboard</h1>
+      <h1 className="text-4xl font-bold my-8">Ethereum Market</h1>
       <LendingHeader userReserves = {userSummary} />
       <section className="flex flex-row justify-between space-x-10">
         <Card className="border shadow-lg bg-neutral-200 w-1/2">
