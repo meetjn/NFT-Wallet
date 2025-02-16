@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import React, { useState } from "react";
+import RepayPopover from "../Popover/RepayPopover";
 
 interface Asset {
   name: string;
@@ -17,14 +18,16 @@ interface Props {
   asset: Asset;
 }
 
-const RepayDialog = ({ asset }: Props) => {
+const RepayDialog = ({ asset }: Props): JSX.Element => {
   const [amount, setAmount] = useState<number>(0);
+  const [selectedToken, setSelectedToken] = useState<string>("USDC");
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log({
       amount,
       asset,
+      selectedToken,
     });
   };
 
@@ -52,10 +55,18 @@ const RepayDialog = ({ asset }: Props) => {
                   step="any"
                   placeholder="0.00"
                 />
-                <span className="text-sm ml-2">{asset?.name}</span>
+                <RepayPopover
+                  data={asset}
+                  selectedToken={selectedToken}
+                  setSelectedToken={setSelectedToken}
+                />
               </div>
+              {/* Showing updated token */}
+              <p className="mt-2 text-xs text-gray-600">
+                Selected Token: {selectedToken}
+              </p>
             </div>
-            <label>Transaction Overview</label>
+            <label className="font-semibold">Transaction Overview</label>
             <div className="flex flex-col w-full justify-between border rounded-md p-2 space-y-4">
               <div className="flex flex-row w-full justify-between items-center">
                 <span>Remaining Debt</span>
@@ -64,7 +75,7 @@ const RepayDialog = ({ asset }: Props) => {
                 </span> */}
               </div>
               <div className="flex flex-row w-full justify-between items-center">
-                <span>Health factor</span>
+                <span>Health Factor</span>
                 {/* <span className={getHealthFactorColor(healthFactor)}>
                   {healthFactor !== null ? healthFactor.toFixed(2) : "N/A"}
                 </span> */}
