@@ -18,9 +18,9 @@ interface Props {
   asset: Asset;
 }
 
-const RepayDialog = ({ asset }: Props) => {
+const RepayDialog = ({ asset }: Props): JSX.Element => {
   const [amount, setAmount] = useState<number>(0);
-  const [selectedToken, setSelectedToken] = useState<string>(asset?.name);
+  const [selectedToken, setSelectedToken] = useState<string>("USDC");
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -61,8 +61,12 @@ const RepayDialog = ({ asset }: Props) => {
                   setSelectedToken={setSelectedToken}
                 />
               </div>
+              {/* Showing updated token */}
+              <p className="mt-2 text-xs text-gray-600">
+                Selected Token: {selectedToken}
+              </p>
             </div>
-            <label>Transaction Overview</label>
+            <label className="font-semibold">Transaction Overview</label>
             <div className="flex flex-col w-full justify-between border rounded-md p-2 space-y-4">
               <div className="flex flex-row w-full justify-between items-center">
                 <span>Remaining Debt</span>
