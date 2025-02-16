@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import React, { useState } from "react";
+import RepayPopover from "../Popover/RepayPopover";
 
 interface Asset {
   name: string;
@@ -19,12 +20,14 @@ interface Props {
 
 const RepayDialog = ({ asset }: Props) => {
   const [amount, setAmount] = useState<number>(0);
+  const [selectedToken, setSelectedToken] = useState<string>(asset?.name);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log({
       amount,
       asset,
+      selectedToken,
     });
   };
 
@@ -52,7 +55,11 @@ const RepayDialog = ({ asset }: Props) => {
                   step="any"
                   placeholder="0.00"
                 />
-                <span className="text-sm ml-2">{asset?.name}</span>
+                <RepayPopover
+                  data={asset}
+                  selectedToken={selectedToken}
+                  setSelectedToken={setSelectedToken}
+                />
               </div>
             </div>
             <label>Transaction Overview</label>
@@ -64,7 +71,7 @@ const RepayDialog = ({ asset }: Props) => {
                 </span> */}
               </div>
               <div className="flex flex-row w-full justify-between items-center">
-                <span>Health factor</span>
+                <span>Health Factor</span>
                 {/* <span className={getHealthFactorColor(healthFactor)}>
                   {healthFactor !== null ? healthFactor.toFixed(2) : "N/A"}
                 </span> */}
