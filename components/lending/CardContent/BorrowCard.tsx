@@ -18,7 +18,7 @@ interface BorrowCardProps {
 const BorrowCard = ({ data }: BorrowCardProps) => {
   const reserves = data?.userReservesData;
 
-  const filteredReserves = reserves.filter(
+  const filteredReserves = reserves?.filter(
     (reserve) => Number(reserve.totalBorrowsUSD) > 0
   );
   console.log(filteredReserves);
