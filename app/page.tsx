@@ -16,6 +16,18 @@ import AddFundsModal from "@/components/AddFundsModal";
 import router from "next/router";
 import Sidebar from "@/components/sidebar";
 
+enum TransactionType {
+  ETH = "ETH",
+  ERC20 = "ERC20",
+}
+
+interface TransactionDetails {
+  type: TransactionType | "";
+  amount: string;
+  to: string;
+  tokenAddress?: string;
+}
+
 export default function Home() {
   const { isConnected, address } = useAccount();
   const [tokenBoundClient, setTokenBoundClient] =
@@ -29,10 +41,25 @@ export default function Home() {
   const [erc20Balance, setErc20Balance] = useState<string>("0");
   const [currentTokenId, setCurrentTokenId] = useState(0);
   const [selectedChainId, setSelectedChainId] = useState<number>(sepolia.id);
-  const [showMultiSigWalletCreator, setShowMultiSigWalletCreator] =
-    useState(true);
   const [isEthModalOpen, setIsEthModalOpen] = useState(false);
   const [isErc20ModalOpen, setIsErc20ModalOpen] = useState(false);
+  const [showMultisig, setShowMultisig] = useState(false);
+  const [isTransactionPending, setIsTransactionPending] = useState(false);
+  const [currentTbaAddress, setCurrentTbaAddress] = useState("");
+  const [pendingTx, setPendingTx] = useState<{
+    type: "ETH" | "ERC20";
+    amount: string;
+    to: string;
+    tokenAddress?: string;
+  } | null>(null);
+  const [isMultiSigApproved, setIsMultiSigApproved] = useState(false);
+  const [pendingTransaction, setPendingTransaction] =
+    useState<TransactionDetails>({
+      type: "",
+      amount: "",
+      to: "",
+    });
+  const [showMetamaskPrompt, setShowMetamaskPrompt] = useState(false);
   useEffect(() => {
     if (isConnected) {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -136,62 +163,89 @@ export default function Home() {
 
   const fundWithEth = async () => {
     if (!manualTbaAddress) return alert("Please enter a valid TBA address.");
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
 
-    try {
-      const tx = await signer.sendTransaction({
-        to: manualTbaAddress,
-        value: ethers.utils.parseEther(fundingAmount),
-      });
-      console.log("Transaction sent:", tx.hash);
-      alert(`ETH sent successfully! Tx Hash: ${tx.hash}`);
-    } catch (error) {
-      console.error("Error sending ETH:", error);
-      alert("Failed to send ETH.");
-    }
+    setPendingTransaction({
+      type: TransactionType.ETH,
+      amount: fundingAmount,
+      to: manualTbaAddress,
+    });
+
+    setCurrentTbaAddress(manualTbaAddress);
+    setShowMultisig(true);
+    setIsTransactionPending(true);
+    setIsEthModalOpen(false);
   };
 
   const fundWithErc20 = async () => {
     if (!manualTbaAddress || !erc20Address)
       return alert("TBA and ERC20 token address are required.");
+
+    setPendingTransaction({
+      type: TransactionType.ERC20,
+      amount: fundingAmount,
+      to: manualTbaAddress,
+      tokenAddress: erc20Address,
+    });
+
+    setCurrentTbaAddress(manualTbaAddress);
+    setShowMultisig(true);
+    setIsTransactionPending(true);
+    setIsErc20ModalOpen(false);
+  };
+
+  const executeTransaction = async () => {
+    if (!pendingTx || !isMultiSigApproved) {
+      console.log("Cannot execute: transaction not approved or missing");
+      return;
+    }
+
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
 
     try {
-      const erc20Abi = [
-        "function transfer(address to, uint amount) returns (bool)",
-      ];
-      const erc20Contract = new ethers.Contract(erc20Address, erc20Abi, signer);
+      if (pendingTx.type === "ETH") {
+        const tx = await signer.sendTransaction({
+          to: pendingTx.to,
+          value: ethers.utils.parseEther(pendingTx.amount),
+        });
+        console.log("ETH Transaction sent:", tx.hash);
+        await tx.wait();
 
-      const tx = await erc20Contract.transfer(
-        manualTbaAddress,
-        ethers.utils.parseUnits(fundingAmount, 18)
-      );
-      console.log("ERC20 transfer transaction:", tx.hash);
-      alert(`ERC20 tokens sent successfully! Tx Hash: ${tx.hash}`);
+        alert(`ETH sent successfully! Tx Hash: ${tx.hash}`);
+      } else {
+        const erc20Abi = [
+          "function transfer(address to, uint amount) returns (bool)",
+        ];
+        const erc20Contract = new ethers.Contract(
+          pendingTx.tokenAddress!,
+          erc20Abi,
+          signer
+        );
+        const tx = await erc20Contract.transfer(
+          pendingTx.to,
+          ethers.utils.parseUnits(pendingTx.amount, 18)
+        );
+        await tx.wait();
+        console.log("ERC20 Transaction sent:", tx.hash);
+        alert(`ERC20 tokens sent successfully! Tx Hash: ${tx.hash}`);
+      }
     } catch (error) {
-      console.error("Error sending ERC20 tokens:", error);
-      alert("Failed to send ERC20 tokens.");
+      console.error("Transaction failed:", error);
+      alert("Transaction failed.");
+    } finally {
+      setIsTransactionPending(false);
+      setShowMultisig(false);
+      setPendingTx(null);
+      setIsMultiSigApproved(false);
     }
   };
 
-  const handleMultiSigWalletComplete = () => {
-    localStorage.setItem("multiSigCompleted", "true");
-    setShowMultiSigWalletCreator(false);
-
-    // Hide the MultiSigWalletCreator
-  };
-
-  if (showMultiSigWalletCreator) {
-    return (
-      <div className="w-screen h-screen fixed top-0 left-0 bg-white z-50">
-        <Web3Provider>
-          <MultiSigWalletCreator onComplete={handleMultiSigWalletComplete} />
-        </Web3Provider>
-      </div>
-    );
-  }
+  // Add useEffect to handle transaction execution after MultiSig approval
+  useEffect(() => {
+    if (isMultiSigApproved && pendingTx) {
+      executeTransaction();
+    }
+  }, [isMultiSigApproved]);
 
   return (
     <section className="pt-8 p-responsive flex flex-col gap-10 w-full pb-10">
@@ -304,7 +358,24 @@ export default function Home() {
           />
         </div>
       </div>
-
+      {showMultisig && (
+        <Web3Provider>
+          <MultiSigWalletCreator
+            onComplete={() => {
+              if (!isTransactionPending) {
+                setShowMultisig(false);
+                setIsTransactionPending(false);
+                setPendingTransaction(null);
+              }
+            }}
+            onApproval={() => {
+              executeTransaction();
+            }}
+            tbaAddress={currentTbaAddress}
+            transactionDetails={pendingTransaction}
+          />
+        </Web3Provider>
+      )}
       <AddFundsModal
         isOpen={isEthModalOpen}
         onClose={() => {
@@ -330,4 +401,15 @@ export default function Home() {
       />
     </section>
   );
+}
+function setIsTransactionPending(arg0: boolean) {
+  throw new Error("Function not implemented.");
+}
+
+function setShowMultisig(arg0: boolean) {
+  throw new Error("Function not implemented.");
+}
+
+function setCurrentTbaAddress(manualTbaAddress: string) {
+  throw new Error("Function not implemented.");
 }
