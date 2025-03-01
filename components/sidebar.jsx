@@ -13,22 +13,24 @@ import {
   Image,
   Leaf,
   ChartAreaIcon,
+  Plus,
   ArrowLeftRight,
 } from "lucide-react"; // Import valid icons
 import Link from "next/link";
 
 const items = [
+  { name: "Create Account", icon: <Plus />, href: "/Multisignature" },
   { name: "Home", icon: <House />, href: "/" },
-  { name: "Assets", icon: <BriefcaseBusiness />, href: "/assets" },
+  // { name: "Assets", icon: <BriefcaseBusiness />, href: "/assets" },
   { name: "NFTs", icon: <Image />, href: "/nfts" },
   { name: "Lending", icon: <Banknote />, href: "/lending" },
-  { name: "Staking", icon: <BadgeDollarSign />, href: "/staking" },
-  { name: "Farming", icon: <Leaf />, href: "/farming" },
-  { name: "Crypto ETFs", icon: <BarChart />, href: "/etfs" },
-  { name: "Index Funds", icon: <PieChart />, href: "/index" },
-  { name: "Transactions", icon: <ArrowUpDown />, href: "/transactions" },
+  // { name: "Staking", icon: <BadgeDollarSign />, href: "/staking" },
+  // { name: "Farming", icon: <Leaf />, href: "/farming" },
+  // { name: "Crypto ETFs", icon: <BarChart />, href: "/etfs" },
+  // { name: "Index Funds", icon: <PieChart />, href: "/index" },
+  // { name: "Transactions", icon: <ArrowUpDown />, href: "/transactions" },
   { name: "Trading", icon: <ChartAreaIcon />, href: "/trading" },
-  {name : "Swap", icon: <ArrowLeftRight />, href: "/swap"}
+  { name: "Swap", icon: <ArrowLeftRight />, href: "/swap" },
 ];
 
 const Sidebar = () => {
