@@ -73,11 +73,6 @@ a {
   text-align: center;
 }
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 
 
 /* Your custom styles */
@@ -99,4 +94,10 @@ body {
 
 .hover-scale-on {
   @apply transition-transform transform duration-300 ease-in-out hover:scale-105 hover:shadow-2xl;
+}
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+  }
 }
