@@ -29,6 +29,10 @@ const config: Config = {
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
+<<<<<<< HEAD
+=======
+    './src/**/*.{ts,tsx}',
+>>>>>>> f868de1 (index-fund initial commit)
   ],
   theme: {
     container: {
@@ -79,6 +83,67 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+<<<<<<< HEAD
+=======
+      keyframes: {
+        "accordion-down": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+      },
+    
+      fontFamily: {
+  			'urbanist-black': [
+  				'Urbanist-Black',
+  				'sans-serif'
+  			],
+  			'urbanist-bold': [
+  				'Urbanist-Bold',
+  				'sans-serif'
+  			],
+  			'urbanist-extrabold': [
+  				'Urbanist-ExtraBold',
+  				'sans-serif'
+  			],
+  			'urbanist-extralight': [
+  				'Urbanist-ExtraLight',
+  				'sans-serif'
+  			],
+  			'urbanist-light': [
+  				'Urbanist-Light',
+  				'sans-serif'
+  			],
+  			'urbanist-medium': [
+  				'Urbanist-Medium',
+  				'sans-serif'
+  			],
+  			'urbanist-regular': [
+  				'Urbanist-Regular',
+  				'sans-serif'
+  			],
+  			'urbanist-semibold': [
+  				'Urbanist-SemiBold',
+  				'sans-serif'
+  			],
+  			'urbanist-thin': [
+  				'Urbanist-Thin',
+  				'sans-serif'
+  			],
+  			'digital-7': [
+  				'Digital7',
+  				'sans-serif'
+  			]
+  		},
+      
+>>>>>>> f868de1 (index-fund initial commit)
     },
   },
   plugins: [],

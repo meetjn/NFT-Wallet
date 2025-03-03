@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
@@ -77,3 +78,23 @@ const CardFooter = React.forwardRef<
 CardFooter.displayName = "CardFooter"
 
 export { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
+=======
+"use client";
+
+import { ReactNode } from "react";
+
+interface CardProps {
+  className?: string;
+  children: ReactNode;
+}
+
+const Card = ({ className = "", children }: CardProps) => {
+  return (
+    <div className={`bg-white rounded-lg shadow ${className}`}>
+      {children}
+    </div>
+  );
+};
+
+export { Card };
+>>>>>>> f868de1 (index-fund initial commit)
