@@ -13,6 +13,10 @@ import {
   Image,
   Leaf,
   ChartAreaIcon,
+<<<<<<< HEAD
+=======
+  ArrowLeftRight,
+>>>>>>> f868de1 (index-fund initial commit)
 } from "lucide-react"; // Import valid icons
 import Link from "next/link";
 
@@ -24,21 +28,38 @@ const items = [
   { name: "Staking", icon: <BadgeDollarSign />, href: "/staking" },
   { name: "Farming", icon: <Leaf />, href: "/farming" },
   { name: "Crypto ETFs", icon: <BarChart />, href: "/etfs" },
+<<<<<<< HEAD
   { name: "Index Funds", icon: <PieChart />, href: "/index" },
   { name: "Transactions", icon: <ArrowUpDown />, href: "/transactions" },
   { name: "Trading", icon: <ChartAreaIcon />, href: "/trading" },
+=======
+  { name: "Index Funds", icon: <PieChart />, href: "/index-fund" },
+  { name: "Transactions", icon: <ArrowUpDown />, href: "/transactions" },
+  { name: "Trading", icon: <ChartAreaIcon />, href: "/trading" },
+  {name : "Swap", icon: <ArrowLeftRight />, href: "/swap"}
+>>>>>>> f868de1 (index-fund initial commit)
 ];
 
 const Sidebar = () => {
   const { isConnected, address } = useAccount();
 
   return (
+<<<<<<< HEAD
     <div className="h-screen w-64 text-white flex flex-col p-4 justify-between sticky border-r border-gray-600 border-opacity-50">
       <div className="flex flex-col space-y-4 h-full ">
         <div>
           {items.map((item, index) => (
             <Link key={index} href={item.href}>
               <div className="flex gap-2 items-center py-2">
+=======
+    <div className="h-screen w-64 flex flex-col py-5 justify-between sticky top-0 border-r border-gray-600 border-opacity-50">
+      <div className="flex flex-col space-y-4 h-full ">
+        <div>
+          <h1 className="text-2xl font-urbanist-semibold p-4">TBA Platform</h1>
+          {items.map((item, index) => (
+            <Link key={index} href={item.href}>
+              <div className="flex gap-2 items-center p-4 hover:bg-[#f65164] hover:text-white rounded-md hover-scale-on">
+>>>>>>> f868de1 (index-fund initial commit)
                 <span>{item.icon}</span>
                 <span>{item.name}</span>
               </div>
@@ -48,14 +69,22 @@ const Sidebar = () => {
       </div>
       <div className="border-t border-gray-600 pt-2 justify-self-end flex flex-col space-y-4">
         <Link href="/settings">
+<<<<<<< HEAD
           <div className="flex gap-2 items-center py-2">
+=======
+          <div className="flex gap-2 items-center p-4 hover:bg-[#f65164] hover:text-white rounded-md hover-scale-on">
+>>>>>>> f868de1 (index-fund initial commit)
             <span>
               <Settings />
             </span>
             <span>Settings</span>
           </div>
         </Link>
+<<<<<<< HEAD
         <p>
+=======
+        <p className="px-4">
+>>>>>>> f868de1 (index-fund initial commit)
           <w3m-button />
           {isConnected && <w3m-network-button />}
         </p>

@@ -11,11 +11,21 @@ import { ContractProvider } from "@/lending/index";
 import NavBar from "@/components/navbar";
 import Sidebar from "@/components/sidebar";
 
+<<<<<<< HEAD
 export const metadata: Metadata = {
   title: "Quranium Node Sell",
   description: "Quranium Node Sell",
 };
 
+=======
+
+export const metadata: Metadata = {
+  title: "QNFT-Wallet",
+  description: "Quranium NFT Wallet",
+};
+
+
+>>>>>>> f868de1 (index-fund initial commit)
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -31,7 +41,11 @@ export default async function RootLayout({
             <div className="flex flex-row w-full gap-4">
               <Sidebar />
               {children}
+<<<<<<< HEAD
             </div>
+=======
+              </div>
+>>>>>>> f868de1 (index-fund initial commit)
           </ContractProvider>
         </ContextProvider>
       </body>
