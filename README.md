@@ -1,68 +1,23 @@
-# Contributing
+# All features
+1. Create TBA
+2. Multi Chain support
+3. Funding TBA Wallet
+4. Lending protocol using Aave
+5. Index funds
+   
+# NFT Contract (Not verified):
+https://sepolia.etherscan.io/address/0xe4d54752B3c6786851c2F8336743367458835c5C
 
-1. Fork the repository. (See the button on top left)
-2. Clone the forked repository on your machine
-3. To run the Frontend run the following commands
-```
-npm install
-```
+# Demo Videos:
 
-followed by 
+Creating TBA, Multichain, funding wallet, fetching balance, and Trade page: https://www.loom.com/share/11d69e8651c349d48e6bee7332ec6337?sid=66c5fb9f-bcd7-488b-a690-f93fac86a110
 
-```
-npm run dev
-```
+Lending: https://drive.google.com/file/d/1NAgTwzAXniorJ8woRI9smj4tmiFxMJ92/view?usp=sharing
 
-Now this will start frontend code localhost:3000
+Index Funds: https://drive.google.com/file/d/11Oy7PRYzMbjNVPaLJ8zQKmn98f6gB0Wm/view
 
-4. To make contributions create your own branch with your name
-5. Add all the changes by the using the command
+# Important Points:
 
-   ```
-   gid add .
-   ```
-
-   followed by
-
-   ```
-   git commit -m "your commit message"
-   ```
-
-   lastly,
-```
-   git push -u origin "your branch name here"
-```
-
-# Project Setup Guide
-
-## Installation
-
-To install dependencies while avoiding conflicts, run:
-```bash
-npm i --legacy-peer-deps
-```
-
-## Running the Proxy Server
-
-To resolve CORS issues, start the proxy server:
-
-1. Navigate to the proxy directory:
-```bash
-cd proxy
-```
-
-2. Start the server:
-```bash
-node server.js
-```
-
-## Notes
-- The `--legacy-peer-deps` flag is used to bypass dependency conflicts
-- The proxy server must be running to handle CORS (Cross-Origin Resource Sharing) requests properly
-- Make sure all dependencies are installed before starting the proxy server
-
-## Issues
-If you encounter any problems, please ensure:
-- Node.js is installed on your system
-- You're in the correct directory when running commands
-- All required dependencies are listed in package.json
+1. As TBA creation, multichain, funding wallet, and fetching balance functionalities have been integrated using ERC-6551 SDK (https://github.com/tokenbound/sdk) so there is no separate contract address for it.
+2. Lending functionality is also integrated using Aave SDK (https://github.com/aave/aave-utilities).
+3. Index funds implemented using Binance API (https://api.binance.com/api/v3).
