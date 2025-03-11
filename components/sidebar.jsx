@@ -14,11 +14,13 @@ import {
   Leaf,
   ChartAreaIcon,
   ArrowLeftRight,
+  Users,
 } from "lucide-react"; // Import valid icons
 import Link from "next/link";
 
 const items = [
   { name: "Home", icon: <House />, href: "/" },
+  { name: "MultiSig", icon: <Users size={20} />, href: "/Multisignature" }, 
   { name: "Assets", icon: <BriefcaseBusiness />, href: "/assets" },
   { name: "NFTs", icon: <Image />, href: "/nfts" },
   { name: "Lending", icon: <Banknote />, href: "/lending" },

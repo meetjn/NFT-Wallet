@@ -10,6 +10,7 @@ import ContextProvider from "@/context";
 import { ContractProvider } from "@/lending/index";
 import NavBar from "@/components/navbar";
 import Sidebar from "@/components/sidebar";
+import { Web3Provider } from "@/context/Web3Context";
 
 export const metadata: Metadata = {
   title: "Quranium Node Sell",
@@ -26,14 +27,16 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ContextProvider cookies={cookies}>
-          <ContractProvider>
-            <div className="flex flex-row w-full gap-4">
-              <Sidebar />
-              {children}
-            </div>
-          </ContractProvider>
-        </ContextProvider>
+        <Web3Provider>
+          <ContextProvider cookies={cookies}>
+            <ContractProvider>
+              <div className="flex flex-row w-full gap-4">
+                <Sidebar />
+                {children}
+              </div>
+            </ContractProvider>
+          </ContextProvider>
+        </Web3Provider>
       </body>
     </html>
   );
