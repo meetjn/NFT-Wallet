@@ -1,0 +1,38 @@
+.index-fund-list {
+    padding: 20px;
+  }
+  
+  .funds-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  
+  .fund-card {
+    background: #f5f5f5;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .fund-card h2 {
+    margin-bottom: 10px;
+  }
+  
+  .fund-details {
+    margin-top: 10px;
+  }
+  
+  .view-details-button {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: #0070f3;
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+  }
+  
+  .view-details-button:hover {
+    background: #005bb5;
+  }

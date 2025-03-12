@@ -16,11 +16,15 @@ enum TransactionType {
   ERC20 = "ERC20",
 }
 
-interface TransactionDetails {
-  type: "ETH" | "ERC20" | "";
+export interface TransactionDetails {
+  type: "ETH" | "ERC20" | "SWAP" | "";
   amount: string;
   to: string;
   tokenAddress?: string;
+  inputTokenAddress?: string;
+  outputTokenAddress?: string;
+  swapAmount?: string;
+  slippage?: string;
 }
 
 export default function Home() {

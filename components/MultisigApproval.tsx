@@ -9,6 +9,10 @@ interface TransactionDetails {
   amount: string;
   to: string;
   tokenAddress?: string;
+  inputTokenAddress?: string;
+  outputTokenAddress?: string;
+  swapAmount?: string;
+  slippage?: string;
 }
 
 interface Signer {

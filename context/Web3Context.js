@@ -69,9 +69,18 @@ export function Web3Provider({ children }) {
         const storedWalletAddress = localStorage.getItem("multisigWalletAddress");
         const storedSigners = localStorage.getItem("multisigSigners");
         const storedRequiredSignatures = localStorage.getItem("multisigRequiredSignatures");
-        
+        let signer = null;
         if (storedWalletAddress && storedSigners && storedRequiredSignatures) {
-          const signer = provider.getSigner().catch(() => null);
+        try {
+  signer = provider.getSigner();
+} catch (error) {
+  // Handle error if needed; signer will remain null
+}
+
+// Only set the contract if we can get a signer
+if (signer) {
+  // Your logic using the signer
+}
           
           // Only set the contract if we can get a signer
           if (signer) {

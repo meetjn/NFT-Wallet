@@ -6,6 +6,8 @@ import { sepolia } from "viem/chains";
 import { useAccount } from "wagmi";
 import { CurrencyAmount, TradeType, Percent, Token } from "@uniswap/sdk-core";
 import { Pool, Route, Trade, SwapRouter } from "@uniswap/v3-sdk";
+import { Web3Provider } from "@/context/Web3Context";
+import TransactionApproval from "./MultisigApproval";
 
 export default function TokenSwapInterface() {
   const { isConnected, address } = useAccount();
@@ -15,6 +17,23 @@ export default function TokenSwapInterface() {
   const [outputTokenAddress, setOutputTokenAddress] = useState("");
   const [swapAmount, setSwapAmount] = useState("");
   const [slippage, setSlippage] = useState("1.0");
+  const [showTransactionTypeModal, setShowTransactionTypeModal] =
+    useState(false);
+  const [pendingSwapDetails, setPendingSwapDetails] = useState<{
+    tbaAddress: string;
+    inputTokenAddress: string;
+    outputTokenAddress: string;
+    swapAmount: string;
+    slippage: string;
+  }>({
+    tbaAddress: "",
+    inputTokenAddress: "",
+    outputTokenAddress: "",
+    swapAmount: "",
+    slippage: "",
+  });
+  const [showMultisigApproval, setShowMultisigApproval] = useState(false);
+  const [isMultiSigApproved, setIsMultiSigApproved] = useState(false);
 
   useEffect(() => {
     if (isConnected) {
@@ -37,7 +56,16 @@ export default function TokenSwapInterface() {
     ) {
       return alert("Please fill out all fields.");
     }
-
+    setPendingSwapDetails({
+      tbaAddress,
+      inputTokenAddress,
+      outputTokenAddress,
+      swapAmount,
+      slippage,
+    });
+    setShowTransactionTypeModal(true);
+  };
+  const executeDirectSwap = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
 
@@ -98,6 +126,15 @@ export default function TokenSwapInterface() {
     } catch (error) {
       console.error("Swap failed:", error);
       alert("Swap failed. Check the console for more details.");
+    }
+  };
+
+  const handleTransactionTypeSelect = (type: "normal" | "multisig") => {
+    setShowTransactionTypeModal(false);
+    if (type === "normal") {
+      executeDirectSwap();
+    } else if (type === "multisig") {
+      setShowMultisigApproval(true);
     }
   };
 
@@ -174,6 +211,58 @@ export default function TokenSwapInterface() {
       >
         Perform Swap
       </button>
+      {/* Transaction Type Modal */}
+      {showTransactionTypeModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg max-w-md w-full">
+            <h2 className="text-2xl font-bold mb-4">Choose Transaction Type</h2>
+            <div className="space-y-4">
+              <button
+                onClick={() => handleTransactionTypeSelect("normal")}
+                className="w-full px-6 py-3 bg-[#CE192D] text-white rounded-lg hover:bg-red-600 transition-all"
+              >
+                Normal Transaction
+              </button>
+              <button
+                onClick={() => handleTransactionTypeSelect("multisig")}
+                className="w-full px-6 py-3 bg-[#CE192D] text-white rounded-lg hover:bg-red-600 transition-all"
+              >
+                Multisig Transaction
+              </button>
+            </div>
+            <button
+              onClick={() => setShowTransactionTypeModal(false)}
+              className="mt-4 px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-all"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Multisig Approval Modal */}
+      {showMultisigApproval && (
+        <Web3Provider>
+          <TransactionApproval
+            tbaAddress={pendingSwapDetails.tbaAddress}
+            transactionDetails={{
+              type: "SWAP",
+              // Provide dummy values for 'amount' and 'to' since they're not needed for swaps
+              amount: "",
+              to: "",
+              inputTokenAddress: pendingSwapDetails.inputTokenAddress,
+              outputTokenAddress: pendingSwapDetails.outputTokenAddress,
+              swapAmount: pendingSwapDetails.swapAmount,
+              slippage: pendingSwapDetails.slippage,
+            }}
+            onApproval={() => {
+              setShowMultisigApproval(false);
+              executeDirectSwap();
+            }}
+            onComplete={() => {}}
+          />
+        </Web3Provider>
+      )}
     </div>
   );
 }
