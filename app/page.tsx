@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import { useAccount } from "wagmi";
+import { useAccount, useWalletClient } from "wagmi";
 import { TokenboundClient } from "@tokenbound/sdk";
 import { sepolia } from "viem/chains";
 import { Web3Provider } from "@/context/Web3Context";
@@ -10,6 +10,11 @@ import { Coins } from "lucide-react";
 import AddFundsModal from "@/components/AddFundsModal";
 import MultiSigWalletCreator from "@/components/MultiSignature"; // Ensure this is correct
 import TransactionApproval from "@/components/MultisigApproval";
+
+// ===== Added multi-chain imports =====
+import { SUPPORTED_CHAINS, SupportedChain } from "@/utils/chains";
+import { createTBA } from "@/components/createTBA";
+import { error } from "console";
 
 enum TransactionType {
   ETH = "ETH",
@@ -56,6 +61,11 @@ export default function Home() {
     });
   const [showTransactionTypeModal, setShowTransactionTypeModal] =
     useState(false);
+
+  // ===== Added multi-chain state and wallet client =====
+  const [selectedChain, setSelectedChain] = useState<SupportedChain>("sepolia");
+  const [isDeploying, setIsDeploying] = useState(false);
+  const { data: walletClient } = useWalletClient();
 
   useEffect(() => {
     if (isConnected) {
@@ -168,6 +178,46 @@ export default function Home() {
       } catch (error) {
         console.error("Error creating Token Bound Account:", error);
       }
+    }
+  };
+
+  // ===== Added multi-chain deploy function =====
+  const handleCreateTBA = async () => {
+    if (!isConnected || !walletClient) {
+      console.error("No wallet client available.");
+      return;
+    }
+    setIsDeploying(true);
+    try {
+      if (!SUPPORTED_CHAINS[selectedChain]) {
+        throw new Error("Invalid chain selection");
+      }
+      const expectedChainId = SUPPORTED_CHAINS[selectedChain].id;
+      // Switch network if necessary
+      if (window.ethereum && window.ethereum.request) {
+        const currentChainId = parseInt(window.ethereum.chainId, 16);
+        if (currentChainId !== expectedChainId) {
+          console.log(
+            `Switching network to ${SUPPORTED_CHAINS[selectedChain].name}...`
+          );
+          await window.ethereum.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: `0x${expectedChainId.toString(16)}` }],
+          });
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
+      }
+      const newTbaAddress = await createTBA(selectedChain, walletClient);
+      console.log(
+        `TBA deployed successfully on ${selectedChain}: ${newTbaAddress}`
+      );
+      setTbaAddress(newTbaAddress);
+      setCurrentTbaAddress(newTbaAddress);
+      fetchExistingTbas();
+    } catch (error: any) {
+      console.error("Error creating TBA:", error);
+    } finally {
+      setIsDeploying(false);
     }
   };
 
@@ -381,6 +431,34 @@ export default function Home() {
         )}
       </div>
 
+      {/* ===== Added Multi-Chain Deployment UI Section ===== */}
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold">Deploy on Multiple Chains</h2>
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Select Network
+          </label>
+          <select
+            value={selectedChain}
+            onChange={(e) => setSelectedChain(e.target.value as SupportedChain)}
+            className="w-full p-2 border rounded"
+          >
+            {Object.keys(SUPPORTED_CHAINS).map((chainKey) => (
+              <option key={chainKey} value={chainKey}>
+                {SUPPORTED_CHAINS[chainKey as SupportedChain].name}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={handleCreateTBA}
+            disabled={isDeploying || !isConnected}
+            className="mt-4 w-full bg-red-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:bg-gray-400"
+          >
+            {isDeploying ? "Deploying..." : "Deploy TBA on Selected Chain"}
+          </button>
+        </div>
+      </div>
+
       <div className="flex flex-col gap-4">
         <h2 className="text-lg font-medium">
           Enter Token Bound Account (TBA) Address
@@ -444,6 +522,96 @@ export default function Home() {
         </div>
       </div>
 
+      <div>
+        <h2 className="text-2xl font-urbanist-semibold">
+          Deploy on Multiple Chains
+        </h2>
+        <div className="mt-4">
+          <div className="my-8">
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-2xl font-bold mb-4">
+                Token Bound Account Manager
+              </h2>
+
+              {/* Chain Selector */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Network
+                </label>
+                <select
+                  value={selectedChain}
+                  onChange={(e) =>
+                    setSelectedChain(e.target.value as SupportedChain)
+                  }
+                  className="w-full p-2 border rounded"
+                >
+                  {Object.keys(SUPPORTED_CHAINS).map((chain) => (
+                    <option key={chain} value={chain}>
+                      {SUPPORTED_CHAINS[chain as SupportedChain].name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* NFT Info */}
+              <div className="mb-6">
+                <h3 className="text-lg font-medium mb-2">NFT Details</h3>
+                <p>Contract: 0xe4d54752B3c6786851c2F8336743367458835c5C</p>
+                <p>Token ID: 1</p>
+              </div>
+
+              {/* TBA Address Display */}
+              {tbaAddress && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-medium mb-2">TBA Address</h3>
+                  <p className="font-mono break-all">{tbaAddress}</p>
+                </div>
+              )}
+
+              {/* Deploy Button */}
+              <button
+                onClick={handleCreateTBA}
+                disabled={isDeploying || !isConnected}
+                className="w-full bg-red-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:bg-gray-400 mb-4"
+              >
+                {isDeploying ? "Deploying..." : "Deploy TBA"}
+              </button>
+
+              {/* Transfer Section  
+          // Currently transfer fund section is disabled temporarily, will be enabled in future.
+          {tbaAddress && (
+            <div className="mt-6">
+              <h3 className="text-lg font-medium mb-4">Transfer Funds</h3>
+              <div className="space-y-4">
+                <input
+                  type="text"
+                  placeholder="Amount"
+                  value={transferAmount}
+                  onChange={(e) => setTransferAmount(e.target.value)}
+                  className="w-full p-2 border rounded"
+                />
+                <input
+                  type="text"
+                  placeholder="Recipient Address"
+                  value={recipientAddress}
+                  onChange={(e) => setRecipientAddress(e.target.value)}
+                  className="w-full p-2 border rounded"
+                />
+                <button
+                  onClick={handleTransfer}
+                  className="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700"
+                >
+                  Transfer
+                </button>
+              </div>
+            </div>
+          )}
+            */}
+            </div>
+          </div>
+        </div>
+        <div className="mt-4"></div>
+      </div>
       {showMultisigCreator && (
         <Web3Provider key="multisig-creator">
           <MultiSigWalletCreator onComplete={handleMultisigCreatorComplete} />
@@ -467,13 +635,16 @@ export default function Home() {
 
       <AddFundsModal
         isOpen={isEthModalOpen}
-        onClose={() => setIsEthModalOpen(false)}
+        onClose={() => {
+          setIsEthModalOpen(false);
+        }}
         manualTbaAddress={manualTbaAddress}
         fundingAmount={fundingAmount}
         setFundingAmount={setFundingAmount}
         onFund={fundWithEth}
         fundingType="ETH"
       />
+
       <AddFundsModal
         isOpen={isErc20ModalOpen}
         onClose={() => setIsErc20ModalOpen(false)}

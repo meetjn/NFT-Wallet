@@ -21,14 +21,14 @@ import Link from "next/link";
 const items = [
   { name: "Home", icon: <House />, href: "/" },
   { name: "MultiSig", icon: <Users size={20} />, href: "/Multisignature" }, 
-  { name: "Assets", icon: <BriefcaseBusiness />, href: "/assets" },
+  //{ name: "Assets", icon: <BriefcaseBusiness />, href: "/assets" },
   { name: "NFTs", icon: <Image />, href: "/nfts" },
   { name: "Lending", icon: <Banknote />, href: "/lending" },
-  { name: "Staking", icon: <BadgeDollarSign />, href: "/staking" },
-  { name: "Farming", icon: <Leaf />, href: "/farming" },
-  { name: "Crypto ETFs", icon: <BarChart />, href: "/etfs" },
-  { name: "Index Funds", icon: <PieChart />, href: "/index" },
-  { name: "Transactions", icon: <ArrowUpDown />, href: "/transactions" },
+ // { name: "Staking", icon: <BadgeDollarSign />, href: "/staking" },
+ // { name: "Farming", icon: <Leaf />, href: "/farming" },
+  //{ name: "Crypto ETFs", icon: <BarChart />, href: "/etfs" },
+  { name: "Index Funds", icon: <PieChart />, href: "/index-fund" },
+  //{ name: "Transactions", icon: <ArrowUpDown />, href: "/transactions" },
   { name: "Trading", icon: <ChartAreaIcon />, href: "/trading" },
   {name : "Swap", icon: <ArrowLeftRight />, href: "/swap"}
 ];
