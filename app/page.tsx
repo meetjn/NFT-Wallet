@@ -53,20 +53,18 @@ export default function Home() {
   const { data: walletClient } = useWalletClient(); 
 
 
+  // Fetch TBA address when connected or chain changes
   useEffect(() => {
     if (!isConnected || !address) return;
-  
+
     const fetchTBA = async () => {
       try {
         console.log("Fetching TBA Address for:", selectedChain);
-  
-        const tbaAddress = getTBAAddress(selectedChain);
+        const tbaAddress = getTBAAddress(selectedChain, currentTokenId.toString());
         console.log("Fetched TBA Address:", tbaAddress);
-  
+
         if (tbaAddress) {
           setTbaAddress(tbaAddress);
-  
-          // Store TBA in existing list if not already present
           setExistingTbas((prevTbas) =>
             prevTbas.includes(tbaAddress) ? prevTbas : [...prevTbas, tbaAddress]
           );
@@ -79,65 +77,52 @@ export default function Home() {
         setError("Failed to fetch TBA address.");
       }
     };
-  
+
     fetchTBA();
-  }, [isConnected, address, selectedChain]);
+  }, [isConnected, address, selectedChain, currentTokenId]);
   
-  
 
-// useEffect(() => {
-//   if (!isConnected) return;
-// 
-//   const fetchTBA = async () => {
-//     try {
-//       console.log("Fetching TBA Address for:", selectedChain);
-//       const address = getTBAAddress(selectedChain);
-//       setTbaAddress(address);
-//     } catch (err) {
-//       console.error("Error fetching TBA:", err);
-//       setError("Failed to fetch TBA address.");
-//     }
-//   };
-// 
-//   fetchTBA();
-// }, [isConnected, selectedChain]);
-
-const handleCreateTBA = async () => {
-  if (!isConnected || !walletClient) {
-    console.error("No wallet client available.");
-    setError("Please connect your wallet first.");
-    return;
-  }
-
-  setIsDeploying(true);
-  setError(null);
-
-  try {
-    if (!SUPPORTED_CHAINS[selectedChain]) {
-      throw new Error("Invalid chain selection");
+  const handleCreateTBA = async () => {
+    if (!isConnected || !walletClient) {
+      console.error("No wallet client available.");
+      setError("Please connect your wallet first.");
+      return;
     }
-    const expectedChainId = SUPPORTED_CHAINS[selectedChain].id;
 
-    // Using MetaMask directly instead of `switchChain()`
-    if (chain?.id !== expectedChainId) {
-      console.log(`Switching network to ${SUPPORTED_CHAINS[selectedChain].name}...`);
-      await window.ethereum.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: `0x${expectedChainId.toString(16)}` }],
-      });
+    setIsDeploying(true);
+    setError(null);
 
-      await new Promise((resolve) => setTimeout(resolve, 500));
+    try {
+      if (!SUPPORTED_CHAINS[selectedChain]) {
+        throw new Error("Invalid chain selection");
+      }
+      const expectedChainId = SUPPORTED_CHAINS[selectedChain].id;
+
+      // Switch network if necessary
+      if (chain?.id !== expectedChainId) {
+        console.log(`Switching network to ${SUPPORTED_CHAINS[selectedChain].name}...`);
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: `0x${expectedChainId.toString(16)}` }],
+        });
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+
+      // Create TBA for the current tokenId
+      const newTbaAddress = await createTBA(selectedChain, walletClient, currentTokenId.toString());
+      console.log(`TBA deployed successfully on ${selectedChain}: ${newTbaAddress}`);
+      setTbaAddress(newTbaAddress);
+      setExistingTbas((prev) =>
+        prev.includes(newTbaAddress) ? prev : [...prev, newTbaAddress]
+      );
+      setCurrentTokenId((prev) => prev + 1); // Increment only on success
+    } catch (error: any) {
+      console.error("Error creating TBA:", error);
+      setError(error.message || "Failed to create TBA.");
+    } finally {
+      setIsDeploying(false);
     }
-    const newTbaAddress = await createTBA(selectedChain, walletClient);
-    console.log(`TBA deployed successfully on ${selectedChain}: ${newTbaAddress}`);
-    setTbaAddress(newTbaAddress);
-  } catch (error: any) {
-    console.error("Error creating TBA:", error);
-    setError(error.message || "Failed to create TBA.");
-  } finally {
-    setIsDeploying(false);
-  }
-};
+  };
 
   const handleTransfer = async () => {
     if (!isConnected || !tbaAddress) {

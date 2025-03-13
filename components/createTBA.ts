@@ -1,26 +1,28 @@
 import { SUPPORTED_CHAINS, SupportedChain } from "../utils/chains";
 import { TokenboundClient } from "@tokenbound/sdk";
-import { WalletClient } from "viem";
+import { WalletClient, createPublicClient, http } from "viem";
 import { Signer, providers } from "ethers";
+import { sepolia } from "viem/chains";
+import NftAbi from "./ABI/MyNFT.json";
 
-// Constant
-const NFT_CONTRACT = "0xe4d54752B3c6786851c2F8336743367458835c5C";
-  //"0x1894CA318597538418607bFB3933f44b8F2B6d91", // NFT contract address of avax-fuji-chain
-const TOKEN_ID = "1";
+const NFT_CONTRACT = "0xc7186EcDC29c8047C095C9170e67d96D3c99e317";
 const FIXED_SALT = 7;
 const NFT_NATIVE_CHAIN_ID = 11155111;
 
+const NFT_ABI = NftAbi as any;
+
 export async function createTBA(
   selectedChain: SupportedChain,
-  walletClient: WalletClient | null
+  walletClient: WalletClient | null,
+  tokenId: string
 ): Promise<string> {
   if (!walletClient) {
     throw new Error("No wallet client found. Ensure your wallet is connected.");
   }
 
-  await new Promise((resolve) => setTimeout(resolve, 500)); 
+  await new Promise((resolve) => setTimeout(resolve, 500));
   const provider = new providers.Web3Provider(window.ethereum);
-  await provider.getNetwork(); 
+  await provider.getNetwork();
   const signer: Signer = provider.getSigner();
 
   if (!signer) {
@@ -39,6 +41,26 @@ export async function createTBA(
     throw new Error(`Signer is on the wrong network. Expected: ${id}, Got: ${detectedNetwork.chainId}`);
   }
 
+  const publicClient = createPublicClient({
+    chain: sepolia,
+    transport: http("https://eth-sepolia.g.alchemy.com/v2/EIOdaYqWdQmC604QqW6iNERdWcTaqfQi"), // Replace with your Infura key
+  });
+
+  try {
+    const owner = await publicClient.readContract({
+      address: NFT_CONTRACT,
+      abi: NFT_ABI,
+      functionName: "ownerOf",
+      args: [BigInt(tokenId)],
+    });
+
+    if (owner === "0x0000000000000000000000000000000000000000") {
+      throw new Error(`NFT with tokenId ${tokenId} does not exist`);
+    }
+  } catch (error) {
+    throw new Error(`NFT with tokenId ${tokenId} does not exist`);
+  }
+
   const tokenboundClient = new TokenboundClient({
     signer,
     chain: chainData,
@@ -47,43 +69,38 @@ export async function createTBA(
     implementationAddress: accountImplementation,
   });
 
-  //  Compute the deterministic TBA address
   const tbaAddress = await tokenboundClient.getAccount({
-    tokenContract: "0xe4d54752B3c6786851c2F8336743367458835c5C",
-    tokenId: "1",
+    tokenContract: NFT_CONTRACT,
+    tokenId,
     salt: FIXED_SALT,
     chainId: NFT_NATIVE_CHAIN_ID,
   });
-  console.log(`Computed TBA address on ${selectedChain}:`, tbaAddress);
+  console.log(`Computed TBA address on ${selectedChain} for tokenId ${tokenId}:`, tbaAddress);
 
-  // Check if the account is already deployed
   const isDeployed = await tokenboundClient.checkAccountDeployment({
     accountAddress: tbaAddress,
   });
 
   if (isDeployed) {
-    console.log("TBA is already deployed at:", tbaAddress);
+    console.log(`TBA is already deployed at ${tbaAddress} for tokenId ${tokenId}`);
     return tbaAddress;
   }
 
-  //  Deploy the account
   const { txHash } = await tokenboundClient.createAccount({
-    tokenContract: "0xe4d54752B3c6786851c2F8336743367458835c5C",
-    tokenId: "1",
+    tokenContract: NFT_CONTRACT,
+    tokenId,
     salt: FIXED_SALT,
     chainId: NFT_NATIVE_CHAIN_ID,
   });
 
   console.log("Deploy transaction sent. Waiting for confirmation...", txHash);
-
-  // Wait for the transaction to be confirmed on the correct network
   await provider.waitForTransaction(txHash);
-  console.log("TBA deployed successfully at:", tbaAddress);
+  console.log(`TBA deployed successfully at ${tbaAddress} for tokenId ${tokenId}`);
 
   return tbaAddress;
 }
 
-export function getTBAAddress(selectedChain: SupportedChain): string {
+export function getTBAAddress(selectedChain: SupportedChain, tokenId: string): string {
   const { registryAddress, accountImplementation, id, chain: chainData } =
     SUPPORTED_CHAINS[selectedChain];
 
@@ -96,10 +113,8 @@ export function getTBAAddress(selectedChain: SupportedChain): string {
 
   return tokenboundClient.getAccount({
     tokenContract: NFT_CONTRACT,
-    tokenId: TOKEN_ID,
+    tokenId,
     salt: FIXED_SALT,
     chainId: NFT_NATIVE_CHAIN_ID,
   });
 }
-
- 
