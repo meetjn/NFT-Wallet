@@ -2,20 +2,16 @@ import { createWalletClient, createPublicClient, http, custom, type WalletClient
 import { SUPPORTED_CHAINS, SupportedChain } from "../utils/chains";
 import { TokenboundClient } from "@tokenbound/sdk";
 
-
 export async function getClients(chain: SupportedChain) {
-   
   if (!window.ethereum) {
     throw new Error("MetaMask is not installed. Please install MetaMask and try again.");
   }
 
-  const { id, registryAddress, accountImplementation, chain:chainData } = SUPPORTED_CHAINS[chain];
-  
+  const { id, registryAddress, accountImplementation, chain: chainData } = SUPPORTED_CHAINS[chain];
 
   if (!chainData) {
     throw new Error(`Chain configuration not found for ${chain}`);
   }
-
 
   const chainConfig = chainData as Chain;
 
@@ -51,4 +47,3 @@ export async function getClients(chain: SupportedChain) {
 
   return { publicClient, walletClient, tokenboundClient };
 }
-
