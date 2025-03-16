@@ -431,34 +431,6 @@ export default function Home() {
         )}
       </div>
 
-      {/* ===== Added Multi-Chain Deployment UI Section ===== */}
-      <div className="mt-8">
-        <h2 className="text-2xl font-bold">Deploy on Multiple Chains</h2>
-        <div className="mt-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Select Network
-          </label>
-          <select
-            value={selectedChain}
-            onChange={(e) => setSelectedChain(e.target.value as SupportedChain)}
-            className="w-full p-2 border rounded"
-          >
-            {Object.keys(SUPPORTED_CHAINS).map((chainKey) => (
-              <option key={chainKey} value={chainKey}>
-                {SUPPORTED_CHAINS[chainKey as SupportedChain].name}
-              </option>
-            ))}
-          </select>
-          <button
-            onClick={handleCreateTBA}
-            disabled={isDeploying || !isConnected}
-            className="mt-4 w-full bg-red-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:bg-gray-400"
-          >
-            {isDeploying ? "Deploying..." : "Deploy TBA on Selected Chain"}
-          </button>
-        </div>
-      </div>
-
       <div className="flex flex-col gap-4">
         <h2 className="text-lg font-medium">
           Enter Token Bound Account (TBA) Address
