@@ -1,51 +1,34 @@
-const { ethers } = require("hardhat");
+const hre = require("hardhat");
 
 async function main() {
-  try {
-    //list of signers (owners)
-    const [admin1, admin2, admin3] = await ethers.getSigners();
-    
-    console.log("Deploying with account:", admin1.address);
-    console.log("Account balance:", (await admin1.getBalance()).toString());
+  // Get the deployer account from Hardhat's local accounts
+  const [deployer] = await hre.ethers.getSigners();
+  console.log("Deploying contracts with the account:", deployer.address);
 
-    const MultisigFactory = await ethers.getContractFactory("MultiSigWallet");
+  const balance = await deployer.getBalance();
+  console.log("Account balance:", hre.ethers.utils.formatEther(balance));
 
-    const owners = [admin1.address, admin2.address, admin3.address];
-    const threshold = 2;
+  // Define owners and threshold. These could be hard-coded or come from user input.
+  const owners = [
+    deployer.address,
+    "0xAbC123...SecondOwner",   // Replace with an actual local account address if needed
+    "0xDef456...ThirdOwner"      // Replace with an actual local account address if needed
+  ];
+  const threshold = 2; // Example: require 2 approvals
 
-    console.log("Deploying MultiSig Wallet contract...");
-    console.log("Owners:", owners);
-    console.log("Threshold:", threshold);
+  // Get the contract factory for your MultiSigWallet
+  const MultiSigWallet = await hre.ethers.getContractFactory("MultiSigWallet");
 
-    const multisig = await MultisigFactory.deploy(owners, threshold);
-    
-    // Waitin for deployment to complete
-    await multisig.deployed();
-    
-    console.log("\nDeployment successful!");
-    console.log("MultiSig Wallet address:", multisig.address);
-    console.log("Deployed by:", admin1.address);
+  // Deploy the contract
+  const multisig = await MultiSigWallet.deploy(owners, threshold);
+  await multisig.deployed();
 
-    // Additional verification
-    const contractThreshold = await multisig.threshold();
-    console.log("\nVerifying contract state:");
-    console.log("Configured threshold:", contractThreshold.toString());
-    
-    // Verifyin 
-    const isOwner = await multisig.isOwner(owners[0]);
-    console.log("First owner verification:", isOwner);
-
-  } catch (error) {
-    console.error("\nDeployment failed!");
-    console.error("Error:", error.message);
-    process.exit(1);
-  }
+  console.log("MultiSigWallet deployed to:", multisig.address);
 }
 
-// Runnin the script
 main()
   .then(() => process.exit(0))
   .catch((error) => {
-    console.error("Unhandled error:", error);
+    console.error(error);
     process.exit(1);
   });
