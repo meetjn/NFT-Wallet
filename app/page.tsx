@@ -17,10 +17,6 @@ import { transferFromTBA } from "@/components/transferETH";
 import { useWalletClient } from "wagmi";
 import { injected } from "wagmi";
 
-
-
-
-
 import router from "next/router";
 import Sidebar from "@/components/sidebar";
 
@@ -50,22 +46,21 @@ export default function Home() {
   //const [deploymentStatus, setDeploymentStatus] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
   const { chain } = useAccount(); // Get the connected chain
   //const { switchChain } = useSwitchChain();
-  const { data: walletClient } = useWalletClient(); 
-
+  const { data: walletClient } = useWalletClient();
 
   useEffect(() => {
     if (!isConnected || !address) return;
-  
+
     const fetchTBA = async () => {
       try {
         console.log("Fetching TBA Address for:", selectedChain);
-  
+
         const tbaAddress = getTBAAddress(selectedChain);
         console.log("Fetched TBA Address:", tbaAddress);
-  
+
         if (tbaAddress) {
           setTbaAddress(tbaAddress);
-  
+
           // Store TBA in existing list if not already present
           setExistingTbas((prevTbas) =>
             prevTbas.includes(tbaAddress) ? prevTbas : [...prevTbas, tbaAddress]
@@ -79,65 +74,67 @@ export default function Home() {
         setError("Failed to fetch TBA address.");
       }
     };
-  
+
     fetchTBA();
   }, [isConnected, address, selectedChain]);
-  
-  
 
-// useEffect(() => {
-//   if (!isConnected) return;
-// 
-//   const fetchTBA = async () => {
-//     try {
-//       console.log("Fetching TBA Address for:", selectedChain);
-//       const address = getTBAAddress(selectedChain);
-//       setTbaAddress(address);
-//     } catch (err) {
-//       console.error("Error fetching TBA:", err);
-//       setError("Failed to fetch TBA address.");
-//     }
-//   };
-// 
-//   fetchTBA();
-// }, [isConnected, selectedChain]);
+  // useEffect(() => {
+  //   if (!isConnected) return;
+  //
+  //   const fetchTBA = async () => {
+  //     try {
+  //       console.log("Fetching TBA Address for:", selectedChain);
+  //       const address = getTBAAddress(selectedChain);
+  //       setTbaAddress(address);
+  //     } catch (err) {
+  //       console.error("Error fetching TBA:", err);
+  //       setError("Failed to fetch TBA address.");
+  //     }
+  //   };
+  //
+  //   fetchTBA();
+  // }, [isConnected, selectedChain]);
 
-const handleCreateTBA = async () => {
-  if (!isConnected || !walletClient) {
-    console.error("No wallet client available.");
-    setError("Please connect your wallet first.");
-    return;
-  }
-
-  setIsDeploying(true);
-  setError(null);
-
-  try {
-    if (!SUPPORTED_CHAINS[selectedChain]) {
-      throw new Error("Invalid chain selection");
+  const handleCreateTBA = async () => {
+    if (!isConnected || !walletClient) {
+      console.error("No wallet client available.");
+      setError("Please connect your wallet first.");
+      return;
     }
-    const expectedChainId = SUPPORTED_CHAINS[selectedChain].id;
 
-    // Using MetaMask directly instead of `switchChain()`
-    if (chain?.id !== expectedChainId) {
-      console.log(`Switching network to ${SUPPORTED_CHAINS[selectedChain].name}...`);
-      await window.ethereum.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: `0x${expectedChainId.toString(16)}` }],
-      });
+    setIsDeploying(true);
+    setError(null);
 
-      await new Promise((resolve) => setTimeout(resolve, 500));
+    try {
+      if (!SUPPORTED_CHAINS[selectedChain]) {
+        throw new Error("Invalid chain selection");
+      }
+      const expectedChainId = SUPPORTED_CHAINS[selectedChain].id;
+
+      // Using MetaMask directly instead of `switchChain()`
+      if (chain?.id !== expectedChainId) {
+        console.log(
+          `Switching network to ${SUPPORTED_CHAINS[selectedChain].name}...`
+        );
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: `0x${expectedChainId.toString(16)}` }],
+        });
+
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+      const newTbaAddress = await createTBA(selectedChain, walletClient);
+      console.log(
+        `TBA deployed successfully on ${selectedChain}: ${newTbaAddress}`
+      );
+      setTbaAddress(newTbaAddress);
+    } catch (error: any) {
+      console.error("Error creating TBA:", error);
+      setError(error.message || "Failed to create TBA.");
+    } finally {
+      setIsDeploying(false);
     }
-    const newTbaAddress = await createTBA(selectedChain, walletClient);
-    console.log(`TBA deployed successfully on ${selectedChain}: ${newTbaAddress}`);
-    setTbaAddress(newTbaAddress);
-  } catch (error: any) {
-    console.error("Error creating TBA:", error);
-    setError(error.message || "Failed to create TBA.");
-  } finally {
-    setIsDeploying(false);
-  }
-};
+  };
 
   const handleTransfer = async () => {
     if (!isConnected || !tbaAddress) {
@@ -146,7 +143,10 @@ const handleCreateTBA = async () => {
     }
 
     try {
-      console.log(`Transferring ${transferAmount} ETH to ${recipientAddress} from TBA:`, tbaAddress);
+      console.log(
+        `Transferring ${transferAmount} ETH to ${recipientAddress} from TBA:`,
+        tbaAddress
+      );
       const txHash = await transferFromTBA(
         selectedChain,
         transferAmount,
@@ -162,7 +162,7 @@ const handleCreateTBA = async () => {
       }
     }
   };
-  
+
   const fetchBalances = async () => {
     if (!manualTbaAddress) return;
     console.log("tba address", manualTbaAddress);
@@ -195,7 +195,6 @@ const handleCreateTBA = async () => {
     fetchBalances();
   }, [manualTbaAddress]);
 
-  
   const fundWithEth = async () => {
     if (!manualTbaAddress) return alert("Please enter a valid TBA address.");
     const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -245,10 +244,11 @@ const handleCreateTBA = async () => {
           {address ? <> {address}</> : <h1>Wallet Not connected</h1>}
         </div>
         <button
-          onClick={handleCreateTBA} disabled={isDeploying}
+          onClick={handleCreateTBA}
+          disabled={isDeploying}
           className="py-3 px-6 bg-[#CE192D] font-urbanist-semibold rounded-lg text-white"
         >
-              {isDeploying ? "Deploying...":"" }
+          {isDeploying ? "Deploying..." : ""}
           Create TBA
         </button>
         {tbaAddress && (
@@ -258,14 +258,14 @@ const handleCreateTBA = async () => {
           </h2>
         )}
       </div>
-         
+
       <div className="flex gap-5 items-center">
         <h3 className="font-urbanist-medium text-lg">Existing TBAs:</h3>
         {existingTbas.length > 0 ? (
           <ul className="list-disc list-inside">
             {existingTbas.map((tba, index) => (
               <li key={index} className="mt-2">
-                {tba} 
+                {tba}
               </li>
             ))}
           </ul>
@@ -337,58 +337,62 @@ const handleCreateTBA = async () => {
         </div>
       </div>
 
-          <div>
-            <h2 className="text-2xl font-urbanist-semibold">Deploy on Multiple Chains</h2>
-            <div className="mt-4">
-            <div className="my-8">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-2xl font-bold mb-4">Token Bound Account Manager</h2>
-          
-          {/* Chain Selector */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select Network
-            </label>
-            <select
-              value={selectedChain}
-              onChange={(e) => setSelectedChain(e.target.value as SupportedChain)}
-              className="w-full p-2 border rounded"
-            >
-              {Object.keys(SUPPORTED_CHAINS).map((chain) => (
-                <option key={chain} value={chain}>
-                  {SUPPORTED_CHAINS[chain as SupportedChain].name}
-                </option>
-              ))}
-            </select>
-          </div>
+      <div>
+        <h2 className="text-2xl font-urbanist-semibold">
+          Deploy on Multiple Chains
+        </h2>
+        <div className="mt-4">
+          <div className="my-8">
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-2xl font-bold mb-4">
+                Token Bound Account Manager
+              </h2>
 
-          {/* NFT Info */}
-          <div className="mb-6">
-            <h3 className="text-lg font-medium mb-2">NFT Details</h3>
-            <p>Contract: 0xe4d54752B3c6786851c2F8336743367458835c5C
-            </p>
-            <p>Token ID: 1</p>
-          </div>
+              {/* Chain Selector */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Network
+                </label>
+                <select
+                  value={selectedChain}
+                  onChange={(e) =>
+                    setSelectedChain(e.target.value as SupportedChain)
+                  }
+                  className="w-full p-2 border rounded"
+                >
+                  {Object.keys(SUPPORTED_CHAINS).map((chain) => (
+                    <option key={chain} value={chain}>
+                      {SUPPORTED_CHAINS[chain as SupportedChain].name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-          {/* TBA Address Display */}
-          {tbaAddress && (
-            <div className="mb-6">
-              <h3 className="text-lg font-medium mb-2">TBA Address</h3>
-              <p className="font-mono break-all">{tbaAddress}</p>
-            </div>
-          )}
+              {/* NFT Info */}
+              <div className="mb-6">
+                <h3 className="text-lg font-medium mb-2">NFT Details</h3>
+                <p>Contract: 0xe4d54752B3c6786851c2F8336743367458835c5C</p>
+                <p>Token ID: 1</p>
+              </div>
 
-          {/* Deploy Button */}
-          <button
-            onClick={handleCreateTBA}
-            disabled={isDeploying || !isConnected}
-            className="w-full bg-red-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:bg-gray-400 mb-4"
-          >
-            {isDeploying ? "Deploying..." : "Deploy TBA"}
-          </button>
+              {/* TBA Address Display */}
+              {tbaAddress && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-medium mb-2">TBA Address</h3>
+                  <p className="font-mono break-all">{tbaAddress}</p>
+                </div>
+              )}
 
-          
-          {/* Transfer Section  
+              {/* Deploy Button */}
+              <button
+                onClick={handleCreateTBA}
+                disabled={isDeploying || !isConnected}
+                className="w-full bg-red-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:bg-gray-400 mb-4"
+              >
+                {isDeploying ? "Deploying..." : "Deploy TBA"}
+              </button>
+
+              {/* Transfer Section  
           // Currently transfer fund section is disabled temporarily, will be enabled in future.
           {tbaAddress && (
             <div className="mt-6">
@@ -419,20 +423,17 @@ const handleCreateTBA = async () => {
           )}
             */}
 
-          {/* Error Display */}
-          {error && (
-            <div className="mt-4 p-4 bg-red-100 text-red-700 rounded">
-              {error}
-            </div>
-          )}
-        </div>
-      </div>
-    
-            </div>
-            <div className="mt-4">
-             
+              {/* Error Display */}
+              {error && (
+                <div className="mt-4 p-4 bg-red-100 text-red-700 rounded">
+                  {error}
+                </div>
+              )}
             </div>
           </div>
+        </div>
+        <div className="mt-4"></div>
+      </div>
 
       <AddFundsModal
         isOpen={isEthModalOpen}
