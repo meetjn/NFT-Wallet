@@ -989,6 +989,13 @@ export default function Home() {
           >
             Fetch Balances
           </button>
+          <button
+            onClick={fundMultiSig}
+            disabled={!isMultiSigDeployed}
+            className="font-urbanist-medium rounded-lg bg-[#CE192D] h-full px-6 text-white "
+          >
+            Fund Multisig Wallet
+          </button>
         </div>
       </div>
 
@@ -1099,13 +1106,7 @@ export default function Home() {
         </div>
         <div className="mt-4"></div>
       </div>
-      <button
-        onClick={fundMultiSig}
-        disabled={!isMultiSigDeployed}
-        className="font-urbanist-medium text-lg rounded-lg bg-green-600 py-4 px-6 text-white"
-      >
-        Fund Multisig Wallet
-      </button>
+
       <AddFundsModal
         isOpen={isEthModalOpen}
         onClose={() => setIsEthModalOpen(false)}
