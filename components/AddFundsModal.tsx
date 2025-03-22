@@ -772,7 +772,35 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
 
     fetchConnectedWallet();
   }, []);
+  useEffect(() => {
+    const fetchConnectedWallet = async () => {
+      const accounts = await window.ethereum.request({
+        method: "eth_accounts",
+      });
+      if (accounts && accounts.length > 0) {
+        setConnectedWalletAddress(accounts[0]);
+      }
+    };
 
+    // Initial fetch
+    fetchConnectedWallet();
+
+    // Listen for account changes
+    const handleAccountsChanged = (accounts: string[]) => {
+      if (accounts.length > 0) {
+        setConnectedWalletAddress(accounts[0]);
+      } else {
+        setConnectedWalletAddress(null);
+      }
+    };
+
+    window.ethereum.on("accountsChanged", handleAccountsChanged);
+
+    // Cleanup listener on unmount
+    return () => {
+      window.ethereum.removeListener("accountsChanged", handleAccountsChanged);
+    };
+  }, []);
   if (!isOpen) return null;
 
   // Deploy Multisig Wallet
@@ -817,11 +845,12 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
 
   // Propose Transaction
   const proposeTransaction = async (isFundingMultisig: boolean) => {
-    if (!multiSigAddress) return alert("No multisig wallet deployed.");
-
+    if (!multiSigAddress && !isFundingMultisig)
+      return alert("No multisig wallet deployed.");
     try {
       setIsProposing(true);
 
+      // Get provider and signer
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       const ethAdapter = new EthersAdapter({
@@ -829,54 +858,75 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
         signerOrProvider: signer,
       });
 
-      const safeSdk = await Safe.create({
-        ethAdapter,
-        safeAddress: multiSigAddress,
-      });
+      let transaction;
+      let safeSdk;
+      if (!multiSigAddress) {
+        return alert("Multisig wallet address is not available.");
+      }
 
-      // Create transaction data
-      const safeTransactionData: SafeTransactionDataPartial = {
-        to: isFundingMultisig ? multiSigAddress : manualTbaAddress,
-        value: ethers.utils.parseEther(fundingAmount).toString(),
-        data: "0x",
-      };
+      if (isFundingMultisig) {
+        // Fund Multisig Wallet: Transaction originates from the connected wallet
+        const tx = {
+          to: multiSigAddress, // Send funds to the multisig wallet
+          value: ethers.utils.parseEther(fundingAmount).toString(),
+        };
+        console.log("Funding multisig wallet with:", tx);
+        const txResponse = await signer.sendTransaction(tx);
+        console.log("Transaction sent:", txResponse.hash);
+        alert(`Transaction sent! Hash: ${txResponse.hash}`);
+        setIsProposing(false);
+        return;
+      } else {
+        // Fund TBA via Multisig: Transaction originates from the multisig wallet
+        safeSdk = await Safe.create({
+          ethAdapter,
+          safeAddress: multiSigAddress!,
+        });
 
-      // Create transaction
-      const transaction = await safeSdk.createTransaction({
-        safeTransactionData,
-      });
-      setSafeTransaction(transaction);
-      console.log("safe transaction by 1st signer", safeTransaction);
-      // Generate hash
-      const txHash = await safeSdk.getTransactionHash(transaction);
-      setSafeTxHash(txHash);
+        // Create transaction data
+        const safeTransactionData: SafeTransactionDataPartial = {
+          to: manualTbaAddress, // Send funds to the TBA address
+          value: ethers.utils.parseEther(fundingAmount).toString(),
+          data: "0x",
+        };
 
-      // Sign transaction
-      const chainId = (await provider.getNetwork()).chainId;
-      const domain = { chainId, verifyingContract: multiSigAddress };
-      const types = {
-        SafeTx: [
-          { name: "to", type: "address" },
-          { name: "value", type: "uint256" },
-          { name: "data", type: "bytes" },
-          { name: "operation", type: "uint8" },
-          { name: "safeTxGas", type: "uint256" },
-          { name: "baseGas", type: "uint256" },
-          { name: "gasPrice", type: "uint256" },
-          { name: "gasToken", type: "address" },
-          { name: "refundReceiver", type: "address" },
-          { name: "nonce", type: "uint256" },
-        ],
-      };
+        // Create transaction
+        transaction = await safeSdk.createTransaction({
+          safeTransactionData,
+        });
+        setSafeTransaction(transaction);
+        console.log("safe transaction by 1st signer", safeTransaction);
 
-      const signature = await signer._signTypedData(domain, types, {
-        ...transaction.data,
-        nonce: await safeSdk.getNonce(),
-      });
+        // Generate hash
+        const txHash = await safeSdk.getTransactionHash(transaction);
+        setSafeTxHash(txHash);
 
-      // Store the first signer's EIP-712 signature
-      setSignaturesCollected([signature]);
-      alert(`Transaction proposed! Hash: ${txHash}`);
+        // Sign transaction
+        const chainId = (await provider.getNetwork()).chainId;
+        const domain = { chainId, verifyingContract: multiSigAddress! };
+        const types = {
+          SafeTx: [
+            { name: "to", type: "address" },
+            { name: "value", type: "uint256" },
+            { name: "data", type: "bytes" },
+            { name: "operation", type: "uint8" },
+            { name: "safeTxGas", type: "uint256" },
+            { name: "baseGas", type: "uint256" },
+            { name: "gasPrice", type: "uint256" },
+            { name: "gasToken", type: "address" },
+            { name: "refundReceiver", type: "address" },
+            { name: "nonce", type: "uint256" },
+          ],
+        };
+        const signature = await signer._signTypedData(domain, types, {
+          ...transaction.data,
+          nonce: await safeSdk.getNonce(),
+        });
+
+        // Store the first signer's EIP-712 signature
+        setSignaturesCollected([signature]);
+        alert(`Transaction proposed! Hash: ${txHash}`);
+      }
     } catch (error) {
       console.error("Error proposing transaction:", error);
       alert("Failed to propose transaction.");
@@ -889,7 +939,6 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
   const signTransaction = async () => {
     if (!multiSigAddress || !safeTxHash)
       return alert("No transaction to sign.");
-
     try {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
@@ -897,7 +946,6 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
         ethers,
         signerOrProvider: signer,
       });
-
       const safeSdk = await Safe.create({
         ethAdapter,
         safeAddress: multiSigAddress,
@@ -920,6 +968,7 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
           { name: "nonce", type: "uint256" },
         ],
       };
+
       console.log("safe transaction by other signers", safeTransaction);
 
       // Sign using EIP-712
@@ -928,17 +977,23 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
         nonce: await safeSdk.getNonce(),
       });
 
+      // Check for duplicate signatures
+      const currentSigner = await signer.getAddress();
+      if (signaturesCollected.some((sig) => sig.startsWith(currentSigner))) {
+        return alert("You have already signed this transaction.");
+      }
+
       // Update signatures
       setSignaturesCollected((prev) => [...prev, signature]);
       console.log("signaturesCollected", signaturesCollected);
-      alert(`Signed transaction as: ${await signer.getAddress()}`);
+
+      alert(`Signed transaction as: ${currentSigner}`);
     } catch (error) {
       console.error("Error signing transaction:", error);
       alert("Failed to sign transaction.");
     }
   };
 
-  // Execute Transaction
   const executeTransaction = async () => {
     if (!multiSigAddress || !safeTransaction)
       return alert("No transaction to execute.");
@@ -950,14 +1005,12 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
         ethers,
         signerOrProvider: signer,
       });
-
       const safeSdk = await Safe.create({
         ethAdapter,
         safeAddress: multiSigAddress,
       });
       const threshold = await safeSdk.getThreshold();
       console.log("threshold", threshold);
-      console.log("signaturesCollected", signaturesCollected);
       // Check threshold
       if (signaturesCollected.length < threshold) {
         return alert(
@@ -965,16 +1018,18 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
         );
       }
 
-      // Combine signatures
-      const combinedSignatures = signaturesCollected.join("");
-      console.log("combinedSignatures", combinedSignatures);
-
-      // Execute
-      const txResponse = await safeSdk.executeTransaction({
-        ...safeTransaction,
-        signatures: signaturesCollected,
+      // Add all signatures to the transaction
+      signaturesCollected.forEach((signature) => {
+        safeTransaction.addSignature({
+          signer: connectedWalletAddress!, // Ensure address is available
+          data: signature,
+          staticPart: () => signature,
+          dynamicPart: () => "",
+        });
       });
-
+      console.log("sig collected", signaturesCollected);
+      // Execute with properly signed transaction
+      const txResponse = await safeSdk.executeTransaction(safeTransaction);
       console.log("Transaction executed:", txResponse.hash);
       alert(`Transaction executed! Hash: ${txResponse.hash}`);
 
