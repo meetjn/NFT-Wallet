@@ -822,24 +822,6 @@ export default function Home() {
     }
   };
 
-  const fundMultiSig = async () => {
-    if (!multiSigAddress) return alert("No multisig wallet deployed.");
-
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-
-    try {
-      const tx = await signer.sendTransaction({
-        to: multiSigAddress,
-        value: ethers.utils.parseEther(fundingAmount),
-      });
-      console.log("Funded multisig:", tx.hash);
-      alert(`Sent ETH to multisig! Tx: ${tx.hash}`);
-    } catch (error) {
-      console.error("Error funding multisig:", error);
-      alert("Failed to fund multisig wallet.");
-    }
-  };
   const fundWithEthViaSafe = async () => {
     if (!manualTbaAddress) return alert("Please enter a valid TBA address.");
     if (!multiSigAddress) return alert("No multisig wallet deployed.");
@@ -861,14 +843,6 @@ export default function Home() {
       data: "0x", // No calldata for simple ETH transfer
       operation: 0, // 0 = CALL, 1 = DELEGATECALL
     };
-
-    // Generate the transaction hash
-    const safeTxGas = await safeContract.requiredTxGas(
-      txData.to,
-      txData.value,
-      txData.data,
-      txData.operation
-    );
 
     // Sign the transaction using EIP-712
     const signature = await signer._signTypedData(
@@ -988,13 +962,6 @@ export default function Home() {
             className="font-urbanist-medium rounded-lg bg-[#CE192D] h-full px-6 text-white "
           >
             Fetch Balances
-          </button>
-          <button
-            onClick={fundMultiSig}
-            disabled={!isMultiSigDeployed}
-            className="font-urbanist-medium rounded-lg bg-[#CE192D] h-full px-6 text-white "
-          >
-            Fund Multisig Wallet
           </button>
         </div>
       </div>
