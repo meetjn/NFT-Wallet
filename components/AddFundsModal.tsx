@@ -533,6 +533,7 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
 
     // Initial fetch
     fetchConnectedWallet();
+
     // Listen for account changes
     const handleAccountsChanged = (accounts: string[]) => {
       if (accounts.length > 0) {
@@ -549,6 +550,11 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
       window.ethereum.removeListener("accountsChanged", handleAccountsChanged);
     };
   }, []);
+  useEffect(() => {
+    if (safeTransaction) {
+      console.log("Updated safeTransaction:", safeTransaction);
+    }
+  }, [safeTransaction]);
   if (!isOpen) return null;
 
   // Deploy Multisig Wallet
@@ -734,15 +740,63 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
 
       // Update signatures
       setSignaturesCollected((prev) => [...prev, signature]);
-      console.log("signaturesCollected", signaturesCollected);
 
       alert(`Signed transaction as: ${currentSigner}`);
+      console.log("signaturesCollected", signaturesCollected);
     } catch (error) {
       console.error("Error signing transaction:", error);
       alert("Failed to sign transaction.");
     }
   };
 
+  // const executeTransaction = async () => {
+  //   if (!multiSigAddress || !safeTransaction)
+  //     return alert("No transaction to execute.");
+
+  //   try {
+  //     const provider = new ethers.providers.Web3Provider(window.ethereum);
+  //     const signer = provider.getSigner();
+  //     const ethAdapter = new EthersAdapter({
+  //       ethers,
+  //       signerOrProvider: signer,
+  //     });
+  //     const safeSdk = await Safe.create({
+  //       ethAdapter,
+  //       safeAddress: multiSigAddress,
+  //     });
+  //     const threshold = await safeSdk.getThreshold();
+  //     console.log("threshold", threshold);
+  //     // Check threshold
+  //     if (signaturesCollected.length < threshold) {
+  //       return alert(
+  //         `Need ${threshold - signaturesCollected.length} more signatures.`
+  //       );
+  //     }
+
+  //     // Add all signatures to the transaction
+  //     signaturesCollected.forEach((signature) => {
+  //       safeTransaction.addSignature({
+  //         signer: connectedWalletAddress!,
+  //         data: signature,
+  //         staticPart: () => signature,
+  //         dynamicPart: () => "",
+  //       });
+  //     });
+  //     console.log("sig collected", signaturesCollected);
+  //     // Execute with properly signed transaction
+  //     const txResponse = await safeSdk.executeTransaction(safeTransaction);
+  //     console.log("Transaction executed:", txResponse.hash);
+  //     alert(`Transaction executed! Hash: ${txResponse.hash}`);
+
+  //     // Reset state
+  //     setSafeTransaction(null);
+  //     setSignaturesCollected([]);
+  //     setSafeTxHash(null);
+  //   } catch (error) {
+  //     console.error("Error executing transaction:", error);
+  //     alert("Failed to execute transaction.");
+  //   }
+  // };
   const executeTransaction = async () => {
     if (!multiSigAddress || !safeTransaction)
       return alert("No transaction to execute.");
@@ -754,12 +808,24 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
         ethers,
         signerOrProvider: signer,
       });
+
       const safeSdk = await Safe.create({
         ethAdapter,
         safeAddress: multiSigAddress,
       });
+
       const threshold = await safeSdk.getThreshold();
       console.log("threshold", threshold);
+
+      // Validate ownersInput
+      const owners = ownersInput
+        .split(",")
+        .map((addr) => addr.trim())
+        .filter((addr) => addr); // Remove empty strings
+      if (owners.length === 0) {
+        return alert("No valid owner addresses found.");
+      }
+
       // Check threshold
       if (signaturesCollected.length < threshold) {
         return alert(
@@ -767,16 +833,31 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
         );
       }
 
+      // Ensure ownersInput has enough addresses for all signatures
+      if (signaturesCollected.length > owners.length) {
+        return alert(
+          "Mismatch between signatures collected and owner addresses. Please check your input."
+        );
+      }
+
       // Add all signatures to the transaction
-      signaturesCollected.forEach((signature) => {
+      signaturesCollected.forEach((signature, index) => {
+        const signerAddress = owners[index]; // Get the correct signer address
+        if (!signerAddress) {
+          throw new Error(
+            `Missing owner address for signature at index ${index}`
+          );
+        }
         safeTransaction.addSignature({
-          signer: connectedWalletAddress!, // Ensure address is available
+          signer: signerAddress,
           data: signature,
           staticPart: () => signature,
           dynamicPart: () => "",
         });
       });
+
       console.log("sig collected", signaturesCollected);
+
       // Execute with properly signed transaction
       const txResponse = await safeSdk.executeTransaction(safeTransaction);
       console.log("Transaction executed:", txResponse.hash);
@@ -791,7 +872,6 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
       alert("Failed to execute transaction.");
     }
   };
-
   return (
     <section
       className="modal bg-black bg-opacity-70 fixed top-0 left-0 w-full h-full flex justify-center items-center"
