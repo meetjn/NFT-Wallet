@@ -23,6 +23,7 @@ import { injected } from "wagmi";
 
 import router from "next/router";
 import Sidebar from "@/components/sidebar";
+import TBAHelper from "@/components/tbaHelper";
 
 export default function Home() {
   const { isConnected, address } = useAccount();
@@ -243,7 +244,7 @@ export default function Home() {
           </h2>
         )}
       </div>
-         
+         <TBAHelper/>
       <div className="flex gap-5 items-center">
         <h3 className="font-urbanist-medium text-lg">Existing TBAs:</h3>
         {existingTbas.length > 0 ? (
@@ -350,7 +351,7 @@ export default function Home() {
           {/* NFT Info */}
           <div className="mb-6">
             <h3 className="text-lg font-medium mb-2">NFT Details</h3>
-            <p>Contract: 0xe4d54752B3c6786851c2F8336743367458835c5C
+            <p>Contract: 0xEFefcfb5E8dB1cd664BaA8b706f49D9bB02694B7
             </p>
             <p>Token ID: 1</p>
           </div>
