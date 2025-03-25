@@ -480,6 +480,7 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
 }) => {
   const [isProposing, setIsProposing] = useState(false);
   const [ownersInput, setOwnersInput] = useState<string>("");
+  const [signerInputs, setSignerInputs] = useState<string[]>([""]);
   const [thresholdInput, setThresholdInput] = useState<string>("2");
   const [isCreatingSafe, setIsCreatingSafe] = useState(false);
   const [safeTransaction, setSafeTransaction] = useState<any>(null);
@@ -490,6 +491,9 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
   >(null);
   const [useExistingMultiSig, setUseExistingMultiSig] =
     useState<boolean>(false);
+  const [selectedMultiSigAction, setSelectedMultiSigAction] = useState<
+    "use-existing" | "create-new"
+  >("use-existing");
   useEffect(() => {
     const fetchConnectedWallet = async () => {
       const accounts = await window.ethereum.request({
@@ -556,13 +560,28 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
     }
   }, [safeTransaction]);
   if (!isOpen) return null;
-
+  const handleMultiSigActionChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const value = event.target.value as "use-existing" | "create-new";
+    setSelectedMultiSigAction(value);
+    if (value === "create-new") {
+      setMultiSigAddress(null);
+      setIsMultiSigDeployed(false);
+      localStorage.removeItem("multiSigAddress");
+    } else {
+      setUseExistingMultiSig(true);
+    }
+  };
   // Deploy Multisig Wallet
   const deployMultiSig = async () => {
     try {
       setIsCreatingSafe(true);
 
-      const owners = ownersInput.split(",").map((addr) => addr.trim());
+      // const owners = ownersInput.split(",").map((addr) => addr.trim());
+      const owners = signerInputs
+        .map((addr) => addr.trim())
+        .filter((addr) => addr !== "");
       const threshold = parseInt(thresholdInput);
 
       // Validate inputs
@@ -816,12 +835,11 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
 
       const threshold = await safeSdk.getThreshold();
       console.log("threshold", threshold);
-
+      console.log("signers", signerInputs);
       // Validate ownersInput
-      const owners = ownersInput
-        .split(",")
-        .map((addr) => addr.trim())
-        .filter((addr) => addr); // Remove empty strings
+      const owners = signerInputs
+        .map((addr) => addr.trim()) // Trim whitespace from each address
+        .filter((addr) => addr);
       if (owners.length === 0) {
         return alert("No valid owner addresses found.");
       }
@@ -893,13 +911,33 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
           </p>
           {!isMultiSigDeployed && (
             <>
-              <input
-                type="text"
-                placeholder="Enter owners (comma-separated)"
-                value={ownersInput}
-                onChange={(e) => setOwnersInput(e.target.value)}
-                className="p-2 pr-10 rounded-md text-black bg-gray-100 border border-opacity-10"
-              />
+              <div className="flex flex-col gap-2 w-full">
+                <div className="flex justify-between items-center">
+                  <h3 className="font-urbanist-medium text-lg">Signers</h3>
+                  <button
+                    type="button"
+                    onClick={() => setSignerInputs([...signerInputs, ""])}
+                    className="bg-red-500 text-white px-3 py-1 rounded-md text-sm"
+                  >
+                    Add Signer
+                  </button>
+                </div>
+
+                {signerInputs.map((address, index) => (
+                  <input
+                    key={index}
+                    type="text"
+                    placeholder={`Signer ${index + 1} address`}
+                    value={address}
+                    onChange={(e) => {
+                      const newInputs = [...signerInputs];
+                      newInputs[index] = e.target.value;
+                      setSignerInputs(newInputs);
+                    }}
+                    className="p-2 pr-10 rounded-md text-black bg-gray-100 border border-opacity-10"
+                  />
+                ))}
+              </div>
               <input
                 type="number"
                 placeholder="Threshold (e.g., 2)"
@@ -923,25 +961,35 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
                   <p className="font-urbanist-medium text-lg">
                     A multisig wallet already exists at: {multiSigAddress}
                   </p>
-                  <button
-                    onClick={() => setUseExistingMultiSig(true)}
-                    className="font-urbanist-medium text-lg rounded-lg bg-blue-600 py-4 px-6 text-white"
-                  >
-                    Use Existing Multisig Wallet
-                  </button>
-                  <button
-                    onClick={() => {
-                      setMultiSigAddress(null);
-                      setIsMultiSigDeployed(false);
-                      localStorage.removeItem("multiSigAddress");
-                    }}
-                    className="font-urbanist-medium text-lg rounded-lg bg-red-600 py-4 px-6 text-white"
-                  >
-                    Create New Multisig Wallet
-                  </button>
+                  <div className="flex flex-col gap-2">
+                    <label
+                      htmlFor="multisig-action"
+                      className="font-urbanist-medium text-lg"
+                    >
+                      Select Multisig Action:
+                    </label>
+                    <select
+                      id="multisig-action"
+                      value={selectedMultiSigAction}
+                      // onChange={(e) =>
+                      //   setSelectedMultiSigAction(
+                      //     e.target.value as "use-existing" | "create-new"
+                      //   )
+                      // }
+                      onChange={handleMultiSigActionChange}
+                      className="p-2 rounded-md text-black bg-gray-100 border border-opacity-10"
+                    >
+                      <option value="use-existing">
+                        Use Existing Multisig Wallet
+                      </option>
+                      <option value="create-new">
+                        Create New Multisig Wallet
+                      </option>
+                    </select>
+                  </div>
                 </>
               )}
-              {useExistingMultiSig && (
+              {selectedMultiSigAction === "use-existing" && (
                 <>
                   <p className="font-urbanist-medium text-lg">
                     Multisig Address: {multiSigAddress}
