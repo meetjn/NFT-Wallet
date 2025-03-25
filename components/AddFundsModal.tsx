@@ -494,6 +494,8 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
   const [selectedMultiSigAction, setSelectedMultiSigAction] = useState<
     "use-existing" | "create-new"
   >("use-existing");
+  const [currentScreen, setCurrentScreen] = useState<number>(0);
+
   useEffect(() => {
     const fetchConnectedWallet = async () => {
       const accounts = await window.ethereum.request({
@@ -890,6 +892,25 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
       alert("Failed to execute transaction.");
     }
   };
+  const handleNext = () => {
+    if (currentScreen === 0 && !isMultiSigDeployed) {
+      alert("Please create or select a multisig wallet before proceeding.");
+      return;
+    }
+    setCurrentScreen((prev) => prev + 1);
+  };
+
+  const handleBack = () => {
+    setCurrentScreen((prev) => Math.max(prev - 1, 0));
+  };
+  const removeSigner = (index: number) => {
+    if (signerInputs.length <= 1) {
+      alert("At least one signer is required.");
+      return;
+    }
+    const newSigners = signerInputs.filter((_, i) => i !== index);
+    setSignerInputs(newSigners);
+  };
   return (
     <section
       className="modal bg-black bg-opacity-70 fixed top-0 left-0 w-full h-full flex justify-center items-center"
@@ -906,149 +927,147 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
           <XIcon size={24} onClick={onClose} className="cursor-pointer" />
         </div>
         <div className="p-4 w-full h-full flex flex-col flex-grow gap-8">
-          <p className="font-urbanist-medium text-lg">
-            TBA Address: {manualTbaAddress}
-          </p>
-          {!isMultiSigDeployed && (
+          {/* Screen 0: Multisig Wallet Setup */}
+          {currentScreen === 0 && (
             <>
-              <div className="flex flex-col gap-2 w-full">
-                <div className="flex justify-between items-center">
-                  <h3 className="font-urbanist-medium text-lg">Signers</h3>
-                  <button
-                    type="button"
-                    onClick={() => setSignerInputs([...signerInputs, ""])}
-                    className="border border-green-500 text-black px-3 py-1 rounded-md text-sm bg-green-200"
-                  >
-                    Add Signer
-                  </button>
-                </div>
+              {!isMultiSigDeployed && (
+                <>
+                  <div className="flex flex-col gap-2 w-full">
+                    <div className="flex justify-between items-center">
+                      <h3 className="font-urbanist-medium text-lg">Signers</h3>
+                      <button
+                        type="button"
+                        onClick={() => setSignerInputs([...signerInputs, ""])}
+                        className="border border-green-500 text-black px-3 py-1 rounded-md text-sm bg-green-200"
+                      >
+                        Add Signer
+                      </button>
+                    </div>
 
-                {signerInputs.map((address, index) => (
+                    {signerInputs.map((address, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <input
+                          key={index}
+                          type="text"
+                          placeholder={`Signer ${index + 1} address`}
+                          value={address}
+                          onChange={(e) => {
+                            const newInputs = [...signerInputs];
+                            newInputs[index] = e.target.value;
+                            setSignerInputs(newInputs);
+                          }}
+                          className="p-2 pr-10 rounded-md text-black bg-gray-100 border border-opacity-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeSigner(index)}
+                          className="bg-red-500 text-white px-3 py-1 rounded-md text-sm"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                   <input
-                    key={index}
-                    type="text"
-                    placeholder={`Signer ${index + 1} address`}
-                    value={address}
-                    onChange={(e) => {
-                      const newInputs = [...signerInputs];
-                      newInputs[index] = e.target.value;
-                      setSignerInputs(newInputs);
-                    }}
+                    type="number"
+                    placeholder="Threshold (e.g., 2)"
+                    value={thresholdInput}
+                    onChange={(e) => setThresholdInput(e.target.value)}
                     className="p-2 pr-10 rounded-md text-black bg-gray-100 border border-opacity-10"
                   />
-                ))}
-              </div>
+                  <button
+                    onClick={deployMultiSig}
+                    disabled={isCreatingSafe}
+                    className="font-urbanist-medium text-lg rounded-lg bg-red-600 py-4 px-6 text-white"
+                  >
+                    {isCreatingSafe ? "Deploying..." : "Create Multisig Wallet"}
+                  </button>
+                </>
+              )}
+              {isMultiSigDeployed && (
+                <p className="font-urbanist-medium text-lg">
+                  A multisig wallet already exists at: {multiSigAddress}
+                </p>
+              )}
+            </>
+          )}
+
+          {/* Screen 1: Fund Multisig or TBA */}
+          {currentScreen === 1 && (
+            <>
+              <p className="font-urbanist-medium text-lg">
+                Multisig Address: {multiSigAddress}
+              </p>
               <input
-                type="number"
-                placeholder="Threshold (e.g., 2)"
-                value={thresholdInput}
-                onChange={(e) => setThresholdInput(e.target.value)}
+                type="text"
+                placeholder={`Enter amount (${fundingType})`}
+                value={fundingAmount}
+                onChange={(e) => setFundingAmount(e.target.value)}
                 className="p-2 pr-10 rounded-md text-black bg-gray-100 border border-opacity-10"
               />
               <button
-                onClick={deployMultiSig}
-                disabled={isCreatingSafe}
-                className="font-urbanist-medium text-lg rounded-lg bg-red-600 py-4 px-6 text-white"
+                onClick={() => proposeTransaction(true)} // Fund Multisig Wallet
+                disabled={!isMultiSigDeployed}
+                className="font-urbanist-medium text-lg rounded-lg bg-blue-600 py-4 px-6 text-white"
               >
-                {isCreatingSafe ? "Deploying..." : "Create Multisig Wallet"}
+                Fund Multisig Wallet
               </button>
-            </>
-          )}
-          {isMultiSigDeployed && (
-            <>
-              {!useExistingMultiSig && (
+              <button
+                onClick={() => proposeTransaction(false)} // Fund TBA
+                disabled={!isMultiSigDeployed}
+                className="font-urbanist-medium text-lg rounded-lg bg-blue-600 py-4 px-6 text-white"
+              >
+                Fund TBA via Multisig
+              </button>
+              {safeTxHash && (
                 <>
                   <p className="font-urbanist-medium text-lg">
-                    A multisig wallet already exists at: {multiSigAddress}
+                    Transaction Hash: {safeTxHash}
                   </p>
-                  <div className="flex flex-col gap-2">
-                    <label
-                      htmlFor="multisig-action"
-                      className="font-urbanist-medium text-lg"
-                    >
-                      Select Multisig Action:
-                    </label>
-                    <select
-                      id="multisig-action"
-                      value={selectedMultiSigAction}
-                      // onChange={(e) =>
-                      //   setSelectedMultiSigAction(
-                      //     e.target.value as "use-existing" | "create-new"
-                      //   )
-                      // }
-                      onChange={handleMultiSigActionChange}
-                      className="p-2 rounded-md text-black bg-gray-100 border border-opacity-10"
-                    >
-                      <option value="use-existing">
-                        Use Existing Multisig Wallet
-                      </option>
-                      <option value="create-new">
-                        Create New Multisig Wallet
-                      </option>
-                    </select>
-                  </div>
-                </>
-              )}
-              {selectedMultiSigAction === "use-existing" && (
-                <>
                   <p className="font-urbanist-medium text-lg">
-                    Multisig Address: {multiSigAddress}
+                    Signatures Collected: {signaturesCollected.length}/
+                    {thresholdInput}
                   </p>
-                  <input
-                    type="text"
-                    placeholder={`Enter amount (${fundingType})`}
-                    value={fundingAmount}
-                    onChange={(e) => setFundingAmount(e.target.value)}
-                    className="p-2 pr-10 rounded-md text-black bg-gray-100 border border-opacity-10"
-                  />
                   <button
-                    onClick={() => proposeTransaction(true)} // Fund Multisig Wallet
-                    disabled={!isMultiSigDeployed}
-                    className="font-urbanist-medium text-lg rounded-lg bg-blue-600 py-4 px-6 text-white"
+                    onClick={signTransaction}
+                    disabled={
+                      !connectedWalletAddress ||
+                      signaturesCollected.includes(connectedWalletAddress)
+                    }
+                    className="font-urbanist-medium text-lg rounded-lg bg-yellow-500 py-4 px-6 text-white"
                   >
-                    Fund Multisig Wallet
+                    Sign Transaction
                   </button>
                   <button
-                    onClick={() => proposeTransaction(false)} // Fund TBA
-                    disabled={!isMultiSigDeployed}
-                    className="font-urbanist-medium text-lg rounded-lg bg-blue-600 py-4 px-6 text-white"
+                    onClick={executeTransaction}
+                    disabled={
+                      signaturesCollected.length < parseInt(thresholdInput)
+                    }
+                    className="font-urbanist-medium text-lg rounded-lg bg-green-700 py-4 px-6 text-white"
                   >
-                    Fund TBA via Multisig
+                    Execute Transaction
                   </button>
-                  {safeTxHash && (
-                    <>
-                      <p className="font-urbanist-medium text-lg">
-                        Transaction Hash: {safeTxHash}
-                      </p>
-                      <p className="font-urbanist-medium text-lg">
-                        Signatures Collected: {signaturesCollected.length}/
-                        {thresholdInput}
-                      </p>
-                      <button
-                        onClick={signTransaction}
-                        disabled={
-                          !connectedWalletAddress ||
-                          signaturesCollected.includes(connectedWalletAddress)
-                        }
-                        className="font-urbanist-medium text-lg rounded-lg bg-yellow-500 py-4 px-6 text-white"
-                      >
-                        Sign Transaction
-                      </button>
-                      <button
-                        onClick={executeTransaction}
-                        disabled={
-                          signaturesCollected.length < parseInt(thresholdInput)
-                        }
-                        className="font-urbanist-medium text-lg rounded-lg bg-green-700 py-4 px-6 text-white"
-                      >
-                        Execute Transaction
-                      </button>
-                    </>
-                  )}
                 </>
               )}
             </>
           )}
+
+          {/* Navigation Buttons */}
+          <div className="flex justify-between mt-auto">
+            <button
+              onClick={handleBack}
+              disabled={currentScreen === 0}
+              className="font-urbanist-medium text-lg rounded-lg  py-4 px-6 text-black"
+            >
+              Back
+            </button>
+            <button
+              onClick={handleNext}
+              className="font-urbanist-medium text-lg rounded-lg  py-4 px-6 text-black"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
     </section>
