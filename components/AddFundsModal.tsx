@@ -769,55 +769,6 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
       alert("Failed to sign transaction.");
     }
   };
-
-  // const executeTransaction = async () => {
-  //   if (!multiSigAddress || !safeTransaction)
-  //     return alert("No transaction to execute.");
-
-  //   try {
-  //     const provider = new ethers.providers.Web3Provider(window.ethereum);
-  //     const signer = provider.getSigner();
-  //     const ethAdapter = new EthersAdapter({
-  //       ethers,
-  //       signerOrProvider: signer,
-  //     });
-  //     const safeSdk = await Safe.create({
-  //       ethAdapter,
-  //       safeAddress: multiSigAddress,
-  //     });
-  //     const threshold = await safeSdk.getThreshold();
-  //     console.log("threshold", threshold);
-  //     // Check threshold
-  //     if (signaturesCollected.length < threshold) {
-  //       return alert(
-  //         `Need ${threshold - signaturesCollected.length} more signatures.`
-  //       );
-  //     }
-
-  //     // Add all signatures to the transaction
-  //     signaturesCollected.forEach((signature) => {
-  //       safeTransaction.addSignature({
-  //         signer: connectedWalletAddress!,
-  //         data: signature,
-  //         staticPart: () => signature,
-  //         dynamicPart: () => "",
-  //       });
-  //     });
-  //     console.log("sig collected", signaturesCollected);
-  //     // Execute with properly signed transaction
-  //     const txResponse = await safeSdk.executeTransaction(safeTransaction);
-  //     console.log("Transaction executed:", txResponse.hash);
-  //     alert(`Transaction executed! Hash: ${txResponse.hash}`);
-
-  //     // Reset state
-  //     setSafeTransaction(null);
-  //     setSignaturesCollected([]);
-  //     setSafeTxHash(null);
-  //   } catch (error) {
-  //     console.error("Error executing transaction:", error);
-  //     alert("Failed to execute transaction.");
-  //   }
-  // };
   const executeTransaction = async () => {
     if (!multiSigAddress || !safeTransaction)
       return alert("No transaction to execute.");
