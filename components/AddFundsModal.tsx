@@ -917,7 +917,7 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
                   <button
                     type="button"
                     onClick={() => setSignerInputs([...signerInputs, ""])}
-                    className="bg-red-500 text-white px-3 py-1 rounded-md text-sm"
+                    className="border border-green-500 text-black px-3 py-1 rounded-md text-sm bg-green-200"
                   >
                     Add Signer
                   </button>
@@ -948,7 +948,7 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
               <button
                 onClick={deployMultiSig}
                 disabled={isCreatingSafe}
-                className="font-urbanist-medium text-lg rounded-lg bg-green-600 py-4 px-6 text-white"
+                className="font-urbanist-medium text-lg rounded-lg bg-red-600 py-4 px-6 text-white"
               >
                 {isCreatingSafe ? "Deploying..." : "Create Multisig Wallet"}
               </button>
