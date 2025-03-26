@@ -1,0 +1,49 @@
+.index-fund-container {
+    padding: 20px;
+  }
+  
+  .overview {
+    background: #f5f5f5;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  
+  .deposit-form, .withdraw-form {
+    margin-bottom: 20px;
+  }
+  
+  .deposit-form input, .withdraw-form input {
+    padding: 10px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .deposit-form button, .withdraw-form button {
+    padding: 10px 20px;
+    background: #0070f3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .deposit-form button:hover, .withdraw-form button:hover {
+    background: #005bb5;
+  }
+  
+  .performance-chart {
+    background: #f5f5f5;
+    padding: 20px;
+    border-radius: 8px;
+  }
+  
+  .performance-chart ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .performance-chart li {
+    margin-bottom: 10px;
+  }

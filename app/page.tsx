@@ -17,10 +17,6 @@ import { transferFromTBA } from "@/components/transferETH";
 import { useWalletClient } from "wagmi";
 import { injected } from "wagmi";
 
-
-
-
-
 import router from "next/router";
 import Sidebar from "@/components/sidebar";
 import TBAHelper from "@/components/tbaHelper";
@@ -51,8 +47,7 @@ export default function Home() {
   //const [deploymentStatus, setDeploymentStatus] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
   const { chain } = useAccount(); // Get the connected chain
   //const { switchChain } = useSwitchChain();
-  const { data: walletClient } = useWalletClient(); 
-
+  const { data: walletClient } = useWalletClient();
 
   // Fetch TBA address when connected or chain changes
   useEffect(() => {
@@ -61,11 +56,14 @@ export default function Home() {
     const fetchTBA = async () => {
       try {
         console.log("Fetching TBA Address for:", selectedChain);
+
         const tbaAddress = getTBAAddress(selectedChain, currentTokenId.toString());
+
         console.log("Fetched TBA Address:", tbaAddress);
 
         if (tbaAddress) {
           setTbaAddress(tbaAddress);
+
           setExistingTbas((prevTbas) =>
             prevTbas.includes(tbaAddress) ? prevTbas : [...prevTbas, tbaAddress]
           );
@@ -82,6 +80,24 @@ export default function Home() {
     fetchTBA();
   }, [isConnected, address, selectedChain, currentTokenId]);
   
+
+
+  // useEffect(() => {
+  //   if (!isConnected) return;
+  //
+  //   const fetchTBA = async () => {
+  //     try {
+  //       console.log("Fetching TBA Address for:", selectedChain);
+  //       const address = getTBAAddress(selectedChain);
+  //       setTbaAddress(address);
+  //     } catch (err) {
+  //       console.error("Error fetching TBA:", err);
+  //       setError("Failed to fetch TBA address.");
+  //     }
+  //   };
+  //
+  //   fetchTBA();
+  // }, [isConnected, selectedChain]);
 
   const handleCreateTBA = async () => {
     if (!isConnected || !walletClient) {
@@ -102,10 +118,12 @@ export default function Home() {
       // Switch network if necessary
       if (chain?.id !== expectedChainId) {
         console.log(`Switching network to ${SUPPORTED_CHAINS[selectedChain].name}...`);
+
         await window.ethereum.request({
           method: "wallet_switchEthereumChain",
           params: [{ chainId: `0x${expectedChainId.toString(16)}` }],
         });
+
         await new Promise((resolve) => setTimeout(resolve, 500));
       }
 
@@ -132,7 +150,10 @@ export default function Home() {
     }
 
     try {
-      console.log(`Transferring ${transferAmount} ETH to ${recipientAddress} from TBA:`, tbaAddress);
+      console.log(
+        `Transferring ${transferAmount} ETH to ${recipientAddress} from TBA:`,
+        tbaAddress
+      );
       const txHash = await transferFromTBA(
         selectedChain,
         transferAmount,
@@ -148,7 +169,7 @@ export default function Home() {
       }
     }
   };
-  
+
   const fetchBalances = async () => {
     if (!manualTbaAddress) return;
     console.log("tba address", manualTbaAddress);
@@ -181,7 +202,6 @@ export default function Home() {
     fetchBalances();
   }, [manualTbaAddress]);
 
-  
   const fundWithEth = async () => {
     if (!manualTbaAddress) return alert("Please enter a valid TBA address.");
     const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -231,10 +251,11 @@ export default function Home() {
           {address ? <> {address}</> : <h1>Wallet Not connected</h1>}
         </div>
         <button
-          onClick={handleCreateTBA} disabled={isDeploying}
+          onClick={handleCreateTBA}
+          disabled={isDeploying}
           className="py-3 px-6 bg-[#CE192D] font-urbanist-semibold rounded-lg text-white"
         >
-              {isDeploying ? "Deploying...":"" }
+          {isDeploying ? "Deploying..." : ""}
           Create TBA
         </button>
         {tbaAddress && (
@@ -251,7 +272,7 @@ export default function Home() {
           <ul className="list-disc list-inside">
             {existingTbas.map((tba, index) => (
               <li key={index} className="mt-2">
-                {tba} 
+                {tba}
               </li>
             ))}
           </ul>
@@ -364,17 +385,16 @@ export default function Home() {
             </div>
           )}
 
-          {/* Deploy Button */}
-          <button
-            onClick={handleCreateTBA}
-            disabled={isDeploying || !isConnected}
-            className="w-full bg-red-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:bg-gray-400 mb-4"
-          >
-            {isDeploying ? "Deploying..." : "Deploy TBA"}
-          </button>
+              {/* Deploy Button */}
+              <button
+                onClick={handleCreateTBA}
+                disabled={isDeploying || !isConnected}
+                className="w-full bg-red-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:bg-gray-400 mb-4"
+              >
+                {isDeploying ? "Deploying..." : "Deploy TBA"}
+              </button>
 
-          
-          {/* Transfer Section  
+              {/* Transfer Section  
           // Currently transfer fund section is disabled temporarily, will be enabled in future.
           {tbaAddress && (
             <div className="mt-6">
@@ -405,20 +425,17 @@ export default function Home() {
           )}
             */}
 
-          {/* Error Display */}
-          {error && (
-            <div className="mt-4 p-4 bg-red-100 text-red-700 rounded">
-              {error}
-            </div>
-          )}
-        </div>
-      </div>
-    
-            </div>
-            <div className="mt-4">
-             
+              {/* Error Display */}
+              {error && (
+                <div className="mt-4 p-4 bg-red-100 text-red-700 rounded">
+                  {error}
+                </div>
+              )}
             </div>
           </div>
+        </div>
+        <div className="mt-4"></div>
+      </div>
 
       <AddFundsModal
         isOpen={isEthModalOpen}

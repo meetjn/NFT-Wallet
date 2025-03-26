@@ -27,7 +27,7 @@ const items = [
   // { name: "Staking", icon: <BadgeDollarSign />, href: "/staking" },
   // { name: "Farming", icon: <Leaf />, href: "/farming" },
   // { name: "Crypto ETFs", icon: <BarChart />, href: "/etfs" },
-  // { name: "Index Funds", icon: <PieChart />, href: "/index" },
+  { name: "Index Funds", icon: <PieChart />, href: "/index-fund" },
   // { name: "Transactions", icon: <ArrowUpDown />, href: "/transactions" },
   { name: "Trading", icon: <ChartAreaIcon />, href: "/trading" },
   { name: "Swap", icon: <ArrowLeftRight />, href: "/swap" },
