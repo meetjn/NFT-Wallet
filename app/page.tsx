@@ -700,7 +700,6 @@ export default function Home() {
   const { data: walletClient } = useWalletClient();
   const [multiSigAddress, setMultiSigAddress] = useState<string | null>(null);
   const [isMultiSigDeployed, setIsMultiSigDeployed] = useState(false);
-  const gnosisSafeAddress = "0x2A2D4498B540cA67d2933B76019f906988CE3875";
   useEffect(() => {
     if (!isConnected || !address) return;
 
