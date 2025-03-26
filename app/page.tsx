@@ -19,6 +19,7 @@ import { injected } from "wagmi";
 
 import router from "next/router";
 import Sidebar from "@/components/sidebar";
+import TBAHelper from "@/components/tbaHelper";
 
 export default function Home() {
   const { isConnected, address } = useAccount();
@@ -48,6 +49,7 @@ export default function Home() {
   //const { switchChain } = useSwitchChain();
   const { data: walletClient } = useWalletClient();
 
+  // Fetch TBA address when connected or chain changes
   useEffect(() => {
     if (!isConnected || !address) return;
 
@@ -55,13 +57,13 @@ export default function Home() {
       try {
         console.log("Fetching TBA Address for:", selectedChain);
 
-        const tbaAddress = getTBAAddress(selectedChain);
+        const tbaAddress = getTBAAddress(selectedChain, currentTokenId.toString());
+
         console.log("Fetched TBA Address:", tbaAddress);
 
         if (tbaAddress) {
           setTbaAddress(tbaAddress);
 
-          // Store TBA in existing list if not already present
           setExistingTbas((prevTbas) =>
             prevTbas.includes(tbaAddress) ? prevTbas : [...prevTbas, tbaAddress]
           );
@@ -76,7 +78,9 @@ export default function Home() {
     };
 
     fetchTBA();
-  }, [isConnected, address, selectedChain]);
+  }, [isConnected, address, selectedChain, currentTokenId]);
+  
+
 
   // useEffect(() => {
   //   if (!isConnected) return;
@@ -111,11 +115,10 @@ export default function Home() {
       }
       const expectedChainId = SUPPORTED_CHAINS[selectedChain].id;
 
-      // Using MetaMask directly instead of `switchChain()`
+      // Switch network if necessary
       if (chain?.id !== expectedChainId) {
-        console.log(
-          `Switching network to ${SUPPORTED_CHAINS[selectedChain].name}...`
-        );
+        console.log(`Switching network to ${SUPPORTED_CHAINS[selectedChain].name}...`);
+
         await window.ethereum.request({
           method: "wallet_switchEthereumChain",
           params: [{ chainId: `0x${expectedChainId.toString(16)}` }],
@@ -123,11 +126,15 @@ export default function Home() {
 
         await new Promise((resolve) => setTimeout(resolve, 500));
       }
-      const newTbaAddress = await createTBA(selectedChain, walletClient);
-      console.log(
-        `TBA deployed successfully on ${selectedChain}: ${newTbaAddress}`
-      );
+
+      // Create TBA for the current tokenId
+      const newTbaAddress = await createTBA(selectedChain, walletClient, currentTokenId.toString());
+      console.log(`TBA deployed successfully on ${selectedChain}: ${newTbaAddress}`);
       setTbaAddress(newTbaAddress);
+      setExistingTbas((prev) =>
+        prev.includes(newTbaAddress) ? prev : [...prev, newTbaAddress]
+      );
+      setCurrentTokenId((prev) => prev + 1); // Increment only on success
     } catch (error: any) {
       console.error("Error creating TBA:", error);
       setError(error.message || "Failed to create TBA.");
@@ -258,7 +265,7 @@ export default function Home() {
           </h2>
         )}
       </div>
-
+         <TBAHelper/>
       <div className="flex gap-5 items-center">
         <h3 className="font-urbanist-medium text-lg">Existing TBAs:</h3>
         {existingTbas.length > 0 ? (
@@ -337,51 +344,46 @@ export default function Home() {
         </div>
       </div>
 
-      <div>
-        <h2 className="text-2xl font-urbanist-semibold">
-          Deploy on Multiple Chains
-        </h2>
-        <div className="mt-4">
-          <div className="my-8">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-2xl font-bold mb-4">
-                Token Bound Account Manager
-              </h2>
+          <div>
+            <h2 className="text-2xl font-urbanist-semibold">Deploy on Multiple Chains</h2>
+            <div className="mt-4">
+            <div className="my-8">
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-2xl font-bold mb-4">Token Bound Account Manager</h2>
+          
+          {/* Chain Selector */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Select Network
+            </label>
+            <select
+              value={selectedChain}
+              onChange={(e) => setSelectedChain(e.target.value as SupportedChain)}
+              className="w-full p-2 border rounded"
+            >
+              {Object.keys(SUPPORTED_CHAINS).map((chain) => (
+                <option key={chain} value={chain}>
+                  {SUPPORTED_CHAINS[chain as SupportedChain].name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-              {/* Chain Selector */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Network
-                </label>
-                <select
-                  value={selectedChain}
-                  onChange={(e) =>
-                    setSelectedChain(e.target.value as SupportedChain)
-                  }
-                  className="w-full p-2 border rounded"
-                >
-                  {Object.keys(SUPPORTED_CHAINS).map((chain) => (
-                    <option key={chain} value={chain}>
-                      {SUPPORTED_CHAINS[chain as SupportedChain].name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+          {/* NFT Info */}
+          <div className="mb-6">
+            <h3 className="text-lg font-medium mb-2">NFT Details</h3>
+            <p>Contract: 0xEFefcfb5E8dB1cd664BaA8b706f49D9bB02694B7
+            </p>
+            <p>Token ID: 1</p>
+          </div>
 
-              {/* NFT Info */}
-              <div className="mb-6">
-                <h3 className="text-lg font-medium mb-2">NFT Details</h3>
-                <p>Contract: 0xe4d54752B3c6786851c2F8336743367458835c5C</p>
-                <p>Token ID: 1</p>
-              </div>
-
-              {/* TBA Address Display */}
-              {tbaAddress && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-medium mb-2">TBA Address</h3>
-                  <p className="font-mono break-all">{tbaAddress}</p>
-                </div>
-              )}
+          {/* TBA Address Display */}
+          {tbaAddress && (
+            <div className="mb-6">
+              <h3 className="text-lg font-medium mb-2">TBA Address</h3>
+              <p className="font-mono break-all">{tbaAddress}</p>
+            </div>
+          )}
 
               {/* Deploy Button */}
               <button
