@@ -1,9 +1,15 @@
+/*
+* This file contains the logic to create a Multichain Tokenbound Account (TBA) for an NFT.
+* Little work is left to be done here.
+*/
+
 import { SUPPORTED_CHAINS, SupportedChain } from "../utils/chains";
 import { TokenboundClient } from "@tokenbound/sdk";
 import { WalletClient, createPublicClient, http } from "viem";
 import { Signer, providers } from "ethers";
 import { sepolia } from "viem/chains";
 import NftAbi from "./ABI/MyNFT.json";
+
 
 const FIXED_SALT = 7;
 const NFT_NATIVE_CHAIN_ID = 11155111;
@@ -19,13 +25,15 @@ export async function createTBA(
   if (!walletClient) {
     throw new Error("No wallet client found. Ensure your wallet is connected.");
   }
-
+  
+  const EXISTING_NFT_CONTRACT = "0xc7186EcDC29c8047C095C9170e67d96D3c99e317";
+  const NEW_NFT_CONTRACT = "0xEFefcfb5E8dB1cd664BaA8b706f49D9bB02694B7";
   // Use the provided NFT contract or fall back to the default
-  const NFT_CONTRACT = "0xEFefcfb5E8dB1cd664BaA8b706f49D9bB02694B7";
+  const NFT_CONTRACT = EXISTING_NFT_CONTRACT || NEW_NFT_CONTRACT;
   // (nftContract || process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS) as `0x${string}`;
   
   if (!NFT_CONTRACT) {
-    throw new Error("NFT contract address is required");
+    throw new Error("NFT contract address is required");  
   }
 
   await new Promise((resolve) => setTimeout(resolve, 500));

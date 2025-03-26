@@ -1,8 +1,7 @@
 "use server";
 import axios, { AxiosResponse } from "axios";
+// This jwt is for only testing purposes. You should never expose your API key in the frontend.
 const jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiJjMmU2OGU4NC00YjIxLTRmMzItODhhOC1iODkyZDk2YjM0YWIiLCJlbWFpbCI6Im1yLnNoYWRvdzk0NjFAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInBpbl9wb2xpY3kiOnsicmVnaW9ucyI6W3siZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjEsImlkIjoiRlJBMSJ9LHsiZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjEsImlkIjoiTllDMSJ9XSwidmVyc2lvbiI6MX0sIm1mYV9lbmFibGVkIjpmYWxzZSwic3RhdHVzIjoiQUNUSVZFIn0sImF1dGhlbnRpY2F0aW9uVHlwZSI6InNjb3BlZEtleSIsInNjb3BlZEtleUtleSI6IjY2NGE2ZTNiMDA0ZWRjM2U3MDczIiwic2NvcGVkS2V5U2VjcmV0IjoiYWIwMjk2MDMyOTAzNDhkZDZmNzI4ZDA4OGM0NjUyN2I5NWY4NGJlMTA3MjU5NTNjNmQzNTNlNzhlZTc2ZjZhZSIsImV4cCI6MTc3NDI5MjQ0N30.M81hUZoCkXT3Yng0Fse83lK-r8jTp37AgthyuLBCQiU";
-//const jwt = process.env.JWT || process.env.NEXT_PUBLIC_JWT;
-//console.log("JWT being used:", jwt ? "JWT is defined" : "JWT is undefined");
 
 interface PinataResponse {
   IpfsHash: string;

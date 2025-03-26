@@ -2,32 +2,28 @@ import { useState } from "react";
 import { uploadFileToIPFS, uploadJSONToIPFS } from "../utils/pinata";
 import GetIpfsUrlFromPinata from "../utils/pinataService";
 import { ethers } from "ethers";
-import NftAbi from "./ABI/MyNFT.json"; // Updated ABI with getCurrentTokenId
+import NftAbi from "./ABI/MyNFT.json";
 import { createTBA } from "./createTBA";
 import { useWalletClient } from "wagmi";
 import { SupportedChain } from "../utils/chains";
+import ExistingNftAbi from "./ABI/ExistingNFT.json";
 
-const DEFAULT_NFT_CONTRACT ="0xEFefcfb5E8dB1cd664BaA8b706f49D9bB02694B7";
+const NEW_NFT_CONTRACT = "0xEFefcfb5E8dB1cd664BaA8b706f49D9bB02694B7";
+const EXISTING_NFT_CONTRACT = "0xc7186EcDC29c8047C095C9170e67d96D3c99e317";
 
 const TBAHelper = () => {
-  // State for option selection
   const [option, setOption] = useState("");
-  
-  // State for new NFT creation
   const [file, setFile] = useState<File | null>(null);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  
-  // State for existing NFT
   const [existingTokenId, setExistingTokenId] = useState<string>("");
-  
-  // Common state
   const [loading, setLoading] = useState(false);
-  const [nftContract, setNftContract] = useState(DEFAULT_NFT_CONTRACT);
+  const [nftContract, setNftContract] = useState("");
   const [tokenId, setTokenId] = useState("");
   const [tbaAddress, setTbaAddress] = useState("");
   const { data: walletClient } = useWalletClient();
   const selectedChain: SupportedChain = "sepolia";
+  const [lastExistingTokenId, setLastExistingTokenId] = useState<string>("-1");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -43,8 +39,6 @@ const TBAHelper = () => {
 
     try {
       setLoading(true);
-
-      // Upload image to IPFS
       const formData = new FormData();
       formData.append("file", file);
       const imageResponse = await uploadFileToIPFS(formData);
@@ -54,8 +48,6 @@ const TBAHelper = () => {
       }
 
       const imageURI = GetIpfsUrlFromPinata(imageResponse.pinataURL ?? "");
-
-      // Create metadata and upload to IPFS
       const metadata = {
         name,
         description,
@@ -63,19 +55,16 @@ const TBAHelper = () => {
       };
 
       const metadataResponse = await uploadJSONToIPFS(metadata);
-
       if (!metadataResponse.success) {
         throw new Error("Failed to upload metadata to IPFS");
       }
 
       const metadataURI = GetIpfsUrlFromPinata(metadataResponse.pinataURL ?? "");
-
-      // Mint NFT
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
 
       const nftContractInstance = new ethers.Contract(
-        DEFAULT_NFT_CONTRACT,
+        NEW_NFT_CONTRACT,
         NftAbi,
         signer
       );
@@ -87,8 +76,6 @@ const TBAHelper = () => {
       );
 
       const receipt = await mintTx.wait();
-
-      // Get the tokenId from the event
       const event = receipt.events.find((event: any) => event.event === "Transfer");
       const newTokenId = event.args.tokenId.toString();
 
@@ -110,7 +97,6 @@ const TBAHelper = () => {
     } catch (error) {
       console.error("Error minting NFT:", error);
       setLoading(false);
-      
       if (error instanceof Error) {
         alert(`Error minting NFT: ${error.message}`);
       } else {
@@ -119,30 +105,47 @@ const TBAHelper = () => {
     }
   };
 
+
   const createTBAForExistingNFT = async () => {
     try {
       setLoading(true);
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const nftContractInstance = new ethers.Contract(
-        DEFAULT_NFT_CONTRACT,
-        NftAbi,
+        EXISTING_NFT_CONTRACT,
+        ExistingNftAbi,
         provider
       );
 
-      const currentTokenIdBN: ethers.BigNumber =
-        await nftContractInstance.getCurrentTokenId();
-      
-      const nextTokenId: string = currentTokenIdBN.add(1).toString(); 
+      // Get current token ID only on first call
+      let nextTokenId: string;
+      if (lastExistingTokenId === "-1") {
+        const nextTokenIdBN: ethers.BigNumber = 
+          await nftContractInstance.getNextTokenId();
+        nextTokenId = nextTokenIdBN.toString();
+        nextTokenId = (parseInt(nextTokenId) - 1).toString();
+        if (parseInt(nextTokenId) < 0) {
+          throw new Error("No tokens have been minted yet");
+        }
+      } else {
+        nextTokenId = (parseInt(lastExistingTokenId) + 1).toString();
+        
+      }
+      try {
+        await nftContractInstance.ownerOf(nextTokenId);
+      } catch (error) {
+        throw new Error(`Token ID ${nextTokenId} does not exist yet`);
+      }
 
       // Create TBA for the existing NFT
       const tbaAddress = await createTBA(
         selectedChain,
         walletClient || null,
         nextTokenId,
-        DEFAULT_NFT_CONTRACT
+        EXISTING_NFT_CONTRACT
       );
 
-      setNftContract(DEFAULT_NFT_CONTRACT);
+      setNftContract(EXISTING_NFT_CONTRACT);
+      setLastExistingTokenId(nextTokenId);
       setTokenId(nextTokenId);
       setTbaAddress(tbaAddress);
       
@@ -163,8 +166,6 @@ const TBAHelper = () => {
   return (
     <div className="p-6 max-w-md mx-auto bg-white rounded-xl shadow-md">
       <h2 className="text-xl font-bold mb-4">Create Token Bound Account (TBA)</h2>
-
-      {/* Option Selection */}
       <div className="mb-6">
         <label className="block text-gray-700 mb-2">Choose an option:</label>
         <div className="flex space-x-4">
@@ -182,8 +183,6 @@ const TBAHelper = () => {
           </button>
         </div>
       </div>
-
-      {/* Create New NFT Form */}
       {option === "new" && (
         <div>
           <div className="mb-4">
@@ -237,7 +236,6 @@ const TBAHelper = () => {
         </div>
       )}
 
-       {/* Use Existing NFT Form */}
        {option === "existing" && (
          <div>
            <button 
@@ -250,7 +248,6 @@ const TBAHelper = () => {
          </div>
        )}
 
-       {/* Result Display */}
        {tbaAddress && (
          <div className="mt-4 p-3 bg-green-100 rounded">
            <p><strong>NFT Contract:</strong> {nftContract}</p>
