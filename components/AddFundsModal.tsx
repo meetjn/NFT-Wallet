@@ -936,9 +936,27 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
                 </>
               )}
               {isMultiSigDeployed && (
-                <p className="font-urbanist-medium text-lg">
-                  A multisig wallet already exists at: {multiSigAddress}
-                </p>
+                <div>
+                  <p className="font-urbanist-medium text-lg">
+                    A multisig wallet already exists at: {multiSigAddress}
+                  </p>
+                  {/* Add a selection option */}
+                  <div className="flex flex-col gap-2 mt-4">
+                    <label className="font-urbanist-medium text-lg">
+                      Select an action:
+                    </label>
+                    <select
+                      value={selectedMultiSigAction}
+                      onChange={handleMultiSigActionChange}
+                      className="p-2 pr-10 rounded-md text-black bg-gray-100 border border-opacity-10"
+                    >
+                      <option value="use-existing">
+                        Continue with Existing Multisig
+                      </option>
+                      <option value="create-new">Create New Multisig</option>
+                    </select>
+                  </div>
+                </div>
               )}
             </>
           )}
