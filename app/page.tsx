@@ -37,6 +37,7 @@ export default function Home() {
     useState(true);
   const [isEthModalOpen, setIsEthModalOpen] = useState(false);
   const [isErc20ModalOpen, setIsErc20ModalOpen] = useState(false);
+  const [isTBAModalOpen, setIsTBAModalOpen] = useState(false);
 
   const [selectedChain, setSelectedChain] = useState<SupportedChain>("sepolia");
   const [isDeploying, setIsDeploying] = useState(false);
@@ -49,7 +50,7 @@ export default function Home() {
   //const { switchChain } = useSwitchChain();
   const { data: walletClient } = useWalletClient();
 
-  // Fetch TBA address when connected or chain changes
+
   useEffect(() => {
     if (!isConnected || !address) return;
 
@@ -81,67 +82,20 @@ export default function Home() {
   }, [isConnected, address, selectedChain, currentTokenId]);
   
 
-
-  // useEffect(() => {
-  //   if (!isConnected) return;
-  //
-  //   const fetchTBA = async () => {
-  //     try {
-  //       console.log("Fetching TBA Address for:", selectedChain);
-  //       const address = getTBAAddress(selectedChain);
-  //       setTbaAddress(address);
-  //     } catch (err) {
-  //       console.error("Error fetching TBA:", err);
-  //       setError("Failed to fetch TBA address.");
-  //     }
-  //   };
-  //
-  //   fetchTBA();
-  // }, [isConnected, selectedChain]);
-
-  const handleCreateTBA = async () => {
-    if (!isConnected || !walletClient) {
-      console.error("No wallet client available.");
-      setError("Please connect your wallet first.");
-      return;
-    }
-
-    setIsDeploying(true);
-    setError(null);
-
-    try {
-      if (!SUPPORTED_CHAINS[selectedChain]) {
-        throw new Error("Invalid chain selection");
-      }
-      const expectedChainId = SUPPORTED_CHAINS[selectedChain].id;
-
-      // Switch network if necessary
-      if (chain?.id !== expectedChainId) {
-        console.log(`Switching network to ${SUPPORTED_CHAINS[selectedChain].name}...`);
-
-        await window.ethereum.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: `0x${expectedChainId.toString(16)}` }],
-        });
-
-        await new Promise((resolve) => setTimeout(resolve, 500));
-      }
-
-      // Create TBA for the current tokenId
-      const newTbaAddress = await createTBA(selectedChain, walletClient, currentTokenId.toString());
-      console.log(`TBA deployed successfully on ${selectedChain}: ${newTbaAddress}`);
-      setTbaAddress(newTbaAddress);
-      setExistingTbas((prev) =>
-        prev.includes(newTbaAddress) ? prev : [...prev, newTbaAddress]
-      );
-      setCurrentTokenId((prev) => prev + 1); // Increment only on success
-    } catch (error: any) {
-      console.error("Error creating TBA:", error);
-      setError(error.message || "Failed to create TBA.");
-    } finally {
-      setIsDeploying(false);
-    }
+  const handleCreateTBA = () => {
+    setIsTBAModalOpen(true);
   };
+
+  const handleTBACreated = (newTbaAddress: string, tokenId: string) => {
+    setTbaAddress(newTbaAddress);
+    setExistingTbas((prev) =>
+      prev.includes(newTbaAddress) ? prev : [...prev, newTbaAddress]
+    );
+    setCurrentTokenId(parseInt(tokenId) + 1); 
+    setIsTBAModalOpen(false);
+  };
+
+
 
   const handleTransfer = async () => {
     if (!isConnected || !tbaAddress) {
@@ -180,7 +134,6 @@ export default function Home() {
       const ethBalanceWei = await provider.getBalance(manualTbaAddress);
       setEthBalance(ethers.utils.formatEther(ethBalanceWei));
 
-      // Fetch ERC20 Token Balance
       if (erc20Address) {
         const erc20Abi = [
           "function balanceOf(address account) view returns (uint256)",
@@ -191,7 +144,7 @@ export default function Home() {
           provider
         );
         const erc20BalanceWei = await erc20Contract.balanceOf(manualTbaAddress);
-        setErc20Balance(ethers.utils.formatUnits(erc20BalanceWei, 18)); // Assuming 18 decimals
+        setErc20Balance(ethers.utils.formatUnits(erc20BalanceWei, 18)); 
       }
     } catch (error) {
       console.error("Error fetching balances:", error);
@@ -255,17 +208,32 @@ export default function Home() {
           disabled={isDeploying}
           className="py-3 px-6 bg-[#CE192D] font-urbanist-semibold rounded-lg text-white"
         >
-          {isDeploying ? "Deploying..." : ""}
-          Create TBA
+          {isDeploying ? "Deploying..." : "Create TBA"}
         </button>
         {tbaAddress && (
           <h2 className="text-xl font-urbanist-medium">
-            New Token Bound Account for Token ID {currentTokenId - 1}:{" "}
-            {tbaAddress}
+            New Token Bound Account for Token ID {currentTokenId - 1}: {tbaAddress}
           </h2>
         )}
       </div>
-         <TBAHelper/>
+
+      {isTBAModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow-lg max-w-md w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Create Token Bound Account</h2>
+              <button
+                onClick={() => setIsTBAModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            <TBAHelper onTBACreated={handleTBACreated} />
+          </div>
+        </div>
+      )}
+
       <div className="flex gap-5 items-center">
         <h3 className="font-urbanist-medium text-lg">Existing TBAs:</h3>
         {existingTbas.length > 0 ? (
@@ -295,7 +263,7 @@ export default function Home() {
           />
           <button
             onClick={fetchBalances}
-            className="font-urbanist-medium rounded-lg bg-[#CE192D] h-full px-6 text-white "
+            className="font-urbanist-medium rounded-lg bg-[#CE192D] h-full px-6 text-white"
           >
             Fetch Balances
           </button>
@@ -344,46 +312,45 @@ export default function Home() {
         </div>
       </div>
 
-          <div>
-            <h2 className="text-2xl font-urbanist-semibold">Deploy on Multiple Chains</h2>
-            <div className="mt-4">
-            <div className="my-8">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-2xl font-bold mb-4">Token Bound Account Manager</h2>
-          
-          {/* Chain Selector */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select Network
-            </label>
-            <select
-              value={selectedChain}
-              onChange={(e) => setSelectedChain(e.target.value as SupportedChain)}
-              className="w-full p-2 border rounded"
-            >
-              {Object.keys(SUPPORTED_CHAINS).map((chain) => (
-                <option key={chain} value={chain}>
-                  {SUPPORTED_CHAINS[chain as SupportedChain].name}
-                </option>
-              ))}
-            </select>
-          </div>
+      <div>
+        <h2 className="text-2xl font-urbanist-semibold">Deploy on Multiple Chains</h2>
+        <div className="mt-4">
+          <div className="my-8">
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-2xl font-bold mb-4">Token Bound Account Manager</h2>
+              
+              {/* Chain Selector */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Network
+                </label>
+                <select
+                  value={selectedChain}
+                  onChange={(e) => setSelectedChain(e.target.value as SupportedChain)}
+                  className="w-full p-2 border rounded"
+                >
+                  {Object.keys(SUPPORTED_CHAINS).map((chain) => (
+                    <option key={chain} value={chain}>
+                      {SUPPORTED_CHAINS[chain as SupportedChain].name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-          {/* NFT Info */}
-          <div className="mb-6">
-            <h3 className="text-lg font-medium mb-2">NFT Details</h3>
-            <p>Contract: 0xEFefcfb5E8dB1cd664BaA8b706f49D9bB02694B7
-            </p>
-            <p>Token ID: 1</p>
-          </div>
+              {/* NFT Info */}
+              <div className="mb-6">
+                <h3 className="text-lg font-medium mb-2">NFT Details</h3>
+                <p>Contract: 0xEFefcfb5E8dB1cd664BaA8b706f49D9bB02694B7</p>
+                <p>Token ID: 1</p>
+              </div>
 
-          {/* TBA Address Display */}
-          {tbaAddress && (
-            <div className="mb-6">
-              <h3 className="text-lg font-medium mb-2">TBA Address</h3>
-              <p className="font-mono break-all">{tbaAddress}</p>
-            </div>
-          )}
+              {/* TBA Address Display */}
+              {tbaAddress && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-medium mb-2">TBA Address</h3>
+                  <p className="font-mono break-all">{tbaAddress}</p>
+                </div>
+              )}
 
               {/* Deploy Button */}
               <button
@@ -394,37 +361,6 @@ export default function Home() {
                 {isDeploying ? "Deploying..." : "Deploy TBA"}
               </button>
 
-              {/* Transfer Section  
-          // Currently transfer fund section is disabled temporarily, will be enabled in future.
-          {tbaAddress && (
-            <div className="mt-6">
-              <h3 className="text-lg font-medium mb-4">Transfer Funds</h3>
-              <div className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Amount"
-                  value={transferAmount}
-                  onChange={(e) => setTransferAmount(e.target.value)}
-                  className="w-full p-2 border rounded"
-                />
-                <input
-                  type="text"
-                  placeholder="Recipient Address"
-                  value={recipientAddress}
-                  onChange={(e) => setRecipientAddress(e.target.value)}
-                  className="w-full p-2 border rounded"
-                />
-                <button
-                  onClick={handleTransfer}
-                  className="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700"
-                >
-                  Transfer
-                </button>
-              </div>
-            </div>
-          )}
-            */}
-
               {/* Error Display */}
               {error && (
                 <div className="mt-4 p-4 bg-red-100 text-red-700 rounded">
@@ -434,14 +370,11 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <div className="mt-4"></div>
       </div>
 
       <AddFundsModal
         isOpen={isEthModalOpen}
-        onClose={() => {
-          setIsEthModalOpen(false);
-        }}
+        onClose={() => setIsEthModalOpen(false)}
         manualTbaAddress={manualTbaAddress}
         fundingAmount={fundingAmount}
         setFundingAmount={setFundingAmount}

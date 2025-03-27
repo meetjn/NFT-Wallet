@@ -3,15 +3,19 @@ import { uploadFileToIPFS, uploadJSONToIPFS } from "../utils/pinata";
 import GetIpfsUrlFromPinata from "../utils/pinataService";
 import { ethers } from "ethers";
 import NftAbi from "./ABI/MyNFT.json";
+import ExistingNftAbi from "./ABI/ExistingNFT.json";
 import { createTBA } from "./createTBA";
 import { useWalletClient } from "wagmi";
 import { SupportedChain } from "../utils/chains";
-import ExistingNftAbi from "./ABI/ExistingNFT.json";
 
 const NEW_NFT_CONTRACT = "0xEFefcfb5E8dB1cd664BaA8b706f49D9bB02694B7";
 const EXISTING_NFT_CONTRACT = "0xc7186EcDC29c8047C095C9170e67d96D3c99e317";
 
-const TBAHelper = () => {
+interface TBAHelperProps {
+  onTBACreated?: (tbaAddress: string, tokenId: string) => void;
+}
+
+const TBAHelper = ({ onTBACreated }: TBAHelperProps) => {
   const [option, setOption] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [name, setName] = useState("");
@@ -82,7 +86,6 @@ const TBAHelper = () => {
       setNftContract(nftContractInstance.address);
       setTokenId(newTokenId);
 
-      // Create TBA for the newly minted NFT
       const tbaAddress = await createTBA(
         selectedChain,
         walletClient || null,
@@ -92,6 +95,11 @@ const TBAHelper = () => {
 
       setTbaAddress(tbaAddress);
       setLoading(false);
+
+      // Call the callback if provided
+      if (onTBACreated) {
+        onTBACreated(tbaAddress, newTokenId);
+      }
 
       alert(`NFT minted successfully! Token ID: ${newTokenId}\nTBA Address: ${tbaAddress}`);
     } catch (error) {
@@ -105,7 +113,6 @@ const TBAHelper = () => {
     }
   };
 
-
   const createTBAForExistingNFT = async () => {
     try {
       setLoading(true);
@@ -116,7 +123,6 @@ const TBAHelper = () => {
         provider
       );
 
-      // Get current token ID only on first call
       let nextTokenId: string;
       if (lastExistingTokenId === "-1") {
         const nextTokenIdBN: ethers.BigNumber = 
@@ -128,15 +134,14 @@ const TBAHelper = () => {
         }
       } else {
         nextTokenId = (parseInt(lastExistingTokenId) + 1).toString();
-        
       }
+
       try {
         await nftContractInstance.ownerOf(nextTokenId);
       } catch (error) {
         throw new Error(`Token ID ${nextTokenId} does not exist yet`);
       }
 
-      // Create TBA for the existing NFT
       const tbaAddress = await createTBA(
         selectedChain,
         walletClient || null,
@@ -148,11 +153,15 @@ const TBAHelper = () => {
       setLastExistingTokenId(nextTokenId);
       setTokenId(nextTokenId);
       setTbaAddress(tbaAddress);
-      
+
+      // Call the callback if provided
+      if (onTBACreated) {
+        onTBACreated(tbaAddress, nextTokenId);
+      }
+
       alert(`TBA created successfully for Token ID ${nextTokenId}!\nTBA Address: ${tbaAddress}`);
     } catch (error) {
       console.error("Error creating TBA:", error);
-      
       if (error instanceof Error) {
         alert(`Error creating TBA: ${error.message}`);
       } else {
@@ -236,27 +245,27 @@ const TBAHelper = () => {
         </div>
       )}
 
-       {option === "existing" && (
-         <div>
-           <button 
-             onClick={createTBAForExistingNFT} 
-             disabled={loading}
-             className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 disabled:bg-gray-400"
-           >
-             {loading ? "Processing..." : "Create TBA for Existing NFT"}
-           </button>
-         </div>
-       )}
+      {option === "existing" && (
+        <div>
+          <button 
+            onClick={createTBAForExistingNFT} 
+            disabled={loading}
+            className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 disabled:bg-gray-400"
+          >
+            {loading ? "Processing..." : "Create TBA for Existing NFT"}
+          </button>
+        </div>
+      )}
 
-       {tbaAddress && (
-         <div className="mt-4 p-3 bg-green-100 rounded">
-           <p><strong>NFT Contract:</strong> {nftContract}</p>
-           <p><strong>Token ID:</strong> {tokenId}</p>
-           <p><strong>TBA Address:</strong> {tbaAddress}</p>
-         </div>
-       )}
-     </div>
-   );
+      {tbaAddress && (
+        <div className="mt-4 p-3 bg-green-100 rounded">
+          <p><strong>NFT Contract:</strong> {nftContract}</p>
+          <p><strong>Token ID:</strong> {tokenId}</p>
+          <p><strong>TBA Address:</strong> {tbaAddress}</p>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default TBAHelper;
