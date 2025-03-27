@@ -28,7 +28,9 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "global.d.ts",
-    "src/**/*"
-, "lending/index.tsx"  ],
+    "src/**/*",
+    "lending/index.tsx",
+    "components/sidebar.jsx"
+  ],
   "exclude": ["node_modules"]
 }

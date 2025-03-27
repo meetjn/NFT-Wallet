@@ -1,119 +1,143 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import { X, ChevronLeft } from "lucide-react";
+import { X, AlertCircle, CheckCircle2, Users } from "lucide-react";
 import { useWeb3 } from "../context/Web3Context";
-import { useRouter } from "next/navigation";
-
 import {
   MULTISIG_WALLET_ABI,
   MULTISIG_WALLET_BYTECODE,
 } from "../context/constant";
+import Link from "next/link";
 
 interface Signer {
   name: string;
   address: string;
 }
-interface MultiSigWalletCreatorProps {
-  onComplete: () => void; // Callback to notify when the setup is complete
+
+interface MultiSigCreatorProps {
+  onComplete?: (
+    walletAddress: string,
+    signers: Signer[],
+    requiredSignatures: number
+  ) => void;
 }
 
-const MultiSigWalletCreator: React.FC<MultiSigWalletCreatorProps> = ({
-  onComplete,
-}) => {
+const MultiSigCreator: React.FC<MultiSigCreatorProps> = ({ onComplete }) => {
   const { provider } = useWeb3();
-  const [step, setStep] = useState(1);
   const [signers, setSigners] = useState<Signer[]>([{ name: "", address: "" }]);
   const [requiredSignatures, setRequiredSignatures] = useState(1);
   const [createdAddress, setCreatedAddress] = useState("");
-  const router = useRouter();
-  const [activeSignerAddress, setActiveSignerAddress] = useState<string>("");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  // Removed auto-connection: currentSignerAddress will be set on click of "Connect Wallet"
+  const [currentSignerAddress, setCurrentSignerAddress] = useState("");
+  const [isConnected, setIsConnected] = useState(false);
 
-  const handleLetsGo = () => {
-    onComplete(); // Notify parent component that setup is complete
-  };
+  // Remove auto-connection useEffect
+  // useEffect(() => {
+  //   const getCurrentWallet = async () => {
+  //     if (provider) {
+  //       try {
+  //         const signer = provider.getSigner();
+  //         const address = await signer.getAddress();
+  //         setCurrentSignerAddress(address);
+  //         setIsConnected(true);
+  //       } catch (error) {
+  //         console.error("Error getting current wallet:", error);
+  //       }
+  //     }
+  //   };
+  //   getCurrentWallet();
+  // }, [provider]);
+
+  // In your MultiSigCreator.tsx component
 
   const connectWallet = async (index: number) => {
     setLoading(true);
     setError("");
 
     try {
-      if (!provider) {
-        throw new Error("Please connect your wallet first");
+      // Check for MetaMask by verifying window.ethereum exists
+      if (typeof window.ethereum === "undefined") {
+        throw new Error("Please install MetaMask.");
       }
 
-      // Ensure MetaMask prompts for wallet selection
+      // Force MetaMask to prompt the user for permission
       await window.ethereum.request({
-        method: "wallet_requestPermissions",
-        params: [{ eth_accounts: {} }],
+        method: "eth_requestAccounts",
       });
 
-      const signer = provider.getSigner();
+      const signer = new ethers.providers.Web3Provider(
+        window.ethereum
+      ).getSigner();
       const address = await signer.getAddress();
 
-      // Update active signer address when a wallet is connected
-      setActiveSignerAddress(address); // Added
-
+      // Update the corresponding signer with the connected address
       const newSigners = [...signers];
       newSigners[index] = { ...newSigners[index], address };
       setSigners(newSigners);
-
-      console.log("Connected wallet address:", address); // Added
-      console.log("Updated signers array:", newSigners); // Added
-    } catch (error) {
+      setCurrentSignerAddress(address);
+      setIsConnected(true);
+    } catch (error: any) {
       console.error("Error connecting wallet:", error);
-      setError("Failed to connect wallet");
+      if (error.code === 4001) {
+        setError("Transaction was rejected by the user.");
+      } else {
+        setError("Failed to connect wallet");
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const addSigner = () => {
+    if (signers.length >= 5) {
+      setError("Maximum 5 signers allowed");
+      return;
+    }
     const newSigners = [...signers, { name: "", address: "" }];
     setSigners(newSigners);
-    setRequiredSignatures(newSigners.length);
-    console.log("Signer added. Total signers:", newSigners.length); // Added
   };
 
   const removeSigner = (index: number) => {
-    const signerToRemove = signers[index];
-
-    // If the removed signer is the active signer, reset the active signer address
-    if (signerToRemove.address === activeSignerAddress) {
-      setActiveSignerAddress(""); // Added
+    if (signers.length <= 1) {
+      setError("At least one signer is required");
+      return;
     }
-
     const newSigners = signers.filter((_, i) => i !== index);
     setSigners(newSigners);
+    setRequiredSignatures(Math.min(requiredSignatures, newSigners.length));
+  };
 
-    // Adjust the required signatures to match the new number of signers
-    const updatedThreshold = Math.min(requiredSignatures, newSigners.length);
-    setRequiredSignatures(updatedThreshold);
-
-    console.log("Signer removed. Updated signers:", newSigners); // Added
-    console.log("Updated Threshold:", updatedThreshold); // Added
+  const validateSigners = () => {
+    const allSignersComplete = signers.every(
+      (signer) => signer.name && signer.address
+    );
+    if (!allSignersComplete) {
+      setError("All signers must have names and connected wallets");
+      return false;
+    }
+    const addresses = signers.map((signer) => signer.address.toLowerCase());
+    const uniqueAddresses = new Set(addresses);
+    if (addresses.length !== uniqueAddresses.size) {
+      setError("Duplicate wallet addresses are not allowed");
+      return false;
+    }
+    return true;
   };
 
   const createWallet = async () => {
+    if (!validateSigners()) return;
+
     setLoading(true);
     setError("");
 
     try {
-      if (!provider) {
-        throw new Error("Please connect your wallet first");
-      }
+      if (!provider) throw new Error("Provider not connected");
 
       const signer = provider.getSigner();
-
-      console.log(
-        "Deploying Wallet with Threshold:",
-        requiredSignatures,
-        "Signers:",
-        signers.map((s) => s.address)
-      ); // Added
+      const signerAddresses = signers.map((s) => s.address);
 
       const factory = new ethers.ContractFactory(
         MULTISIG_WALLET_ABI,
@@ -122,199 +146,150 @@ const MultiSigWalletCreator: React.FC<MultiSigWalletCreatorProps> = ({
       );
 
       const contract = await factory.deploy(
-        signers.map((s) => s.address),
-        requiredSignatures // Pass the threshold
+        signerAddresses,
+        requiredSignatures
       );
-
       await contract.deployed();
 
-      console.log("Wallet created successfully at:", contract.address); // Added
       setCreatedAddress(contract.address);
-
-      setStep(4);
-    } catch (error: any) {
-      console.error("Error creating wallet:", error);
-
-      if (error.code === "ACTION_REJECTED") {
-        setError("Transaction rejected by the user.");
-      } else {
-        setError("Failed to create wallet. Please try again.");
-      }
+      localStorage.setItem("multisigWalletAddress", contract.address);
+      localStorage.setItem("multisigSigners", JSON.stringify(signers));
+    } catch (error) {
+      console.error("Deployment error:", error);
+      setError(`Failed to create MultiSig wallet:`);
     } finally {
       setLoading(false);
     }
   };
 
-  const renderStep = () => {
-    switch (step) {
-      case 1:
-        return (
-          <div className="">
-            <h2 className="text-xl font-urbanist-bold">Create New Wallet</h2>
-            <button
-              onClick={() => setStep(2)}
-              className="py-3 px-6 bg-[#CE192D] font-urbanist-semibold rounded-lg text-white mt-2"
+  return (
+    <div className="w-full mx-auto bg-white p-8 rounded-xl  pt-24 pl-48">
+      <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
+        Create MultiSig Wallet
+      </h2>
+
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xl font-bold">Authorized Signers</h3>
+          <button
+            onClick={addSigner}
+            className="px-4 py-2 bg-gray-100 text-black hover:bg-gray-200 rounded-md transition-all flex items-center space-x-2"
+            disabled={loading || signers.length >= 5}
+          >
+            <Users className="w-4 h-4" />
+            <span>Add Signer</span>
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          {signers.map((signer, index) => (
+            <div
+              key={index}
+              className="p-4 bg-gray-50 rounded-lg border border-gray-200"
             >
-              Create account
-            </button>
-          </div>
-        );
-
-      case 2:
-        console.log(
-          "Authorized Signers Step: Current Threshold:",
-          requiredSignatures
-        ); // Added
-
-        return (
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold">Authorized Signers</h2>
-              <button
-                onClick={addSigner}
-                className="px-4 py-2 bg-green-500 text-white rounded-lg"
-              >
-                + Add Signer
-              </button>
-            </div>
-            {signers.map((signer, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <input
-                  type="text"
-                  placeholder="Signer name"
-                  className="p-2 bg-gray-800 rounded"
-                  value={signer.name}
-                  onChange={(e) => {
-                    const newSigners = [...signers];
-                    newSigners[index].name = e.target.value;
-                    setSigners(newSigners);
-                  }}
-                />
+              <div className="flex items-center space-x-4">
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    placeholder="Signer name"
+                    className="w-full p-2 bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                    value={signer.name}
+                    onChange={(e) => {
+                      const newSigners = [...signers];
+                      newSigners[index].name = e.target.value;
+                      setSigners(newSigners);
+                    }}
+                    disabled={loading}
+                  />
+                </div>
                 {signer.address ? (
-                  <span className="text-gray-300">{signer.address}</span>
+                  <div className="flex items-center space-x-2 bg-gray-100 px-3 py-2 rounded-md">
+                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                    <span className="text-sm text-gray-600">
+                      {signer.address.slice(0, 6)}...
+                      {signer.address.slice(-4)}
+                    </span>
+                  </div>
                 ) : (
                   <button
                     onClick={() => connectWallet(index)}
-                    className="flex-1 p-2 bg-blue-900 text-blue-300 rounded"
+                    className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-all flex items-center space-x-2"
+                    disabled={loading}
                   >
-                    Connect Wallet
+                    <span>Connect Wallet</span>
                   </button>
                 )}
                 {index > 0 && (
-                  <button onClick={() => removeSigner(index)}>
-                    <X className="text-gray-400" />
+                  <button
+                    onClick={() => removeSigner(index)}
+                    className="p-2 text-gray-400 hover:text-gray-600 transition-all"
+                    disabled={loading}
+                  >
+                    <X className="w-4 h-4" />
                   </button>
                 )}
               </div>
-            ))}
-            <div className="space-y-2">
-              <h3 className="text-lg">Threshold</h3>
-              <select
-                value={requiredSignatures}
-                onChange={(e) => {
-                  const newThreshold = Number(e.target.value);
-                  setRequiredSignatures(newThreshold);
-                  console.log("Updated Threshold:", newThreshold); // Added
-                }}
-                className="p-2 bg-gray-800 rounded"
-              >
-                {signers.map((_, index) => (
-                  <option key={index + 1} value={index + 1}>
-                    {index + 1}
-                  </option>
-                ))}
-              </select>
-              <span className="ml-2">Threshold limit {signers.length}</span>
             </div>
-            <div className="flex justify-between">
-              <button
-                onClick={() => setStep(1)}
-                className="flex items-center px-4 py-2 text-gray-400"
-              >
-                <ChevronLeft className="mr-1" /> Previous Step
-              </button>
-              <button
-                onClick={() => setStep(3)}
-                className="px-4 py-2 bg-green-500 text-white rounded-lg"
-              >
-                Continue
-              </button>
-            </div>
-          </div>
-        );
+          ))}
+        </div>
 
-      case 3:
-        console.log(
-          "Review Step: Required Signatures:",
-          requiredSignatures,
-          "Total Signers:",
-          signers.length
-        ); // Added
-        return (
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold">Review</h2>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span>Network</span>
-                <span>Ethereum</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Threshold</span>
-                <span>
-                  {requiredSignatures} out of {signers.length} signers
-                </span>
-              </div>
-            </div>
-            <div className="flex justify-between">
-              <button
-                onClick={() => setStep(2)}
-                className="px-4 py-2 border border-green-500 text-green-500 rounded-lg"
-              >
-                Back
-              </button>
-              <button
-                onClick={createWallet}
-                className="px-4 py-2 bg-green-500 text-white rounded-lg"
-              >
-                Create Wallet
-              </button>
-            </div>
-          </div>
-        );
-
-      case 4:
-        console.log("Wallet Created Successfully!"); // Added
-        console.log("Contract Address:", createdAddress); // Added
-        console.log("Threshold (Required Signatures):", requiredSignatures); // Added
-        return (
-          <div className="space-y-4 text-center">
-            <h2 className="text-2xl font-bold">Your account is almost set!</h2>
-            <p>Use your wallet to receive funds on Ethereum.</p>
-            <p className="text-gray-500">{createdAddress}</p>
-            <button
-              onClick={handleLetsGo}
-              className="px-4 py-2 bg-green-500 text-white rounded-lg"
+        <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+          <h3 className="text-lg font-medium mb-3">Required Signatures</h3>
+          <div className="flex items-center space-x-4">
+            <select
+              value={requiredSignatures}
+              onChange={(e) => setRequiredSignatures(Number(e.target.value))}
+              className="p-2 bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+              disabled={loading}
             >
-              Let’s Go
-            </button>
+              {Array.from({ length: signers.length }).map((_, index) => (
+                <option key={index + 1} value={index + 1}>
+                  {index + 1}
+                </option>
+              ))}
+            </select>
+            <span className="text-gray-600">
+              out of {signers.length} signers
+            </span>
           </div>
-        );
+        </div>
 
-      default:
-        return null;
-    }
-  };
+        <button
+          onClick={createWallet}
+          className="w-full px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all"
+          disabled={loading}
+        >
+          {loading ? (
+            <span className="flex items-center justify-center space-x-2">
+              <span className="animate-spin">⚡</span>
+              <span>Creating Wallet...</span>
+            </span>
+          ) : (
+            "Create MultiSig Wallet"
+          )}
+        </button>
+      </div>
 
-  const errorDisplay = error && (
-    <div className="text-red-500 mt-2">{error}</div>
-  );
+      {error && (
+        <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center space-x-2 text-red-600">
+          <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <p>{error}</p>
+        </div>
+      )}
 
-  return (
-    <div className="w-full h-screen flex items-center justify-center flex-col">
-      {renderStep()}
-      {errorDisplay}
+      {createdAddress && (
+        <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+          <h3 className="text-lg font-medium mb-2 text-green-700">
+            Wallet Created!
+          </h3>
+          <p className="text-sm mb-2">Your MultiSig wallet address:</p>
+          <p className="font-mono bg-gray-100 p-2 rounded overflow-x-auto break-all">
+            {createdAddress}
+          </p>
+        </div>
+      )}
     </div>
   );
 };
 
-export default MultiSigWalletCreator;
+export default MultiSigCreator;
