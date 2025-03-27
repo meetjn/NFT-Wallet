@@ -881,7 +881,25 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
           {/* Screen 0: Multisig Wallet Setup */}
           {currentScreen === 0 && (
             <>
-              {!isMultiSigDeployed && (
+              {/* Dropdown for selecting action */}
+              <div className="flex flex-col gap-2 w-full mb-4">
+                <label className="font-urbanist-medium text-lg">
+                  Select an action:
+                </label>
+                <select
+                  value={selectedMultiSigAction}
+                  onChange={handleMultiSigActionChange}
+                  className="p-2 pr-10 rounded-md text-black bg-gray-100 border border-opacity-10"
+                >
+                  <option value="use-existing">
+                    Continue with Existing Multisig
+                  </option>
+                  <option value="create-new">Create New Multisig</option>
+                </select>
+              </div>
+
+              {/* Show fields only if creating a new multisig */}
+              {selectedMultiSigAction === "create-new" && (
                 <>
                   <div className="flex flex-col gap-2 w-full">
                     <div className="flex justify-between items-center">
@@ -919,6 +937,7 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
                       </div>
                     ))}
                   </div>
+
                   <input
                     type="number"
                     placeholder="Threshold (e.g., 2)"
@@ -926,6 +945,7 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
                     onChange={(e) => setThresholdInput(e.target.value)}
                     className="p-2 pr-10 rounded-md text-black bg-gray-100 border border-opacity-10"
                   />
+
                   <button
                     onClick={deployMultiSig}
                     disabled={isCreatingSafe}
@@ -935,28 +955,13 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
                   </button>
                 </>
               )}
-              {isMultiSigDeployed && (
-                <div>
-                  <p className="font-urbanist-medium text-lg">
-                    A multisig wallet already exists at: {multiSigAddress}
-                  </p>
-                  {/* Add a selection option */}
-                  <div className="flex flex-col gap-2 mt-4">
-                    <label className="font-urbanist-medium text-lg">
-                      Select an action:
-                    </label>
-                    <select
-                      value={selectedMultiSigAction}
-                      onChange={handleMultiSigActionChange}
-                      className="p-2 pr-10 rounded-md text-black bg-gray-100 border border-opacity-10"
-                    >
-                      <option value="use-existing">
-                        Continue with Existing Multisig
-                      </option>
-                      <option value="create-new">Create New Multisig</option>
-                    </select>
-                  </div>
-                </div>
+
+              {/* Show message if continuing with existing multisig */}
+              {selectedMultiSigAction === "use-existing" && (
+                <p className="font-urbanist-medium text-lg">
+                  You have chosen to continue with the existing multisig wallet
+                  at: {multiSigAddress}
+                </p>
               )}
             </>
           )}
@@ -974,20 +979,22 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
                 onChange={(e) => setFundingAmount(e.target.value)}
                 className="p-2 pr-10 rounded-md text-black bg-gray-100 border border-opacity-10"
               />
-              <button
-                onClick={() => proposeTransaction(true)} // Fund Multisig Wallet
-                disabled={!isMultiSigDeployed}
-                className="font-urbanist-medium text-lg rounded-lg bg-blue-600 py-4 px-6 text-white"
-              >
-                Fund Multisig Wallet
-              </button>
-              <button
-                onClick={() => proposeTransaction(false)} // Fund TBA
-                disabled={!isMultiSigDeployed}
-                className="font-urbanist-medium text-lg rounded-lg bg-blue-600 py-4 px-6 text-white"
-              >
-                Fund TBA via Multisig
-              </button>
+              <div className="flex gap-4 justify-center">
+                <button
+                  onClick={() => proposeTransaction(true)} // Fund Multisig Wallet
+                  disabled={!isMultiSigDeployed}
+                  className="font-urbanist-medium text-lg rounded-lg bg-red-500 py-4 px-6 text-white"
+                >
+                  Fund Multisig Wallet
+                </button>
+                <button
+                  onClick={() => proposeTransaction(false)} // Fund TBA
+                  disabled={!isMultiSigDeployed}
+                  className="font-urbanist-medium text-lg rounded-lg bg-red-500 py-4 px-6 text-white"
+                >
+                  Fund TBA via Multisig
+                </button>
+              </div>
               {safeTxHash && (
                 <>
                   <p className="font-urbanist-medium text-lg">
@@ -997,25 +1004,27 @@ const AddFundsModal: React.FC<AddFundsModalProps> = ({
                     Signatures Collected: {signaturesCollected.length}/
                     {thresholdInput}
                   </p>
-                  <button
-                    onClick={signTransaction}
-                    disabled={
-                      !connectedWalletAddress ||
-                      signaturesCollected.includes(connectedWalletAddress)
-                    }
-                    className="font-urbanist-medium text-lg rounded-lg bg-yellow-500 py-4 px-6 text-white"
-                  >
-                    Sign Transaction
-                  </button>
-                  <button
-                    onClick={executeTransaction}
-                    disabled={
-                      signaturesCollected.length < parseInt(thresholdInput)
-                    }
-                    className="font-urbanist-medium text-lg rounded-lg bg-green-700 py-4 px-6 text-white"
-                  >
-                    Execute Transaction
-                  </button>
+                  <div className="flex gap-4 justify-center">
+                    <button
+                      onClick={signTransaction}
+                      disabled={
+                        !connectedWalletAddress ||
+                        signaturesCollected.includes(connectedWalletAddress)
+                      }
+                      className="font-urbanist-medium text-lg rounded-lg bg-red-500 py-4 px-6 text-white"
+                    >
+                      Sign Transaction
+                    </button>
+                    <button
+                      onClick={executeTransaction}
+                      disabled={
+                        signaturesCollected.length < parseInt(thresholdInput)
+                      }
+                      className="font-urbanist-medium text-lg rounded-lg bg-red-500 py-4 px-6 text-white"
+                    >
+                      Execute Transaction
+                    </button>
+                  </div>
                 </>
               )}
             </>
